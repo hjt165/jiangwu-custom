@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'api_service.dart';
+import 'oss_service.dart';
 
 /// 存储服务
 /// 封装SharedPreferences，提供本地缓存功能
@@ -140,31 +141,30 @@ class StorageService {
 
   // ==================== 文件上传 ====================
 
-  /// 上传图片
+  /// 上传图片（通过OSS直传）
   Future<String?> uploadImage(String filePath) async {
     try {
-      final dio = Dio();
-      final file = File(filePath);
-      final fileName = filePath.split('/').last;
-
-      final formData = FormData.fromMap({
-        await MultipartFile.fromFile(filePath, filename: fileName),
-      });
-
-      final response = await dio.post(
-        '${ApiConstants.baseUrl}/upload/image',
-        data: formData,
-        options: Options(
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        ),
+      final ossService = OSSService();
+      final result = await ossService.uploadFile(
+        filePath: filePath,
+        directory: 'images/',
       );
-
-      if (response.statusCode == 200 && response.data['code'] == 200) {
-        return response.data['data']['url'];
-      }
+      return result.success ? result.url : null;
+    } catch (e) {
+      print('上传图片失败: $e');
       return null;
+    }
+  }
+
+  /// 上传图片（通过后端代理，备用方案）
+  Future<String?> uploadImageViaProxy(String filePath) async {
+    try {
+      final ossService = OSSService();
+      final result = await ossService.uploadViaProxy(
+        filePath: filePath,
+        directory: 'images/',
+      );
+      return result.success ? result.url : null;
     } catch (e) {
       print('上传图片失败: $e');
       return null;

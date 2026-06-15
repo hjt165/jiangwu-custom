@@ -99,6 +99,7 @@ flutter:
     - assets/fonts/
     - assets/animations/
     - assets/models/
+    - assets/tflite/
 
   # fonts:
   #   - family: NotoSerifSC

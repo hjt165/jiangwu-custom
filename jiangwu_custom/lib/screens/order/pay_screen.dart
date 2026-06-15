@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/constants.dart';
 import '../../models/order.dart';
 import '../../providers/order_provider.dart';
+import '../../services/payment_service.dart';
 import '../../widgets/business/payment_method_selector.dart';
 import '../../widgets/common/loading_widget.dart';
 import '../../widgets/common/error_widget.dart';
@@ -310,28 +311,54 @@ class _PayScreenState extends ConsumerState<PayScreen> {
       _isPaying = true;
     });
 
-    // 模拟支付过程
-    try {
-      await Future.delayed(const Duration(seconds: 2));
-
+    final order = ref.read(orderProvider).currentOrder;
+    if (order == null) {
       if (mounted) {
-        // 显示支付成功
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('支付成功'),
-            backgroundColor: AppColors.success,
+            content: Text('订单信息不存在'),
+            backgroundColor: AppColors.error,
           ),
         );
+        setState(() { _isPaying = false; });
+      }
+      return;
+    }
 
-        // 刷新订单详情
-        await ref.read(orderProvider.notifier).fetchOrderDetail(widget.orderId);
+    final amount = order.totalAmount - order.paidAmount;
 
-        // 跳转到订单详情页
-        if (mounted) {
-          Navigator.of(context).pushNamedAndRemoveUntil(
-            AppRoutes.orderDetail,
-            (route) => route.isFirst,
-            arguments: widget.orderId,
+    try {
+      final paymentService = PaymentService();
+      final result = await paymentService.pay(
+        orderId: order.id,
+        amount: amount,
+        description: '匠物定制-订单${order.orderNo}',
+      );
+
+      if (mounted) {
+        if (result.success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('支付成功'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+
+          await ref.read(orderProvider.notifier).fetchOrderDetail(widget.orderId);
+
+          if (mounted) {
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              AppRoutes.orderDetail,
+              (route) => route.isFirst,
+              arguments: widget.orderId,
+            );
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result.errorMsg),
+              backgroundColor: AppColors.error,
+            ),
           );
         }
       }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/app.dart';
 import 'services/storage_service.dart';
 import 'services/api_service.dart';
+import 'services/push_service.dart';
 
 /// 全局NavigatorKey，用于401时跳转登录页
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -12,6 +13,9 @@ void main() async {
 
   // 初始化存储服务
   await StorageService().init();
+
+  // 初始化推送服务
+  await PushService().init();
 
   // 设置401未授权回调
   ApiService.onUnauthorized = () {
