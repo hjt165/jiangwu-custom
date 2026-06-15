@@ -267,3 +267,18 @@ CREATE TABLE `t_browse_history` (
     KEY `idx_product_id` (`product_id`),
     KEY `idx_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='浏览历史表';
+
+-- -------------------------------------------
+-- 13. 用户关注表
+-- -------------------------------------------
+DROP TABLE IF EXISTS `t_user_follow`;
+CREATE TABLE `t_user_follow` (
+    `id`          BIGINT   NOT NULL COMMENT '关注ID',
+    `user_id`     BIGINT   NOT NULL COMMENT '用户ID',
+    `artisan_id`  BIGINT   NOT NULL COMMENT '手作人ID',
+    `created_at`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '关注时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_user_artisan` (`user_id`, `artisan_id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_artisan_id` (`artisan_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户关注表';

@@ -257,10 +257,24 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
     );
   }
 
-  void _handleFollow(Artisan artisan) {
-    // TODO: 调用关注/取消关注API
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('关注功能开发中')),
-    );
+  void _handleFollow(Artisan artisan) async {
+    try {
+      final apiService = ApiService();
+      await apiService.post<Map<String, dynamic>>(
+        '/artisan/${artisan.id}/follow',
+        fromJson: (data) => Map<String, dynamic>.from(data),
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('关注成功')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('关注失败: $e')),
+        );
+      }
+    }
   }
 }
