@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dio/dio.dart';
+import 'api_service.dart';
 
 /// 存储服务
 /// 封装SharedPreferences，提供本地缓存功能
@@ -134,4 +137,42 @@ class StorageService {
   Set<String> getKeys() {
     return _prefs?.getKeys() ?? {};
   }
+
+  // ==================== 文件上传 ====================
+
+  /// 上传图片
+  Future<String?> uploadImage(String filePath) async {
+    try {
+      final dio = Dio();
+      final file = File(filePath);
+      final fileName = filePath.split('/').last;
+
+      final formData = FormData.fromMap({
+        await MultipartFile.fromFile(filePath, filename: fileName),
+      });
+
+      final response = await dio.post(
+        '${ApiConstants.baseUrl}/upload/image',
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200 && response.data['code'] == 200) {
+        return response.data['data']['url'];
+      }
+      return null;
+    } catch (e) {
+      print('上传图片失败: $e');
+      return null;
+    }
+  }
 }
+
+/// 存储服务Provider
+final storageServiceProvider = Provider<StorageService>((ref) {
+  return StorageService();
+});

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../app/constants.dart';
 import '../../models/message.dart';
 import '../../providers/chat_provider.dart';
 import '../../services/auth_service.dart';
+import '../../services/storage_service.dart';
 
 /// 聊天页面
 /// 用户与手作人沟通定制细节
@@ -42,13 +44,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         _scrollToBottom();
       }
     });
+
+    // 监听滚动，上拉加载更多消息
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _messageController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    // 当滚动到顶部时加载更多消息
+    if (_scrollController.position.pixels <= 0) {
+      ref.read(chatProvider.notifier).loadMoreMessages();
+    }
   }
 
   void _sendMessage() {
@@ -70,6 +83,46 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         );
       }
     });
+  }
+
+  Future<void> _pickAndSendImage() async {
+    try {
+      final picker = ImagePicker();
+      final image = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image == null) return;
+
+      // 显示加载中
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('正在发送图片...')),
+        );
+      }
+
+      // 上传图片
+      final storageService = ref.read(storageServiceProvider);
+      final imageUrl = await storageService.uploadImage(image.path);
+
+      if (imageUrl != null) {
+        // 发送图片消息
+        ref.read(chatProvider.notifier).sendMessage(
+          imageUrl,
+          messageType: 'image',
+        );
+        _scrollToBottom();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('发送图片失败: $e')),
+        );
+      }
+    }
   }
 
   @override
@@ -256,14 +309,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         ),
                       ),
                     const SizedBox(height: 4),
-                    Text(
-                      _formatTime(message.createdAt),
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: isMe
-                            ? AppColors.white.withOpacity(0.7)
-                            : AppColors.textHint,
-                      ),
+                    // 时间和状态
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _formatTime(message.createdAt),
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: isMe
+                                ? AppColors.white.withOpacity(0.7)
+                                : AppColors.textHint,
+                          ),
+                        ),
+                        if (isMe) ...[
+                          const SizedBox(width: 4),
+                          _buildMessageStatus(message.status),
+                        ],
+                      ],
                     ),
                   ],
                 ),
@@ -282,6 +345,35 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildMessageStatus(int status) {
+    // status: 0-发送中 1-已发送 2-已读
+    switch (status) {
+      case 0:
+        return SizedBox(
+          width: 10,
+          height: 10,
+          child: CircularProgressIndicator(
+            strokeWidth: 1,
+            color: AppColors.white.withOpacity(0.7),
+          ),
+        );
+      case 1:
+        return Icon(
+          Icons.check,
+          size: 12,
+          color: AppColors.white.withOpacity(0.7),
+        );
+      case 2:
+        return Icon(
+          Icons.done_all,
+          size: 12,
+          color: AppColors.white.withOpacity(0.7),
+        );
+      default:
+        return const SizedBox.shrink();
+    }
   }
 
   Widget _buildInputArea() {
@@ -307,9 +399,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           // 图片按钮
           IconButton(
             icon: const Icon(Icons.image_outlined, color: AppColors.textSecondary),
-            onPressed: () {
-              // TODO: 实现图片发送
-            },
+            onPressed: _pickAndSendImage,
           ),
           // 输入框
           Expanded(

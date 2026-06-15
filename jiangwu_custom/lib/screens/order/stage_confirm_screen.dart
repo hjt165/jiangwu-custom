@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/constants.dart';
 import '../../models/order.dart';
 import '../../providers/order_provider.dart';
+import '../../services/chat_service.dart';
+import '../../services/auth_service.dart';
 import '../../widgets/business/stage_deliver_card.dart';
 import '../../widgets/business/feedback_form.dart';
 import '../../widgets/common/loading_widget.dart';
@@ -46,19 +48,38 @@ class _StageConfirmScreenState extends ConsumerState<StageConfirmScreen> {
         title: const Text('阶段确认'),
         actions: [
           IconButton(
-            onPressed: () {
+            onPressed: () async {
               final order = ref.read(orderProvider).currentOrder;
               if (order != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ChatScreen(
-                      order: order,
-                      artisanName: order.artisan?.name ?? '手作人',
-                      artisanAvatar: order.artisan?.avatar,
-                    ),
-                  ),
-                );
+                final user = ref.read(authServiceProvider).currentUser;
+                if (user != null && order.artisanId != null) {
+                  try {
+                    final chatService = ref.read(chatServiceProvider);
+                    final conversation = await chatService.getOrCreateConversation(
+                      user.id,
+                      order.artisanId!,
+                      orderId: int.tryParse(order.id),
+                    );
+                    if (mounted) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ChatScreen(
+                            conversationId: conversation.id,
+                            otherName: order.artisan?.name ?? '手作人',
+                            otherAvatar: order.artisan?.avatar,
+                          ),
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('创建会话失败: $e')),
+                      );
+                    }
+                  }
+                }
               }
             },
             icon: const Icon(Icons.chat_outlined),
@@ -242,19 +263,38 @@ class _StageConfirmScreenState extends ConsumerState<StageConfirmScreen> {
             child: ButtonWidget(
               text: '联系手作人',
               isOutlined: true,
-              onPressed: () {
+              onPressed: () async {
                 final order = ref.read(orderProvider).currentOrder;
                 if (order != null) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ChatScreen(
-                        order: order,
-                        artisanName: order.artisan?.name ?? '手作人',
-                        artisanAvatar: order.artisan?.avatar,
-                      ),
-                    ),
-                  );
+                  final user = ref.read(authServiceProvider).currentUser;
+                  if (user != null && order.artisanId != null) {
+                    try {
+                      final chatService = ref.read(chatServiceProvider);
+                      final conversation = await chatService.getOrCreateConversation(
+                        user.id,
+                        order.artisanId!,
+                        orderId: int.tryParse(order.id),
+                      );
+                      if (mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ChatScreen(
+                              conversationId: conversation.id,
+                              otherName: order.artisan?.name ?? '手作人',
+                              otherAvatar: order.artisan?.avatar,
+                            ),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('创建会话失败: $e')),
+                        );
+                      }
+                    }
+                  }
                 }
               },
             ),

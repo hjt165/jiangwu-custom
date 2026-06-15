@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/constants.dart';
 import '../../models/order.dart';
 import '../../providers/order_provider.dart';
+import '../../services/chat_service.dart';
+import '../../services/auth_service.dart';
 import '../../widgets/business/order_status_header.dart';
 import '../../widgets/business/order_info_card.dart';
 import '../../widgets/business/stage_timeline.dart';
@@ -375,17 +377,37 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     Navigator.pushNamed(context, AppRoutes.review, arguments: order.id);
   }
 
-  void _handleContactArtisan(Order order) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ChatScreen(
-          order: order,
-          artisanName: order.artisan?.name ?? '手作人',
-          artisanAvatar: order.artisan?.avatar,
-        ),
-      ),
-    );
+  void _handleContactArtisan(Order order) async {
+    final user = ref.read(authServiceProvider).currentUser;
+    if (user == null || order.artisanId == null) return;
+
+    try {
+      final chatService = ref.read(chatServiceProvider);
+      final conversation = await chatService.getOrCreateConversation(
+        user.id,
+        order.artisanId!,
+        orderId: int.tryParse(order.id),
+      );
+
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ChatScreen(
+              conversationId: conversation.id,
+              otherName: order.artisan?.name ?? '手作人',
+              otherAvatar: order.artisan?.avatar,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('创建会话失败: $e')),
+        );
+      }
+    }
   }
 
   void _showMoreActions() {
