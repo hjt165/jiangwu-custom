@@ -93,13 +93,19 @@ CREATE TABLE `t_product` (
 -- -------------------------------------------
 DROP TABLE IF EXISTS `t_product_image`;
 CREATE TABLE `t_product_image` (
-    `id`         BIGINT       NOT NULL COMMENT '图片ID',
-    `product_id` BIGINT       NOT NULL COMMENT '作品ID',
-    `image_url`  VARCHAR(500) NOT NULL COMMENT '图片URL',
-    `sort_order` INT          DEFAULT 0 COMMENT '排序',
-    `created_at` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `id`              BIGINT       NOT NULL COMMENT '图片ID',
+    `product_id`      BIGINT       NOT NULL COMMENT '作品ID',
+    `image_url`       VARCHAR(500) NOT NULL COMMENT '图片URL',
+    `description`     VARCHAR(500) DEFAULT NULL COMMENT '图片描述',
+    `sort_order`      INT          DEFAULT 0 COMMENT '排序',
+    `review_status`   TINYINT      NOT NULL DEFAULT 0 COMMENT '审核状态：0-待审核 1-已通过 2-已拒绝',
+    `review_remark`   VARCHAR(500) DEFAULT NULL COMMENT '审核备注',
+    `reviewer_id`     BIGINT       DEFAULT NULL COMMENT '审核人ID',
+    `reviewed_at`     DATETIME     DEFAULT NULL COMMENT '审核时间',
+    `created_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     PRIMARY KEY (`id`),
-    KEY `idx_product_id` (`product_id`)
+    KEY `idx_product_id` (`product_id`),
+    KEY `idx_review_status` (`review_status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='作品图片表';
 
 -- -------------------------------------------
@@ -181,24 +187,29 @@ CREATE TABLE `t_customization` (
 -- -------------------------------------------
 DROP TABLE IF EXISTS `t_review`;
 CREATE TABLE `t_review` (
-    `id`          BIGINT   NOT NULL COMMENT '评价ID',
-    `order_id`    BIGINT   NOT NULL COMMENT '订单ID',
-    `user_id`     BIGINT   NOT NULL COMMENT '用户ID',
-    `artisan_id`  BIGINT   DEFAULT NULL COMMENT '手作人ID',
-    `rating`      TINYINT  NOT NULL COMMENT '评分（1-5）',
-    `content`     TEXT     DEFAULT NULL COMMENT '评价内容',
-    `images`      TEXT     DEFAULT NULL COMMENT '评价图片（JSON数组）',
-    `tags`        TEXT     DEFAULT NULL COMMENT '评价标签（JSON数组）',
-    `is_anonymous` TINYINT DEFAULT 0 COMMENT '是否匿名',
-    `reply`       TEXT     DEFAULT NULL COMMENT '手作人回复',
-    `reply_at`    DATETIME DEFAULT NULL COMMENT '回复时间',
-    `created_at`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `updated_at`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `deleted`     TINYINT  NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+    `id`            BIGINT   NOT NULL COMMENT '评价ID',
+    `order_id`      BIGINT   NOT NULL COMMENT '订单ID',
+    `user_id`       BIGINT   NOT NULL COMMENT '用户ID',
+    `artisan_id`    BIGINT   DEFAULT NULL COMMENT '手作人ID',
+    `rating`        TINYINT  NOT NULL COMMENT '评分（1-5）',
+    `content`       TEXT     DEFAULT NULL COMMENT '评价内容',
+    `images`        TEXT     DEFAULT NULL COMMENT '评价图片（JSON数组）',
+    `tags`          TEXT     DEFAULT NULL COMMENT '评价标签（JSON数组）',
+    `is_anonymous`  TINYINT  DEFAULT 0 COMMENT '是否匿名',
+    `reply`         TEXT     DEFAULT NULL COMMENT '手作人回复',
+    `reply_at`      DATETIME DEFAULT NULL COMMENT '回复时间',
+    `review_status` TINYINT  NOT NULL DEFAULT 0 COMMENT '审核状态：0-待审核 1-已通过 2-已拒绝',
+    `review_remark` VARCHAR(500) DEFAULT NULL COMMENT '审核备注',
+    `reviewer_id`   BIGINT   DEFAULT NULL COMMENT '审核人ID',
+    `reviewed_at`   DATETIME DEFAULT NULL COMMENT '审核时间',
+    `created_at`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted`       TINYINT  NOT NULL DEFAULT 0 COMMENT '逻辑删除',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_order_id` (`order_id`),
     KEY `idx_user_id` (`user_id`),
-    KEY `idx_artisan_id` (`artisan_id`)
+    KEY `idx_artisan_id` (`artisan_id`),
+    KEY `idx_review_status` (`review_status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='评价表';
 
 -- -------------------------------------------
