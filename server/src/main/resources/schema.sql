@@ -237,3 +237,33 @@ CREATE TABLE `t_material` (
     PRIMARY KEY (`id`),
     KEY `idx_category` (`category`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='材质表';
+
+-- -------------------------------------------
+-- 11. 用户收藏表
+-- -------------------------------------------
+DROP TABLE IF EXISTS `t_user_favorite`;
+CREATE TABLE `t_user_favorite` (
+    `id`         BIGINT   NOT NULL COMMENT '收藏ID',
+    `user_id`    BIGINT   NOT NULL COMMENT '用户ID',
+    `product_id` BIGINT   NOT NULL COMMENT '作品ID',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_user_product` (`user_id`, `product_id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_product_id` (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户收藏表';
+
+-- -------------------------------------------
+-- 12. 浏览历史表
+-- -------------------------------------------
+DROP TABLE IF EXISTS `t_browse_history`;
+CREATE TABLE `t_browse_history` (
+    `id`         BIGINT   NOT NULL COMMENT '记录ID',
+    `user_id`    BIGINT   NOT NULL COMMENT '用户ID',
+    `product_id` BIGINT   NOT NULL COMMENT '作品ID',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '浏览时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_product_id` (`product_id`),
+    KEY `idx_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='浏览历史表';
