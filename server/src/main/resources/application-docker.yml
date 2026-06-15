@@ -1,0 +1,64 @@
+# Docker 环境配置
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://mysql:3306/jiangwu_custom?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: ${MYSQL_ROOT_PASSWORD:123456}
+
+  data:
+    redis:
+      host: redis
+      port: 6379
+      password:
+      database: 0
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+
+# JWT
+jwt:
+  secret: ${JWT_SECRET:jiangwu-custom-secret-key-must-be-at-least-256-bits-long-for-hs256}
+  expiration: 86400000
+
+# Flowable
+flowable:
+  database-schema-update: true
+  async-executor-activate: false
+
+# AI Service (容器内部通信)
+ai:
+  service:
+    base-url: http://ai-service:8001/api/ai
+    timeout: 30000
+    connect-timeout: 5000
+
+# MyBatis-Plus (生产环境关闭 SQL 日志)
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.nop.NopLoggingImpl
+
+# Actuator (健康检查)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+# Logging (生产环境降低日志级别)
+logging:
+  level:
+    com.jiangwu: info
+    org.springframework: warn

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             targetNamespace="http://www.jiangwu.com/processes">
+
+    <process id="order_process" name="订单定制流程" isExecutable="true">
+
+        <!-- 开始节点 -->
+        <startEvent id="start" name="开始">
+            <extensionElements>
+                <flowable:executionListener event="start"
+                    delegateExpression="${orderProcess}"/>
+            </extensionElements>
+        </startEvent>
+
+        <!-- 草稿确认 -->
+        <userTask id="draft_confirm" name="草稿确认" flowable:assignee="${userId}">
+            <extensionElements>
+                <flowable:executionListener event="complete"
+                    delegateExpression="${orderProcess}"/>
+            </extensionElements>
+        </userTask>
+
+        <!-- 制作中 -->
+        <userTask id="producing" name="制作中" flowable:assignee="${artisanId}">
+            <extensionElements>
+                <flowable:executionListener event="complete"
+                    delegateExpression="${orderProcess}"/>
+            </extensionElements>
+        </userTask>
+
+        <!-- 阶段交付 -->
+        <userTask id="stage_deliver" name="阶段交付" flowable:assignee="${userId}">
+            <extensionElements>
+                <flowable:executionListener event="complete"
+                    delegateExpression="${orderProcess}"/>
+            </extensionElements>
+        </userTask>
+
+        <!-- 最终确认 -->
+        <userTask id="final_confirm" name="最终确认" flowable:assignee="${userId}">
+            <extensionElements>
+                <flowable:executionListener event="complete"
+                    delegateExpression="${orderProcess}"/>
+            </extensionElements>
+        </userTask>
+
+        <!-- 结束节点 -->
+        <endEvent id="end" name="结束">
+            <extensionElements>
+                <flowable:executionListener event="start"
+                    delegateExpression="${orderProcess}"/>
+            </extensionElements>
+        </endEvent>
+
+        <!-- 流程顺序 -->
+        <sequenceFlow id="flow_start" sourceRef="start" targetRef="draft_confirm"/>
+        <sequenceFlow id="flow_draft" sourceRef="draft_confirm" targetRef="producing"/>
+        <sequenceFlow id="flow_producing" sourceRef="producing" targetRef="stage_deliver"/>
+        <sequenceFlow id="flow_stage" sourceRef="stage_deliver" targetRef="final_confirm"/>
+        <sequenceFlow id="flow_final" sourceRef="final_confirm" targetRef="end"/>
+
+    </process>
+</definitions>

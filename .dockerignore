@@ -1,0 +1,42 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.iml
+*.iws
+
+# Flutter build
+jiangwu_custom/build/
+jiangwu_custom/.dart_tool/
+jiangwu_custom/.pub-cache/
+jiangwu_custom/.packages
+
+# Node modules
+admin/node_modules/
+admin/dist/
+
+# Python
+ai-service/__pycache__/
+ai-service/**/*.pyc
+ai-service/.venv/
+ai-service/.env
+
+# Maven
+server/target/
+server/.mvn/wrapper/maven-wrapper.jar
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Documentation
+*.md
+LICENSE
+
+# Docker compose env (keep example only)
+.env
+!.env.example
