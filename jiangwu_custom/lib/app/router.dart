@@ -26,6 +26,8 @@ import '../screens/artisan/work_screen.dart';
 import '../screens/artisan/order_manage_screen.dart';
 import '../screens/artisan/product_manage_screen.dart';
 import '../screens/artisan/income_screen.dart';
+import '../screens/chat/chat_list_screen.dart';
+import '../screens/chat/chat_screen.dart';
 
 /// 路由配置
 /// 定义所有页面路由映射
@@ -135,6 +137,20 @@ class AppRouter {
         return _buildRoute(const ProductManageScreen(), settings);
       case AppRoutes.artisanIncome:
         return _buildRoute(const IncomeScreen(), settings);
+
+      // 聊天模块
+      case AppRoutes.chatList:
+        return _buildRoute(const ChatListScreen(), settings);
+      case AppRoutes.chat:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return _buildRoute(
+          ChatScreen(
+            conversationId: args?['conversationId'] ?? 0,
+            otherName: args?['otherName'] ?? '聊天',
+            otherAvatar: args?['otherAvatar'],
+          ),
+          settings,
+        );
 
       default:
         return _buildRoute(const MainScreen(), settings);

@@ -1,35 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../app/constants.dart';
-import '../../models/order.dart';
+import '../../models/message.dart';
+import '../../providers/chat_provider.dart';
+import '../../services/auth_service.dart';
 
 /// 聊天页面
 /// 用户与手作人沟通定制细节
-
-class ChatScreen extends StatefulWidget {
-  final Order order;
-  final String artisanName;
-  final String? artisanAvatar;
+class ChatScreen extends ConsumerStatefulWidget {
+  final int conversationId;
+  final String otherName;
+  final String? otherAvatar;
 
   const ChatScreen({
     super.key,
-    required this.order,
-    required this.artisanName,
-    this.artisanAvatar,
+    required this.conversationId,
+    required this.otherName,
+    this.otherAvatar,
   });
 
   @override
-  State<ChatScreen> createState() => _ChatScreenState();
+  ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
-  final List<ChatMessage> _messages = [];
 
   @override
   void initState() {
     super.initState();
-    _loadInitialMessages();
+    // 选择会话并加载消息
+    Future.microtask(() {
+      ref.read(chatProvider.notifier).selectConversation(widget.conversationId);
+    });
+
+    // 监听新消息，自动滚动到底部
+    ref.listenManual(chatProvider, (prev, next) {
+      if (next.currentMessages.length > (prev?.currentMessages.length ?? 0)) {
+        _scrollToBottom();
+      }
+    });
   }
 
   @override
@@ -39,52 +51,13 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
-  void _loadInitialMessages() {
-    // 加载历史消息（模拟）
-    setState(() {
-      _messages.addAll([
-        ChatMessage(
-          content: '您好，我对您的手作作品很感兴趣，想咨询一下定制细节。',
-          isMe: true,
-          timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-        ),
-        ChatMessage(
-          content: '您好！感谢您的关注。请问您想定制什么样的作品呢？',
-          isMe: false,
-          timestamp: DateTime.now().subtract(const Duration(hours: 1, minutes: 50)),
-        ),
-      ]);
-    });
-  }
-
   void _sendMessage() {
     final content = _messageController.text.trim();
     if (content.isEmpty) return;
 
-    setState(() {
-      _messages.add(ChatMessage(
-        content: content,
-        isMe: true,
-        timestamp: DateTime.now(),
-      ));
-    });
-
+    ref.read(chatProvider.notifier).sendMessage(content);
     _messageController.clear();
     _scrollToBottom();
-
-    // 模拟手作人回复
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        setState(() {
-          _messages.add(ChatMessage(
-            content: '收到，我了解了您的需求，稍后给您详细报价。',
-            isMe: false,
-            timestamp: DateTime.now(),
-          ));
-        });
-        _scrollToBottom();
-      }
-    });
   }
 
   void _scrollToBottom() {
@@ -101,48 +74,102 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final chatState = ref.watch(chatProvider);
+    final user = ref.watch(authServiceProvider).currentUser;
+    final currentUserId = user?.id ?? 0;
+
     return Scaffold(
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              widget.artisanName,
+              widget.otherName,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            Text(
-              '订单号：${widget.order.orderNo}',
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-            ),
+            if (!chatState.isConnected)
+              const Text(
+                '连接中...',
+                style: TextStyle(fontSize: 12, color: AppColors.warning),
+              ),
           ],
+        ),
+        backgroundColor: AppColors.primary,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.white),
+          onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert),
+            icon: const Icon(Icons.more_vert, color: AppColors.white),
             onPressed: () {},
           ),
         ],
       ),
       body: Column(
         children: [
+          // 连接状态提示
+          if (!chatState.isConnected)
+            Container(
+              padding: const EdgeInsets.all(8),
+              color: AppColors.warning.withOpacity(0.1),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 12,
+                    height: 12,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  SizedBox(width: 8),
+                  Text('正在连接...', style: TextStyle(fontSize: 12)),
+                ],
+              ),
+            ),
+
           // 消息列表
           Expanded(
-            child: _messages.isEmpty
-                ? const Center(
-                    child: Text(
-                      '开始与手作人沟通吧',
-                      style: TextStyle(color: AppColors.textHint),
-                    ),
-                  )
-                : ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.all(AppSizes.paddingMedium),
-                    itemCount: _messages.length,
-                    itemBuilder: (context, index) {
-                      return _buildMessageBubble(_messages[index]);
-                    },
-                  ),
+            child: chatState.isLoadingMessages
+                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                : chatState.currentMessages.isEmpty
+                    ? const Center(
+                        child: Text(
+                          '开始与手作人沟通吧',
+                          style: TextStyle(color: AppColors.textHint),
+                        ),
+                      )
+                    : ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.all(AppSizes.paddingMedium),
+                        itemCount: chatState.currentMessages.length,
+                        itemBuilder: (context, index) {
+                          final message = chatState.currentMessages[index];
+                          final isMe = message.senderId == currentUserId;
+                          return _buildMessageBubble(message, isMe);
+                        },
+                      ),
           ),
+
+          // 错误提示
+          if (chatState.error != null)
+            Container(
+              padding: const EdgeInsets.all(8),
+              color: AppColors.error.withOpacity(0.1),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      chatState.error!,
+                      style: TextStyle(fontSize: 12, color: AppColors.error),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 16),
+                    onPressed: () => ref.read(chatProvider.notifier).clearError(),
+                  ),
+                ],
+              ),
+            ),
 
           // 输入区域
           _buildInputArea(),
@@ -151,9 +178,7 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildMessageBubble(ChatMessage message) {
-    final isMe = message.isMe;
-
+  Widget _buildMessageBubble(ChatMessage message, bool isMe) {
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -166,25 +191,16 @@ class _ChatScreenState extends State<ChatScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (!isMe) ...[
-              // 手作人头像
+              // 对方头像
               CircleAvatar(
                 radius: 16,
                 backgroundColor: AppColors.divider,
-                child: widget.artisanAvatar != null
-                    ? ClipOval(
-                        child: Image.network(
-                          widget.artisanAvatar!,
-                          width: 32,
-                          height: 32,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Icon(
-                            Icons.person,
-                            size: 20,
-                            color: AppColors.textHint,
-                          ),
-                        ),
-                      )
-                    : const Icon(Icons.person, size: 20, color: AppColors.textHint),
+                backgroundImage: widget.otherAvatar != null
+                    ? NetworkImage(widget.otherAvatar!)
+                    : null,
+                child: widget.otherAvatar == null
+                    ? const Icon(Icons.person, size: 20, color: AppColors.textHint)
+                    : null,
               ),
               const SizedBox(width: AppSizes.spacingSmall),
             ],
@@ -205,7 +221,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
+                      color: Colors.black.withOpacity(0.05),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
@@ -214,20 +230,38 @@ class _ChatScreenState extends State<ChatScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      message.content,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: isMe ? AppColors.white : AppColors.textPrimary,
+                    // 消息类型处理
+                    if (message.messageType == 'image')
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          message.content,
+                          width: 150,
+                          height: 150,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            width: 150,
+                            height: 150,
+                            color: AppColors.divider,
+                            child: const Icon(Icons.image, color: AppColors.textHint),
+                          ),
+                        ),
+                      )
+                    else
+                      Text(
+                        message.content,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isMe ? AppColors.white : AppColors.textPrimary,
+                        ),
                       ),
-                    ),
                     const SizedBox(height: 4),
                     Text(
-                      _formatTime(message.timestamp),
+                      _formatTime(message.createdAt),
                       style: TextStyle(
                         fontSize: 10,
                         color: isMe
-                            ? AppColors.white.withValues(alpha: 0.7)
+                            ? AppColors.white.withOpacity(0.7)
                             : AppColors.textHint,
                       ),
                     ),
@@ -273,7 +307,9 @@ class _ChatScreenState extends State<ChatScreen> {
           // 图片按钮
           IconButton(
             icon: const Icon(Icons.image_outlined, color: AppColors.textSecondary),
-            onPressed: () {},
+            onPressed: () {
+              // TODO: 实现图片发送
+            },
           ),
           // 输入框
           Expanded(
@@ -317,27 +353,18 @@ class _ChatScreenState extends State<ChatScreen> {
 
   String _formatTime(DateTime time) {
     final now = DateTime.now();
-    final diff = now.difference(time);
+    final today = DateTime(now.year, now.month, now.day);
+    final messageDate = DateTime(time.year, time.month, time.day);
 
-    if (diff.inDays > 0) {
-      return '${time.month}/${time.day} ${time.hour}:${time.minute.toString().padLeft(2, '0')}';
-    } else if (diff.inHours > 0) {
-      return '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
+    if (messageDate == today) {
+      return DateFormat('HH:mm').format(time);
+    } else if (messageDate == today.subtract(const Duration(days: 1))) {
+      return '昨天 ${DateFormat('HH:mm').format(time)}';
+    } else if (now.difference(time).inDays < 7) {
+      final weekDay = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'][time.weekday - 1];
+      return '$weekDay ${DateFormat('HH:mm').format(time)}';
     } else {
-      return '${time.minute.toString().padLeft(2, '0')}:${time.second.toString().padLeft(2, '0')}';
+      return DateFormat('MM/dd HH:mm').format(time);
     }
   }
-}
-
-/// 聊天消息模型
-class ChatMessage {
-  final String content;
-  final bool isMe;
-  final DateTime timestamp;
-
-  const ChatMessage({
-    required this.content,
-    required this.isMe,
-    required this.timestamp,
-  });
 }

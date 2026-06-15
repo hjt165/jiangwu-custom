@@ -293,3 +293,44 @@ CREATE TABLE `t_user_follow` (
     KEY `idx_user_id` (`user_id`),
     KEY `idx_artisan_id` (`artisan_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户关注表';
+
+-- -------------------------------------------
+-- 14. 会话表
+-- -------------------------------------------
+DROP TABLE IF EXISTS `t_conversation`;
+CREATE TABLE `t_conversation` (
+    `id`              BIGINT       NOT NULL COMMENT '会话ID',
+    `user_id`         BIGINT       NOT NULL COMMENT '用户ID',
+    `artisan_id`      BIGINT       NOT NULL COMMENT '手作人ID',
+    `order_id`        BIGINT       DEFAULT NULL COMMENT '关联订单ID',
+    `last_message`    VARCHAR(500) DEFAULT NULL COMMENT '最后一条消息',
+    `last_message_at` DATETIME     DEFAULT NULL COMMENT '最后消息时间',
+    `user_unread`     INT          NOT NULL DEFAULT 0 COMMENT '用户未读数',
+    `artisan_unread`  INT          NOT NULL DEFAULT 0 COMMENT '手作人未读数',
+    `created_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_user_artisan` (`user_id`, `artisan_id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_artisan_id` (`artisan_id`),
+    KEY `idx_order_id` (`order_id`),
+    KEY `idx_last_message_at` (`last_message_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='会话表';
+
+-- -------------------------------------------
+-- 15. 消息表
+-- -------------------------------------------
+DROP TABLE IF EXISTS `t_message`;
+CREATE TABLE `t_message` (
+    `id`              BIGINT       NOT NULL COMMENT '消息ID',
+    `conversation_id` BIGINT       NOT NULL COMMENT '会话ID',
+    `sender_id`       BIGINT       NOT NULL COMMENT '发送者ID',
+    `content`         TEXT         NOT NULL COMMENT '消息内容',
+    `message_type`    VARCHAR(20)  NOT NULL DEFAULT 'text' COMMENT '消息类型：text/image/file',
+    `status`          TINYINT      NOT NULL DEFAULT 0 COMMENT '状态：0-发送中 1-已发送 2-已读',
+    `created_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '发送时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_conversation_id` (`conversation_id`),
+    KEY `idx_sender_id` (`sender_id`),
+    KEY `idx_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='消息表';

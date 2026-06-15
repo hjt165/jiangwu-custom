@@ -43,7 +43,9 @@ public class WebConfig implements WebMvcConfigurer {
                         // Swagger
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
-                        "/swagger-ui.html"
+                        "/swagger-ui.html",
+                        // WebSocket
+                        "/ws/**"
                 );
     }
 }

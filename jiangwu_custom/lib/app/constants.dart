@@ -134,6 +134,10 @@ class AppRoutes {
   static const String artisanOrders = '/artisan/orders';
   static const String artisanProducts = '/artisan/products';
   static const String artisanIncome = '/artisan/income';
+
+  // 聊天模块
+  static const String chatList = '/chat/list';
+  static const String chat = '/chat/:conversationId';
 }
 
 /// API配置常量
