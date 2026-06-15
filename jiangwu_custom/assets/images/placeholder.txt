@@ -1,0 +1,14 @@
+# 占位图文件
+
+此文件为占位符，实际项目中应替换为真实的图片资源。
+
+## 需要替换的文件：
+- logo.svg → logo.png (应用Logo，512x512)
+- placeholder.txt → placeholder.png (占位图，300x300)
+- empty_state.txt → empty_state.png (空状态图，400x300)
+- splash.txt → splash.png (启动图，1080x1920)
+
+## 图片规格：
+- 格式：PNG (透明背景)
+- 色彩模式：RGBA
+- DPI：300

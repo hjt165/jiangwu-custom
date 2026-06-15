@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:jpush_flutter/jpush_flutter.dart';
 import 'api_service.dart';
 
@@ -31,8 +32,10 @@ class PushService {
 
     try {
       // 初始化推送SDK
+      // 请在极光开发者平台申请AppKey并替换
+      // https://www.jiguang.cn/dev/#/app/list
       await _jPush.setup(
-        appKey: 'your-app-key', // TODO: 替换为实际极光AppKey
+        appKey: const String.fromEnvironment('JPUSH_APP_KEY', defaultValue: 'your-app-key'),
         channel: 'developer-default',
         production: false,
         debug: true,
@@ -168,8 +171,9 @@ class PushService {
 
   /// 获取平台类型
   String _getPlatform() {
-    // 根据运行平台返回
-    return 'android'; // TODO: 根据实际平台判断
+    if (Platform.isAndroid) return 'android';
+    if (Platform.isIOS) return 'ios';
+    return 'unknown';
   }
 
   /// 释放资源

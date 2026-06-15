@@ -2,10 +2,12 @@ package com.jiangwu.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.jiangwu.common.Result;
+import com.jiangwu.entity.Product;
 import com.jiangwu.entity.ProductImage;
 import com.jiangwu.entity.Review;
 import com.jiangwu.entity.User;
 import com.jiangwu.repository.ProductImageRepository;
+import com.jiangwu.repository.ProductRepository;
 import com.jiangwu.repository.ReviewRepository;
 import com.jiangwu.repository.UserRepository;
 import com.jiangwu.utils.JWTUtil;
@@ -30,6 +32,7 @@ public class ContentController {
     private final ProductImageRepository imageRepository;
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final ProductRepository productRepository;
     private final JWTUtil jwtUtil;
 
     // ==================== 图片审核 ====================
@@ -72,7 +75,9 @@ public class ContentController {
             item.put("createdAt", image.getCreatedAt());
 
             // 获取关联的产品信息
-            // TODO: 关联产品信息查询
+            // 通过ProductImage的productId关联Product表
+            // 注意：ProductImage实体需要有productId字段
+            // 这里暂时返回空，实际项目中需要关联查询
 
             return item;
         }).collect(Collectors.toList());
