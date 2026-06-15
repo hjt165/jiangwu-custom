@@ -384,6 +384,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  fluwx:
+    dependency: "direct main"
+    description:
+      name: fluwx
+      sha256: d25c26a12a1fa280833105869ea255a5877695e03dc1190f0d2c027a7c989ef3
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "4.6.3"
   freezed_annotation:
     dependency: transitive
     description:
@@ -568,6 +576,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.1"
+  jpush_flutter:
+    dependency: "direct main"
+    description:
+      name: jpush_flutter
+      sha256: "02046086774b95e662a9cbc52aafbea3bc3ca25868f57e2f087db750e28c17eb"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.4.6"
   js:
     dependency: transitive
     description:
@@ -792,6 +808,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.0.0"
+  quiver:
+    dependency: transitive
+    description:
+      name: quiver
+      sha256: ea0b925899e64ecdfbf9c7becb60d5b50e706ade44a85b2363be2a22d88117d2
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.2.2"
   record_use:
     dependency: transitive
     description:
@@ -1037,6 +1061,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.7.12"
+  tflite_flutter:
+    dependency: "direct main"
+    description:
+      name: tflite_flutter
+      sha256: ffb8651fdb116ab0131d6dc47ff73883e0f634ad1ab12bb2852eef1bbeab4a6a
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.10.4"
   timing:
     dependency: transitive
     description:

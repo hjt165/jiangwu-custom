@@ -1,6 +1,5 @@
 # ==================== Flutter ====================
 # Flutter/Dart
-*.dart
 .dart_tool/
 .packages
 .pub-cache/

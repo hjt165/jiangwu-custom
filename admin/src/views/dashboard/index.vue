@@ -1,7 +1,11 @@
 <template>
-  <div class="dashboard">
+  <div class="dashboard" v-loading="loading">
     <div class="page-header">
       <h2>工作台</h2>
+      <el-button type="primary" @click="fetchDashboardData" :loading="loading">
+        <el-icon><Refresh /></el-icon>
+        刷新
+      </el-button>
     </div>
 
     <el-row :gutter="20" class="stat-cards">
@@ -91,24 +95,54 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
+import { getDashboardData } from '@/api/stats'
+import { Refresh } from '@element-plus/icons-vue'
 
 const stats = reactive({
-  totalUsers: 1280,
-  totalOrders: 356,
-  totalRevenue: '128,960',
-  totalArtisans: 45,
+  totalUsers: 0,
+  totalOrders: 0,
+  totalRevenue: '0',
+  totalArtisans: 0,
 })
 
-const todoList = ref([
-  { type: '用户认证', content: '张三申请成为手作人', time: '2026-06-14 10:00' },
-  { type: '争议处理', content: '订单 JW20260614-001234 有争议', time: '2026-06-14 09:30' },
-  { type: '内容审核', content: '3张新图片待审核', time: '2026-06-14 09:00' },
-  { type: '评论审核', content: '5条新评论待审核', time: '2026-06-14 08:30' },
-])
+const todoList = ref([])
+const loading = ref(false)
+
+const fetchDashboardData = async () => {
+  loading.value = true
+  try {
+    const res = await getDashboardData()
+    if (res.code === 200 && res.data) {
+      Object.assign(stats, res.data.stats || {})
+      todoList.value = res.data.todoList || []
+    }
+  } catch (error) {
+    console.error('获取仪表盘数据失败:', error)
+    // 使用默认数据作为fallback
+    stats.totalUsers = 0
+    stats.totalOrders = 0
+    stats.totalRevenue = '0'
+    stats.totalArtisans = 0
+    todoList.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchDashboardData()
+})
 </script>
 
 <style lang="scss" scoped>
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 .stat-cards {
   margin-bottom: 20px;
 }

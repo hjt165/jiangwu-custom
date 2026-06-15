@@ -63,13 +63,13 @@ dependencies:
   # flutter_unity_widget: ^4.6.0  # 暂时注释，需要Unity环境
 
   # AI Inference
-  # tflite_flutter: ^0.10.4  # 暂时注释，需要TFLite环境
+  tflite_flutter: ^0.10.4
 
   # Push
-  # jpush_flutter: ^3.0.0  # 暂时注释，需要极光推送配置
+  jpush_flutter: ^3.0.0
 
   # Payment
-  # fluwx: ^4.6.0  # 暂时注释，需要微信支付配置
+  fluwx: ^4.6.0
 
 dev_dependencies:
   flutter_test:
