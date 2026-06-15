@@ -206,7 +206,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               TextButton(
                 onPressed: () {
-                  // TODO: 查看更多
+                  Navigator.of(context).pushNamed(AppRoutes.discover);
                 },
                 child: const Text('查看更多'),
               ),
@@ -347,7 +347,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               TextButton(
                 onPressed: () {
-                  // TODO: 查看更多
+                  Navigator.of(context).pushNamed(AppRoutes.discover);
                 },
                 child: const Text('查看更多'),
               ),

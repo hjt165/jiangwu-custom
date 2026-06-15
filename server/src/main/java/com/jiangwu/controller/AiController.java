@@ -1,6 +1,8 @@
 package com.jiangwu.controller;
 
 import com.jiangwu.common.Result;
+import com.jiangwu.entity.Customization;
+import com.jiangwu.repository.CustomizationRepository;
 import com.jiangwu.service.AiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +18,7 @@ import java.util.Map;
 public class AiController {
 
     private final AiService aiService;
+    private final CustomizationRepository customizationRepository;
 
     /**
      * 推荐手作人
@@ -102,13 +105,22 @@ public class AiController {
     /**
      * AI 任务回调端点 (供 AI 服务调用)
      */
+    @SuppressWarnings("unchecked")
     @PostMapping("/task/complete")
     public Result<Void> handleTaskComplete(@RequestBody Map<String, Object> payload) {
         String taskId = (String) payload.get("taskId");
         String status = (String) payload.get("status");
         Map<String, Object> result = (Map<String, Object>) payload.get("result");
+        Long orderId = payload.get("orderId") != null ? ((Number) payload.get("orderId")).longValue() : null;
 
-        // TODO: 根据 taskId 更新数据库中的 AI 建议
+        if (orderId != null && "completed".equals(status) && result != null) {
+            Customization customization = customizationRepository.findByOrderId(orderId);
+            if (customization != null) {
+                String suggestion = result.toString();
+                customization.setAiSuggestion(suggestion);
+                customizationRepository.updateById(customization);
+            }
+        }
         return Result.success(null);
     }
 }

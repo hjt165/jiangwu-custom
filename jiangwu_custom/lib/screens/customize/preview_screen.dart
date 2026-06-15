@@ -3,7 +3,7 @@ import '../../app/constants.dart';
 
 /// 3D预览页面
 /// 展示定制作品的3D模型预览
-/// TODO: 集成model_viewer_plus库实现真实3D渲染
+/// 当前为占位预览，后续集成flutter_unity_widget实现真实3D渲染
 
 class PreviewScreen extends StatefulWidget {
   final String? productId;
@@ -84,7 +84,11 @@ class _PreviewScreenState extends State<PreviewScreen> {
   }
 
   Widget _buildPlaceholderModel() {
-    // TODO: 替换为真实3D模型
+    final params = widget.params ?? {};
+    final material = params['material'] ?? '银';
+    final size = params['size'] ?? '中号';
+    final color = params['color'] ?? '银色';
+
     return Container(
       width: 200,
       height: 200,
@@ -96,28 +100,44 @@ class _PreviewScreenState extends State<PreviewScreen> {
           width: 2,
         ),
       ),
-      child: const Column(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.view_in_ar,
-            size: 80,
+            size: 60,
             color: AppColors.primary,
           ),
-          SizedBox(height: AppSizes.spacingMedium),
+          const SizedBox(height: AppSizes.spacingSmall),
           Text(
-            '3D模型预览',
+            '定制预览',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
             ),
           ),
-          SizedBox(height: AppSizes.spacingSmall),
+          const SizedBox(height: AppSizes.spacingSmall),
+          Text(
+            '材质: $material | 尺寸: $size',
+            style: TextStyle(
+              fontSize: 11,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          Text(
+            '颜色: $color',
+            style: TextStyle(
+              fontSize: 11,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AppSizes.spacingSmall),
           Text(
             '手势拖动旋转 · 双指缩放',
             style: TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondary,
+              fontSize: 10,
+              color: AppColors.textHint,
             ),
           ),
         ],
@@ -226,8 +246,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
         Expanded(
           child: ElevatedButton.icon(
             onPressed: () {
-              // TODO: 确认定制方案
-              Navigator.pop(context);
+              Navigator.pushNamed(context, AppRoutes.confirm, arguments: widget.params);
             },
             icon: const Icon(Icons.check),
             label: const Text('确认方案'),

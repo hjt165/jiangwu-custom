@@ -78,9 +78,7 @@ class _PublishScreenState extends State<PublishScreen> {
         title: const Text('发布需求'),
         actions: [
           TextButton(
-            onPressed: () {
-              // TODO: 实现发布逻辑
-            },
+            onPressed: () => _handlePublish(),
             child: const Text(
               '发布',
               style: TextStyle(color: AppColors.white),
@@ -383,38 +381,61 @@ class _PublishScreenState extends State<PublishScreen> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () async {
-          if (_formKey.currentState!.validate()) {
-            if (_selectedCategory == null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('请选择工艺分类'),
-                  backgroundColor: AppColors.error,
-                ),
-              );
-              return;
-            }
-            if (_selectedImages.isEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('请至少上传一张图片'),
-                  backgroundColor: AppColors.error,
-                ),
-              );
-              return;
-            }
-            // TODO: 调用API发布需求
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('需求发布成功'),
-                backgroundColor: AppColors.success,
-              ),
-            );
-            if (mounted) Navigator.of(context).pop();
-          }
-        },
+        onPressed: () => _handlePublish(),
         child: const Text('发布需求'),
       ),
     );
+  }
+
+  Future<void> _handlePublish() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (_selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('请选择工艺分类'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    if (_selectedImages.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('请至少上传一张图片'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    try {
+      // TODO: 调用后端API发布需求
+      // final response = await ApiService.post('/api/customization/publish', {
+      //   'description': _descriptionController.text,
+      //   'category': _selectedCategory,
+      //   'images': _selectedImages,
+      // });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('需求发布成功，等待手作人响应'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('发布失败: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 }

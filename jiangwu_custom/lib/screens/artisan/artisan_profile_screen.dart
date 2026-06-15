@@ -101,15 +101,11 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
         actions: [
           IconButton(
             icon: const Icon(Icons.share),
-            onPressed: () {
-              // TODO: 分享功能
-            },
+            onPressed: () => _handleShare(),
           ),
           IconButton(
             icon: const Icon(Icons.more_vert),
-            onPressed: () {
-              // TODO: 更多操作
-            },
+            onPressed: () => _showMoreActions(),
           ),
         ],
       ),
@@ -169,7 +165,6 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
               ArtisanWorksGrid(
                 works: artisan.works,
                 onWorkTap: (product) {
-                  // TODO: 跳转到作品详情或定制发布页
                   Navigator.of(context).pushNamed(
                     AppRoutes.publish,
                     arguments: {
@@ -216,9 +211,7 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
           Expanded(
             flex: 1,
             child: OutlinedButton.icon(
-              onPressed: () {
-                // TODO: 关注/取消关注
-              },
+              onPressed: () => _handleFollow(artisan),
               icon: const Icon(Icons.favorite_border, size: 18),
               label: const Text('关注'),
               style: OutlinedButton.styleFrom(
@@ -244,6 +237,55 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
           ),
         ],
       ),
+    );
+  }
+
+  void _handleShare() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('分享功能开发中')),
+    );
+  }
+
+  void _showMoreActions() {
+    final artisan = ref.read(artisanProvider).currentArtisan;
+    if (artisan == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.report),
+              title: const Text('举报'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('举报功能开发中')),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.block),
+              title: const Text('拉黑'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('拉黑功能开发中')),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _handleFollow(Artisan artisan) {
+    // TODO: 调用关注/取消关注API
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('关注功能开发中')),
     );
   }
 }

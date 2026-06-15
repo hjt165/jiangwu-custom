@@ -43,9 +43,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
         title: const Text('订单详情'),
         actions: [
           IconButton(
-            onPressed: () {
-              // TODO: 显示更多操作
-            },
+            onPressed: () => _showMoreActions(),
             icon: const Icon(Icons.more_vert),
           ),
         ],
@@ -366,17 +364,14 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
   }
 
   void _handlePayOrder(Order order) {
-    // TODO: 跳转到支付页面
     Navigator.pushNamed(context, AppRoutes.pay, arguments: order.id);
   }
 
   void _handleConfirmStage(Order order) {
-    // TODO: 跳转到阶段确认页面
     Navigator.pushNamed(context, AppRoutes.stageConfirm, arguments: order.id);
   }
 
   void _handleReviewOrder(Order order) {
-    // TODO: 跳转到评价页面
     Navigator.pushNamed(context, AppRoutes.review, arguments: order.id);
   }
 
@@ -388,6 +383,52 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
           order: order,
           artisanName: order.artisan?.name ?? '手作人',
           artisanAvatar: order.artisan?.avatar,
+        ),
+      ),
+    );
+  }
+
+  void _showMoreActions() {
+    final order = ref.read(orderProvider).currentOrder;
+    if (order == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.share),
+              title: const Text('分享订单'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('分享功能开发中')),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.customer_service),
+              title: const Text('联系客服'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('客服功能开发中')),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.report),
+              title: const Text('举报'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('举报功能开发中')),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

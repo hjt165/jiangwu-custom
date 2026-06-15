@@ -2,6 +2,8 @@ package com.jiangwu.listener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jiangwu.config.RabbitMQConfig;
+import com.jiangwu.entity.Customization;
+import com.jiangwu.repository.CustomizationRepository;
 import com.jiangwu.service.AiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,7 @@ public class AiTaskListener {
 
     private final AiService aiService;
     private final ObjectMapper objectMapper;
+    private final CustomizationRepository customizationRepository;
 
     /**
      * 监听 AI 任务队列 - 接收任务请求并转发到 AI 服务
@@ -64,15 +67,28 @@ public class AiTaskListener {
     /**
      * 监听 AI 任务完成回调队列 - AI 服务异步任务完成后回调
      */
+    @SuppressWarnings("unchecked")
     @RabbitListener(queues = RabbitMQConfig.AI_TASK_COMPLETE_QUEUE)
     public void handleAiTaskComplete(Map<String, Object> message) {
         String taskId = (String) message.get("taskId");
         String status = (String) message.get("status");
         Map<String, Object> result = (Map<String, Object>) message.get("result");
+        Long orderId = message.get("orderId") != null ? ((Number) message.get("orderId")).longValue() : null;
 
         log.info("AI 任务回调: taskId={}, status={}", taskId, status);
 
-        // TODO: 根据 taskId 更新数据库中的 AI 建议
-        // 例如: customizationRepository.updateAiSuggestion(orderId, suggestion)
+        if (orderId != null && "completed".equals(status) && result != null) {
+            try {
+                Customization customization = customizationRepository.findByOrderId(orderId);
+                if (customization != null) {
+                    String suggestion = objectMapper.writeValueAsString(result);
+                    customization.setAiSuggestion(suggestion);
+                    customizationRepository.updateById(customization);
+                    log.info("AI 建议已保存: orderId={}", orderId);
+                }
+            } catch (Exception e) {
+                log.error("保存 AI 建议失败: orderId={}, error={}", orderId, e.getMessage());
+            }
+        }
     }
 }

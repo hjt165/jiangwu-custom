@@ -357,9 +357,6 @@ class _OrderManageScreenState extends ConsumerState<OrderManageScreen>
   }
 
   void _handleDeliverStage(Order order) {
-    // TODO: 跳转到阶段交付页面
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('阶段交付功能开发中...')),
-    );
+    Navigator.pushNamed(context, AppRoutes.stageConfirm, arguments: order.id);
   }
 }
