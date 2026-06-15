@@ -28,22 +28,32 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { getCommentReviewList, reviewComment } from '@/api/content'
+import { ElMessage } from 'element-plus'
 
 const loading = ref(false)
 const tableData = ref([])
 
-function loadData() {
+async function loadData() {
   loading.value = true
-  setTimeout(() => {
-    tableData.value = [
-      { id: 1, userName: '用户A', content: '做工非常精细，很满意！', rating: 5, createdAt: '2026-06-14' },
-    ]
+  try {
+    const res = await getCommentReviewList({ page: 1, size: 10 })
+    tableData.value = res.data || []
+  } catch (e) {
+    console.error('加载评论列表失败:', e)
+  } finally {
     loading.value = false
-  }, 500)
+  }
 }
 
-function handleAudit(id, action) {
-  tableData.value = tableData.value.filter(item => item.id !== id)
+async function handleAudit(id, action) {
+  try {
+    await reviewComment(id, { action })
+    tableData.value = tableData.value.filter(item => item.id !== id)
+    ElMessage.success(action === 'pass' ? '审核通过' : '已拒绝')
+  } catch (e) {
+    ElMessage.error('审核操作失败')
+  }
 }
 
 onMounted(loadData)

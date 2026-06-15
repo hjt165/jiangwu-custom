@@ -47,30 +47,35 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { getOrderDetail } from '@/api/order'
 
 const route = useRoute()
 const order = ref({})
 
-function getStatusType(status) {
-  const map = { '已完成': 'success', '制作中': '', '待支付': 'warning', '已取消': 'info' }
-  return map[status] || 'info'
+const statusMap = {
+  pending_payment: { label: '待支付', type: 'warning' },
+  paid: { label: '已支付', type: 'primary' },
+  producing: { label: '制作中', type: '' },
+  completed: { label: '已完成', type: 'success' },
+  cancelled: { label: '已取消', type: 'info' },
 }
 
-onMounted(() => {
-  order.value = {
-    id: route.params.id,
-    orderNo: 'JW20260614001',
-    status: '制作中',
-    userName: '用户A',
-    artisanName: '手作达人',
-    totalAmount: 580,
-    createdAt: '2026-06-14',
-    stages: [
-      { id: 1, name: '草稿确认', completed: true, time: '2026-06-14' },
-      { id: 2, name: '制作中', completed: false, time: '2026-06-14' },
-      { id: 3, name: '阶段交付', completed: false, time: '' },
-      { id: 4, name: '最终确认', completed: false, time: '' },
-    ],
+function getStatusType(status) {
+  return statusMap[status]?.type || 'info'
+}
+
+function getStatusLabel(status) {
+  return statusMap[status]?.label || status
+}
+
+async function loadOrder() {
+  try {
+    const res = await getOrderDetail(route.params.id)
+    order.value = res.data || {}
+  } catch (e) {
+    console.error('加载订单详情失败:', e)
   }
-})
+}
+
+onMounted(loadOrder)
 </script>

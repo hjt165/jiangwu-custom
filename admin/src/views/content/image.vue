@@ -29,22 +29,32 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { getImageReviewList, reviewImage } from '@/api/content'
+import { ElMessage } from 'element-plus'
 
 const loading = ref(false)
 const tableData = ref([])
 
-function loadData() {
+async function loadData() {
   loading.value = true
-  setTimeout(() => {
-    tableData.value = [
-      { id: 1, userName: '用户A', imageUrl: '', description: '参考图1', createdAt: '2026-06-14' },
-    ]
+  try {
+    const res = await getImageReviewList({ page: 1, size: 10 })
+    tableData.value = res.data || []
+  } catch (e) {
+    console.error('加载图片列表失败:', e)
+  } finally {
     loading.value = false
-  }, 500)
+  }
 }
 
-function handleAudit(id, action) {
-  tableData.value = tableData.value.filter(item => item.id !== id)
+async function handleAudit(id, action) {
+  try {
+    await reviewImage(id, { action })
+    tableData.value = tableData.value.filter(item => item.id !== id)
+    ElMessage.success(action === 'pass' ? '审核通过' : '已拒绝')
+  } catch (e) {
+    ElMessage.error('审核操作失败')
+  }
 }
 
 onMounted(loadData)

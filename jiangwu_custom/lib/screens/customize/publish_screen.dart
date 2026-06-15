@@ -411,12 +411,14 @@ class _PublishScreenState extends State<PublishScreen> {
     }
 
     try {
-      // TODO: 调用后端API发布需求
-      // final response = await ApiService.post('/api/customization/publish', {
-      //   'description': _descriptionController.text,
-      //   'category': _selectedCategory,
-      //   'images': _selectedImages,
-      // });
+      final response = await ApiService().post<Map<String, dynamic>>(
+        '/order/create',
+        data: {
+          'description': _descriptionController.text,
+          'category': _selectedCategory,
+          'images': _selectedImages,
+        },
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -2,6 +2,8 @@ package com.jiangwu.controller;
 
 import com.jiangwu.common.Result;
 import com.jiangwu.dto.response.ArtisanResponse;
+import com.jiangwu.entity.Review;
+import com.jiangwu.repository.ReviewRepository;
 import com.jiangwu.service.ArtisanService;
 import com.jiangwu.utils.JWTUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,6 +21,7 @@ import java.util.List;
 public class ArtisanController {
 
     private final ArtisanService artisanService;
+    private final ReviewRepository reviewRepository;
     private final JWTUtil jwtUtil;
 
     /**
@@ -71,6 +74,15 @@ public class ArtisanController {
         Long userId = extractUserId(request);
         ArtisanResponse response = artisanService.getArtisanByUserId(userId);
         return Result.success(response);
+    }
+
+    /**
+     * 获取手作人评价列表
+     */
+    @GetMapping("/{id}/reviews")
+    public Result<List<Review>> getArtisanReviews(@PathVariable Long id) {
+        List<Review> reviews = reviewRepository.findByArtisanId(id);
+        return Result.success(reviews);
     }
 
     /**

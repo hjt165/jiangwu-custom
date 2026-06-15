@@ -65,7 +65,7 @@ class ArtisanProvider extends ChangeNotifier {
 
     try {
       final response = await _apiService.get<Map<String, dynamic>>(
-        '/artisan/',
+        '/artisan/$artisanId',
       );
 
       _currentArtisan = Artisan.fromJson(response);

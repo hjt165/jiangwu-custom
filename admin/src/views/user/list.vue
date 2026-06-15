@@ -59,6 +59,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { getUserList, updateUserStatus } from '@/api/user'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const loading = ref(false)
@@ -68,25 +70,36 @@ const filterRole = ref('')
 const page = ref(1)
 const total = ref(0)
 
-function loadData() {
+async function loadData() {
   loading.value = true
-  setTimeout(() => {
-    tableData.value = [
-      { id: 1, phone: '13800000001', nickname: '测试用户', role: 0, creditScore: 100, status: 1, createdAt: '2026-06-14' },
-      { id: 2, phone: '13800000002', nickname: '手作达人', role: 1, creditScore: 95, status: 1, createdAt: '2026-06-14' },
-      { id: 3, phone: '13800000000', nickname: '管理员', role: 2, creditScore: 100, status: 1, createdAt: '2026-06-14' },
-    ]
-    total.value = 3
+  try {
+    const res = await getUserList({
+      keyword: searchKeyword.value,
+      page: page.value,
+      size: 10
+    })
+    tableData.value = res.data || []
+    total.value = res.total || 0
+  } catch (e) {
+    console.error('加载用户列表失败:', e)
+  } finally {
     loading.value = false
-  }, 500)
+  }
 }
 
 function viewDetail(id) {
   router.push(`/user/${id}`)
 }
 
-function toggleStatus(row) {
-  row.status = row.status === 1 ? 0 : 1
+async function toggleStatus(row) {
+  try {
+    const newStatus = row.status === 1 ? 0 : 1
+    await updateUserStatus(row.id, newStatus)
+    row.status = newStatus
+    ElMessage.success('状态更新成功')
+  } catch (e) {
+    ElMessage.error('状态更新失败')
+  }
 }
 
 onMounted(loadData)

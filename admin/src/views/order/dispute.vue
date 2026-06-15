@@ -43,25 +43,46 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { getDisputeList, resolveDispute } from '@/api/order'
+import { ElMessage } from 'element-plus'
 
 const loading = ref(false)
 const tableData = ref([])
 const dialogVisible = ref(false)
 const result = ref('user')
 const remark = ref('')
+const currentOrderId = ref(null)
 
-function loadData() {
+async function loadData() {
   loading.value = true
-  setTimeout(() => {
-    tableData.value = [
-      { id: 1, orderNo: 'JW20260614001', userName: '用户A', artisanName: '手作达人', reason: '与描述不符', createdAt: '2026-06-14' },
-    ]
+  try {
+    const res = await getDisputeList({ page: 1, size: 10 })
+    tableData.value = res.data || []
+  } catch (e) {
+    console.error('加载争议订单失败:', e)
+  } finally {
     loading.value = false
-  }, 500)
+  }
 }
 
-function handleResolve(row) { dialogVisible.value = true }
-function submitResolve() { dialogVisible.value = false }
+function handleResolve(row) {
+  currentOrderId.value = row.id
+  dialogVisible.value = true
+}
+
+async function submitResolve() {
+  try {
+    await resolveDispute(currentOrderId.value, {
+      resolution: result.value,
+      remark: remark.value
+    })
+    dialogVisible.value = false
+    ElMessage.success('仲裁完成')
+    loadData()
+  } catch (e) {
+    ElMessage.error('仲裁操作失败')
+  }
+}
 
 onMounted(loadData)
 </script>

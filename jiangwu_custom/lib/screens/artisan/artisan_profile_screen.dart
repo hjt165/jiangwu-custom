@@ -4,6 +4,7 @@ import '../../app/constants.dart';
 import '../../models/artisan.dart';
 import '../../models/review.dart';
 import '../../providers/artisan_provider.dart';
+import '../../services/api_service.dart';
 import '../../widgets/business/artisan_header.dart';
 import '../../widgets/business/artisan_works_grid.dart';
 import '../../widgets/business/artisan_reviews_list.dart';
@@ -29,52 +30,8 @@ class ArtisanProfileScreen extends ConsumerStatefulWidget {
 class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-
-  // Mock评价数据（后续接入API）
-  final List<Review> _mockReviews = [
-    Review(
-      id: '1',
-      orderId: 'order_001',
-      userId: 'user_001',
-      userName: '小明',
-      artisanId: 'artisan_001',
-      artisanName: '手作人',
-      rating: 5,
-      content: '手作人非常专业，作品质量很好，细节处理得很到位！',
-      tags: ['专业', '细致', '质量好'],
-      images: [],
-      createdAt: DateTime.now().subtract(const Duration(days: 3)),
-      updatedAt: DateTime.now().subtract(const Duration(days: 3)),
-    ),
-    Review(
-      id: '2',
-      orderId: 'order_002',
-      userId: 'user_002',
-      userName: '小红',
-      artisanId: 'artisan_001',
-      artisanName: '手作人',
-      rating: 4,
-      content: '制作过程很用心，沟通也很顺畅，就是时间比预期长了一点。',
-      tags: ['用心', '沟通顺畅', '稍慢'],
-      images: [],
-      createdAt: DateTime.now().subtract(const Duration(days: 7)),
-      updatedAt: DateTime.now().subtract(const Duration(days: 7)),
-    ),
-    Review(
-      id: '3',
-      orderId: 'order_003',
-      userId: 'user_003',
-      userName: '小李',
-      artisanId: 'artisan_001',
-      artisanName: '手作人',
-      rating: 5,
-      content: '成品超出预期，非常满意！已经推荐给朋友了。',
-      tags: ['超出预期', '推荐'],
-      images: [],
-      createdAt: DateTime.now().subtract(const Duration(days: 14)),
-      updatedAt: DateTime.now().subtract(const Duration(days: 14)),
-    ),
-  ];
+  List<Review> _reviews = [];
+  bool _isLoadingReviews = false;
 
   @override
   void initState() {
@@ -82,7 +39,23 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
     _tabController = TabController(length: 2, vsync: this);
     Future.microtask(() {
       ref.read(artisanProvider.notifier).fetchArtisanDetail(widget.artisanId);
+      _fetchReviews();
     });
+  }
+
+  Future<void> _fetchReviews() async {
+    setState(() => _isLoadingReviews = true);
+    try {
+      final response = await ApiService().get<List<dynamic>>(
+        '/artisan/${widget.artisanId}/reviews',
+      );
+      setState(() {
+        _reviews = response.map((e) => Review.fromJson(e)).toList();
+        _isLoadingReviews = false;
+      });
+    } catch (e) {
+      setState(() => _isLoadingReviews = false);
+    }
   }
 
   @override
@@ -175,11 +148,13 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
                 },
               ),
               // 评价列表
-              ArtisanReviewsList(
-                reviews: _mockReviews,
-                averageRating: artisan.rating,
-                totalReviews: artisan.ratingCount,
-              ),
+              _isLoadingReviews
+                  ? const Center(child: LoadingWidget())
+                  : ArtisanReviewsList(
+                      reviews: _reviews,
+                      averageRating: artisan.rating,
+                      totalReviews: artisan.ratingCount,
+                    ),
             ],
           ),
         ),

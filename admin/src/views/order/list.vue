@@ -51,6 +51,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { getOrderList } from '@/api/order'
 
 const router = useRouter()
 const loading = ref(false)
@@ -71,15 +72,22 @@ const statusMap = {
 function getStatusLabel(status) { return statusMap[status]?.label || status }
 function getStatusType(status) { return statusMap[status]?.type || 'info' }
 
-function loadData() {
+async function loadData() {
   loading.value = true
-  setTimeout(() => {
-    tableData.value = [
-      { id: 1, orderNo: 'JW20260614001', userName: '用户A', artisanName: '手作达人', totalAmount: 580, status: 'producing', createdAt: '2026-06-14' },
-    ]
-    total.value = 1
+  try {
+    const res = await getOrderList({
+      keyword: searchKeyword.value,
+      status: filterStatus.value,
+      page: page.value,
+      size: 10
+    })
+    tableData.value = res.data || []
+    total.value = res.total || 0
+  } catch (e) {
+    console.error('加载订单列表失败:', e)
+  } finally {
     loading.value = false
-  }, 500)
+  }
 }
 
 function viewDetail(id) { router.push(`/order/${id}`) }

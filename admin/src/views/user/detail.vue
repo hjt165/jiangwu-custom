@@ -49,25 +49,32 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { getUserDetail, updateUserCredit, updateUserStatus } from '@/api/user'
+import { ElMessage } from 'element-plus'
 
 const route = useRoute()
 const user = ref({})
 const creditScore = ref(0)
 
-onMounted(() => {
-  user.value = {
-    id: route.params.id,
-    phone: '13800000001',
-    nickname: '测试用户',
-    role: 0,
-    creditScore: 100,
-    status: 1,
-    createdAt: '2026-06-14',
+async function loadUser() {
+  try {
+    const res = await getUserDetail(route.params.id)
+    user.value = res.data || {}
+    creditScore.value = user.value.creditScore || 0
+  } catch (e) {
+    console.error('加载用户详情失败:', e)
   }
-  creditScore.value = user.value.creditScore
-})
-
-function updateCredit() {
-  user.value.creditScore = creditScore.value
 }
+
+async function updateCredit() {
+  try {
+    await updateUserCredit(user.value.id, creditScore.value)
+    user.value.creditScore = creditScore.value
+    ElMessage.success('信用分调整成功')
+  } catch (e) {
+    ElMessage.error('信用分调整失败')
+  }
+}
+
+onMounted(loadUser)
 </script>
