@@ -49,7 +49,7 @@ public class ProductController {
         if (product != null && product.getCategory() != null) {
             try {
                 Map<String, Object> recommendation = aiService.recommendArtisan(
-                        product.getCategory().getValue(),
+                        product.getCategory(),
                         null, 0, 99999, 30, 5
                 );
                 if (recommendation != null && !recommendation.containsKey("error")) {

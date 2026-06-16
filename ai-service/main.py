@@ -86,13 +86,13 @@ async def lifespan(app: FastAPI):
     if _redis_client:
         try:
             _redis_client.close()
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Redis关闭失败: {e}")
     if _milvus_client:
         try:
             _milvus_client.close()
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Milvus关闭失败: {e}")
     logger.info("资源释放完成")
 
 

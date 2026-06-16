@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user.dart';
 import 'api_service.dart';
 
@@ -112,3 +113,8 @@ class AuthService {
     return await fetchCurrentUser();
   }
 }
+
+/// 认证服务 Riverpod Provider
+final authServiceProvider = Provider<AuthService>((ref) {
+  return AuthService();
+});

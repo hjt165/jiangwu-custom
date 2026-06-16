@@ -4,6 +4,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/message.dart';
 import '../models/conversation.dart';
+import '../app/constants.dart';
 import 'api_service.dart';
 import 'auth_service.dart';
 
@@ -34,7 +35,7 @@ class ChatService {
   Future<void> connect(int userId) async {
     _currentUserId = userId;
     try {
-      final wsUrl = ApiService.baseUrl.replaceFirst('http', 'ws') + '/ws/chat?userId=$userId';
+      final wsUrl = ApiConstants.baseUrl.replaceFirst('http', 'ws') + '/ws/chat?userId=$userId';
       _channel = WebSocketChannel.connect(Uri.parse(wsUrl));
 
       _channel!.stream.listen(

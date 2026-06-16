@@ -28,6 +28,7 @@ import '../screens/artisan/product_manage_screen.dart';
 import '../screens/artisan/income_screen.dart';
 import '../screens/chat/chat_list_screen.dart';
 import '../screens/chat/chat_screen.dart';
+import '../screens/product/product_detail_screen.dart';
 
 /// 路由配置
 /// 定义所有页面路由映射
@@ -149,6 +150,14 @@ class AppRouter {
             otherName: args?['otherName'] ?? '聊天',
             otherAvatar: args?['otherAvatar'],
           ),
+          settings,
+        );
+
+      // 作品模块
+      case '/product/':
+        final productId = args as String? ?? '';
+        return _buildRoute(
+          ProductDetailScreen(productId: productId),
           settings,
         );
 

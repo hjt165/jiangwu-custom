@@ -17,6 +17,8 @@ class JiangwuApp extends StatelessWidget {
       title: '匠物定制',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
       navigatorKey: navigatorKey,
       home: const SplashScreen(),
       onGenerateRoute: AppRouter.generateRoute,

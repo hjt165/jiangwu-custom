@@ -114,7 +114,7 @@ const fetchDashboardData = async () => {
   try {
     const res = await getDashboardData()
     if (res.code === 200 && res.data) {
-      Object.assign(stats, res.data.stats || {})
+      Object.assign(stats, res.data || {})
       todoList.value = res.data.todoList || []
     }
   } catch (error) {

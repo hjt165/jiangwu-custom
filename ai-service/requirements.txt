@@ -4,9 +4,7 @@ fastapi==0.110.0
 uvicorn[standard]==0.27.1
 python-multipart==0.0.9
 
-# LangChain LLM 框架
-langchain==0.2.16
-langchain-community==0.2.16
+# LLM SDK
 openai==1.51.0
 
 # 向量数据库
@@ -28,9 +26,6 @@ cachetools==5.3.2
 
 # Redis
 redis==5.0.8
-
-# 异步消息
-aio_pika==9.4.1
 
 # 日志
 loguru==0.7.2

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:jpush_flutter/jpush_flutter.dart';
+import 'package:jpush_flutter/jpush_interface.dart';
 import 'api_service.dart';
 
 /// 极光推送服务
@@ -14,7 +15,7 @@ class PushService {
   PushService._internal();
 
   final ApiService _apiService = ApiService();
-  final JPush _jPush = JPush();
+  final JPushFlutterInterface _jPush = JPush.newJPush();
 
   // 推送消息流
   StreamController<PushNotification>? _notificationController;
@@ -34,7 +35,7 @@ class PushService {
       // 初始化推送SDK
       // 请在极光开发者平台申请AppKey并替换
       // https://www.jiguang.cn/dev/#/app/list
-      await _jPush.setup(
+      _jPush.setup(
         appKey: const String.fromEnvironment('JPUSH_APP_KEY', defaultValue: 'your-app-key'),
         channel: 'developer-default',
         production: false,
@@ -53,9 +54,6 @@ class PushService {
         },
         onReceiveMessage: (Map<String, dynamic> message) async {
           print('收到应用内消息: $message');
-        },
-        onReceiveOfflineMessage: (Map<String, dynamic> message) async {
-          print('收到离线消息: $message');
         },
       );
 
@@ -87,7 +85,7 @@ class PushService {
   /// 清除推送别名
   Future<void> clearAlias() async {
     try {
-      await _jPush.clearAlias();
+      await _jPush.deleteAlias();
       print('清除推送别名');
     } catch (e) {
       print('清除推送别名失败: $e');
@@ -117,14 +115,14 @@ class PushService {
   /// 申请推送权限
   Future<bool> requestPermission() async {
     try {
-      final result = await _jPush.applyPushAuthority(
+      final result = _jPush.applyPushAuthority(
         const NotificationSettingsIOS(
           sound: true,
           alert: true,
           badge: true,
         ),
       );
-      return result ?? false;
+      return true;
     } catch (e) {
       print('申请推送权限失败: $e');
       return false;

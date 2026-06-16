@@ -40,6 +40,9 @@ public class WebConfig implements WebMvcConfigurer {
                         // 手作人浏览（无需认证）
                         "/artisan/list",
                         "/artisan/search",
+                        // 材质浏览（无需认证）
+                        "/material/list",
+                        "/material/category/**",
                         // Swagger
                         "/v3/api-docs/**",
                         "/swagger-ui/**",

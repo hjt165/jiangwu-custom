@@ -28,7 +28,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatProvider);
     final user = ref.watch(authServiceProvider).currentUser;
-    final isArtisan = user?.role == 1;
+    final isArtisan = false;
 
     return Scaffold(
       appBar: AppBar(

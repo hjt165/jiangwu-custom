@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../app/constants.dart';
+import '../../services/api_service.dart';
 
 /// 需求发布页
 /// 多模态输入（图片/文字/语音）

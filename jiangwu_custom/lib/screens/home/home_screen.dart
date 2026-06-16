@@ -142,4 +142,63 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
+
+  Widget _buildArtisanSection(BuildContext context, ArtisanProvider artisanState) {
+    return Padding(
+      padding: const EdgeInsets.all(AppSizes.paddingMedium),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                '推荐手作人',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed(AppRoutes.discover);
+                },
+                child: const Text('查看更多'),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSizes.spacingSmall),
+          SizedBox(
+            height: 120,
+            child: artisanState.isLoading && artisanState.artisans.isEmpty
+                ? const Center(child: LoadingWidget())
+                : ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: artisanState.artisans.isEmpty
+                        ? 4
+                        : artisanState.artisans.length,
+                    itemBuilder: (context, index) {
+                      if (artisanState.artisans.isEmpty) {
+                        return const HomeArtisanCard(
+                          onTap: null,
+                        );
+                      }
+                      final artisan = artisanState.artisans[index];
+                      return HomeArtisanCard(
+                        artisan: artisan,
+                        onTap: () {
+                          Navigator.of(context).pushNamed(
+                            AppRoutes.artisanProfile,
+                            arguments: artisan.id,
+                          );
+                        },
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
 }

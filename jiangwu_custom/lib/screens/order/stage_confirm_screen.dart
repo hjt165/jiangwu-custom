@@ -56,8 +56,8 @@ class _StageConfirmScreenState extends ConsumerState<StageConfirmScreen> {
                   try {
                     final chatService = ref.read(chatServiceProvider);
                     final conversation = await chatService.getOrCreateConversation(
-                      user.id,
-                      order.artisanId!,
+                      int.parse(user.id),
+                      int.parse(order.artisanId!),
                       orderId: int.tryParse(order.id),
                     );
                     if (mounted) {
@@ -271,8 +271,8 @@ class _StageConfirmScreenState extends ConsumerState<StageConfirmScreen> {
                     try {
                       final chatService = ref.read(chatServiceProvider);
                       final conversation = await chatService.getOrCreateConversation(
-                        user.id,
-                        order.artisanId!,
+                        int.parse(user.id),
+                        int.parse(order.artisanId!),
                         orderId: int.tryParse(order.id),
                       );
                       if (mounted) {

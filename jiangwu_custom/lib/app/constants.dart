@@ -138,6 +138,9 @@ class AppRoutes {
   // 聊天模块
   static const String chatList = '/chat/list';
   static const String chat = '/chat/:conversationId';
+
+  // 作品模块
+  static const String productDetail = '/product/:id';
 }
 
 /// API配置常量
@@ -160,6 +163,9 @@ class ApiConstants {
   // 分页默认值
   static const int defaultPageSize = 20;
   static const int maxPageSize = 100;
+
+  // 微信开放平台appId
+  static const String wechatAppId = 'your-wechat-app-id';
 }
 
 /// 缓存Key常量

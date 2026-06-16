@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../app/constants.dart';
+import '../../app/constants.dart';
 
 /// 标签组件
 /// 提供标签展示、选择等功能

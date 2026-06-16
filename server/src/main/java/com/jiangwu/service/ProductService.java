@@ -10,6 +10,8 @@ import com.jiangwu.common.PageResult;
 import com.jiangwu.repository.ProductImageRepository;
 import com.jiangwu.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,6 +31,7 @@ public class ProductService {
     /**
      * 获取作品列表（分页 + 分类筛选）
      */
+    @Cacheable(value = "products", key = "'list:' + #page + ':' + #size + ':' + (#category ?: 'all')")
     public PageResult<ProductResponse> getProductList(int page, int size, String category) {
         Page<Product> pageParam = new Page<>(page, size);
 
@@ -57,6 +60,7 @@ public class ProductService {
     /**
      * 获取作品详情
      */
+    @Cacheable(value = "products", key = "'detail:' + #productId")
     public ProductResponse getProductDetail(Long productId) {
         return getProductDetail(productId, null);
     }
@@ -104,6 +108,7 @@ public class ProductService {
     /**
      * 获取推荐作品
      */
+    @Cacheable(value = "products", key = "'featured'")
     public List<ProductResponse> getFeaturedProducts() {
         return productRepository.findFeatured().stream()
                 .map(this::toResponseWithImages)
@@ -132,6 +137,7 @@ public class ProductService {
     /**
      * 更新作品评分
      */
+    @CacheEvict(value = "products", key = "'detail:' + #productId")
     public void updateProductRating(Long productId, double rating) {
         productRepository.updateRating(productId, new java.math.BigDecimal(rating));
     }

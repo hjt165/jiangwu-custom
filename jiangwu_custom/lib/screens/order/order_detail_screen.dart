@@ -506,8 +506,8 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     try {
       final chatService = ref.read(chatServiceProvider);
       final conversation = await chatService.getOrCreateConversation(
-        user.id,
-        order.artisanId!,
+        int.parse(user.id),
+        int.parse(order.artisanId!),
         orderId: int.tryParse(order.id),
       );
 
@@ -553,7 +553,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.customer_service),
+              leading: const Icon(Icons.headset_mic),
               title: const Text('联系客服'),
               onTap: () {
                 Navigator.pop(context);

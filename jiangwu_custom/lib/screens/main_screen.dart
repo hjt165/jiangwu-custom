@@ -6,6 +6,9 @@ import '../../screens/customize/publish_screen.dart';
 import '../../screens/order/order_list_screen.dart';
 import '../../screens/profile/profile_screen.dart';
 import '../../screens/artisan/work_screen.dart';
+import '../../screens/artisan/order_manage_screen.dart';
+import '../../screens/artisan/product_manage_screen.dart';
+import '../../screens/artisan/income_screen.dart';
 
 /// 主页面容器
 /// 包含底部导航栏，切换不同功能模块

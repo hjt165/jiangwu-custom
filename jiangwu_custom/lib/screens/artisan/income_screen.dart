@@ -148,7 +148,7 @@ class _IncomeScreenState extends ConsumerState<IncomeScreen>
     }
     // 取最近7条记录的金额作为图表数据
     final recentRecords = records.take(7).toList();
-    return recentRecords.map((r) => (r['amount'] ?? 0.0).toDouble()).toList();
+    return recentRecords.map<double>((r) => (r['amount'] as num? ?? 0.0).toDouble()).toList();
   }
 
   List<String> _generateChartLabels() {

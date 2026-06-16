@@ -83,7 +83,7 @@ class HomeProductCard extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSizes.spacingXSmall),
                   Text(
-                    product != null ? '¥${product!.minPrice ?? ''}起' : '¥--',
+                    product != null ? '¥${product!.price}起' : '¥--',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

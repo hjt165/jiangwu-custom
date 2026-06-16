@@ -4,7 +4,7 @@ import com.jiangwu.common.Result;
 import com.jiangwu.dto.request.CreateOrderRequest;
 import com.jiangwu.dto.response.OrderResponse;
 import com.jiangwu.service.OrderService;
-import com.jiangwu.utils.JWTUtil;
+import com.jiangwu.utils.CurrentUserUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import java.util.Map;
 public class OrderController {
 
     private final OrderService orderService;
-    private final JWTUtil jwtUtil;
+    private final CurrentUserUtil currentUserUtil;
 
     /**
      * 创建订单
@@ -30,7 +30,7 @@ public class OrderController {
     @PostMapping("/create")
     public Result<OrderResponse> createOrder(HttpServletRequest request,
                                              @Valid @RequestBody CreateOrderRequest body) {
-        Long userId = extractUserId(request);
+        Long userId = currentUserUtil.extractUserId(request);
         OrderResponse response = orderService.createOrder(userId, body);
         return Result.success(response);
     }
@@ -42,7 +42,7 @@ public class OrderController {
     public Result<List<OrderResponse>> getOrderList(
             HttpServletRequest request,
             @RequestParam(required = false) String status) {
-        Long userId = extractUserId(request);
+        Long userId = currentUserUtil.extractUserId(request);
         List<OrderResponse> result = orderService.getOrderList(userId, status);
         return Result.success(result);
     }
@@ -63,7 +63,7 @@ public class OrderController {
     public Result<Void> cancelOrder(HttpServletRequest request,
                                     @RequestParam Long orderId,
                                     @RequestParam(required = false) String reason) {
-        Long userId = extractUserId(request);
+        Long userId = currentUserUtil.extractUserId(request);
         orderService.cancelOrder(orderId, userId, reason);
         return Result.success();
     }
@@ -89,7 +89,7 @@ public class OrderController {
     public Result<Void> submitReview(HttpServletRequest request,
                                      @RequestParam Long orderId,
                                      @RequestBody Map<String, Object> body) {
-        Long userId = extractUserId(request);
+        Long userId = currentUserUtil.extractUserId(request);
         Integer rating = (Integer) body.get("rating");
         String content = (String) body.get("content");
         @SuppressWarnings("unchecked")
@@ -100,13 +100,5 @@ public class OrderController {
 
         orderService.submitReview(orderId, userId, rating, content, images, tags, isAnonymous);
         return Result.success();
-    }
-
-    /**
-     * 从请求中提取用户ID
-     */
-    private Long extractUserId(HttpServletRequest request) {
-        String token = jwtUtil.extractToken(request.getHeader("Authorization"));
-        return jwtUtil.parseUserId(token);
     }
 }

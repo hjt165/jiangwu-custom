@@ -76,8 +76,9 @@ class AiRecommendWidget extends StatelessWidget {
 
   Widget _buildEmpty() {
     return Center(
-      padding: const EdgeInsets.all(AppSizes.spacingLarge),
-      child: Column(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSizes.spacingLarge),
+        child: Column(
         children: [
           Icon(
             Icons.search_off,
@@ -93,6 +94,7 @@ class AiRecommendWidget extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }

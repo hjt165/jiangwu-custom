@@ -15,7 +15,7 @@ public class OrderProcess implements JavaDelegate {
 
     @Override
     public void execute(DelegateExecution execution) {
-        String activityName = execution.getCurrentActivityName();
+        String activityName = execution.getEventName();
         Long orderId = (Long) execution.getVariable("orderId");
         log.info("订单流程节点执行: orderId={}, activity={}", orderId, activityName);
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:fluwx/fluwx.dart';
 import 'package:flutter/services.dart';
+import '../app/constants.dart';
 import 'api_service.dart';
 
 /// 微信支付服务
@@ -22,7 +23,7 @@ class PaymentService {
   /// 初始化微信SDK
   Future<bool> init() async {
     try {
-      final result = await _fluwx.registerApi();
+      final result = await _fluwx.registerApi(appId: ApiConstants.wechatAppId);
       return result;
     } catch (e) {
       print('微信SDK初始化失败: $e');
@@ -73,8 +74,15 @@ class PaymentService {
         },
       );
 
-      // 3. 调起微信支付
-      final wechatPayResult = await _fluwx.pay(
+      // 3. 监听微信支付回调并调起支付
+      final completer = Completer<WeChatPaymentResponse>();
+      final subscriber = _fluwx.addSubscriber((response) {
+        if (response is WeChatPaymentResponse && !completer.isCompleted) {
+          completer.complete(response);
+        }
+      });
+
+      await _fluwx.pay(
         which: Payment(
           appId: response['appId'] ?? '',
           partnerId: response['partnerId'] ?? '',
@@ -88,6 +96,12 @@ class PaymentService {
       );
 
       // 4. 处理支付结果
+      final wechatPayResult = await completer.future.timeout(
+        const Duration(seconds: 30),
+        onTimeout: () => WeChatPaymentResponse.fromMap({'errCode': -7, 'errStr': '支付超时'}),
+      );
+      subscriber.cancel();
+
       if (wechatPayResult.errCode == 0) {
         // 支付成功，通知后端
         await _apiService.post<void>(
@@ -107,8 +121,8 @@ class PaymentService {
       } else {
         return PaymentResult(
           success: false,
-          errorCode: wechatPayResult.errCode,
-          errorMsg: _getWechatPayError(wechatPayResult.errCode),
+          errorCode: wechatPayResult.errCode ?? -1,
+          errorMsg: _getWechatPayError(wechatPayResult.errCode ?? -1),
         );
       }
     } catch (e) {

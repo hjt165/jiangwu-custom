@@ -167,6 +167,6 @@ class ImageAnalyzer:
             end = text.rfind("}") + 1
             if start >= 0 and end > start:
                 return json.loads(text[start:end])
-        except json.JSONDecodeError:
-            pass
+        except json.JSONDecodeError as e:
+            logger.warning(f"JSON解析失败: {e}, 原始文本: {text[:200]}")
         return {}

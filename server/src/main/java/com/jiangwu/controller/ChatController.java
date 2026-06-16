@@ -4,9 +4,11 @@ import com.jiangwu.entity.Conversation;
 import com.jiangwu.entity.Message;
 import com.jiangwu.handler.ChatWebSocketHandler;
 import com.jiangwu.service.ChatService;
-import com.jiangwu.util.Result;
+import com.jiangwu.common.Result;
+import com.jiangwu.utils.CurrentUserUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,20 +26,23 @@ public class ChatController {
 
     private final ChatService chatService;
     private final ChatWebSocketHandler chatWebSocketHandler;
+    private final CurrentUserUtil currentUserUtil;
 
     @Operation(summary = "获取或创建会话")
     @GetMapping("/conversation")
     public Result<Conversation> getOrCreateConversation(
-            @RequestParam Long userId,
+            HttpServletRequest request,
             @RequestParam Long artisanId,
             @RequestParam(required = false) Long orderId) {
+        Long userId = currentUserUtil.extractUserId(request);
         Conversation conversation = chatService.getOrCreateConversation(userId, artisanId, orderId);
         return Result.success(conversation);
     }
 
     @Operation(summary = "获取用户会话列表")
-    @GetMapping("/conversations/{userId}")
-    public Result<List<Conversation>> getUserConversations(@PathVariable Long userId) {
+    @GetMapping("/conversations")
+    public Result<List<Conversation>> getUserConversations(HttpServletRequest request) {
+        Long userId = currentUserUtil.extractUserId(request);
         List<Conversation> conversations = chatService.getUserConversations(userId);
         return Result.success(conversations);
     }
@@ -68,17 +73,19 @@ public class ChatController {
     @Operation(summary = "标记已读")
     @PostMapping("/read/{conversationId}")
     public Result<Void> markAsRead(
-            @PathVariable Long conversationId,
-            @RequestParam Long userId) {
+            HttpServletRequest request,
+            @PathVariable Long conversationId) {
+        Long userId = currentUserUtil.extractUserId(request);
         chatService.markAsRead(conversationId, userId);
         return Result.success();
     }
 
     @Operation(summary = "获取未读消息数")
-    @GetMapping("/unread/{userId}")
+    @GetMapping("/unread")
     public Result<Map<String, Object>> getUnreadCount(
-            @PathVariable Long userId,
+            HttpServletRequest request,
             @RequestParam(defaultValue = "user") String role) {
+        Long userId = currentUserUtil.extractUserId(request);
         int count = chatService.getUnreadCount(userId, role);
         return Result.success(Map.of("unreadCount", count));
     }
@@ -86,11 +93,12 @@ public class ChatController {
     @Operation(summary = "发送消息（REST接口，备选方案）")
     @PostMapping("/send")
     public Result<Message> sendMessage(
-            @RequestBody Map<String, Object> request) {
-        Long conversationId = Long.valueOf(request.get("conversationId").toString());
-        Long senderId = Long.valueOf(request.get("senderId").toString());
-        String content = (String) request.get("content");
-        String messageType = (String) request.getOrDefault("messageType", "text");
+            HttpServletRequest request,
+            @RequestBody Map<String, Object> requestBody) {
+        Long senderId = currentUserUtil.extractUserId(request);
+        Long conversationId = Long.valueOf(requestBody.get("conversationId").toString());
+        String content = (String) requestBody.get("content");
+        String messageType = (String) requestBody.getOrDefault("messageType", "text");
 
         Message message = chatService.sendMessage(conversationId, senderId, content, messageType);
 

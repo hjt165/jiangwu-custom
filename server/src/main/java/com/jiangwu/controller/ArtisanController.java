@@ -9,7 +9,7 @@ import com.jiangwu.repository.ReviewRepository;
 import com.jiangwu.repository.UserFollowRepository;
 import com.jiangwu.repository.ArtisanRepository;
 import com.jiangwu.service.ArtisanService;
-import com.jiangwu.utils.JWTUtil;
+import com.jiangwu.utils.CurrentUserUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +31,7 @@ public class ArtisanController {
     private final ReviewRepository reviewRepository;
     private final UserFollowRepository userFollowRepository;
     private final ArtisanRepository artisanRepository;
-    private final JWTUtil jwtUtil;
+    private final CurrentUserUtil currentUserUtil;
 
     /**
      * 获取手作人列表
@@ -61,7 +61,7 @@ public class ArtisanController {
                                      @RequestParam(required = false) String specialty,
                                      @RequestParam(required = false) Integer yearsOfExp,
                                      @RequestParam(required = false) String location) {
-        Long userId = extractUserId(request);
+        Long userId = currentUserUtil.extractUserId(request);
         artisanService.applyArtisan(userId, name, bio, specialty, yearsOfExp, location);
         return Result.success();
     }
@@ -80,7 +80,7 @@ public class ArtisanController {
      */
     @GetMapping("/my")
     public Result<ArtisanResponse> getMyArtisanInfo(HttpServletRequest request) {
-        Long userId = extractUserId(request);
+        Long userId = currentUserUtil.extractUserId(request);
         ArtisanResponse response = artisanService.getArtisanByUserId(userId);
         return Result.success(response);
     }
@@ -99,7 +99,7 @@ public class ArtisanController {
      */
     @PostMapping("/{id}/follow")
     public Result<Map<String, Boolean>> followArtisan(@PathVariable Long id, HttpServletRequest request) {
-        Long userId = extractUserId(request);
+        Long userId = currentUserUtil.extractUserId(request);
 
         // 检查是否已关注
         UserFollow existing = userFollowRepository.findByUserIdAndArtisanId(userId, id);
@@ -132,7 +132,7 @@ public class ArtisanController {
      */
     @DeleteMapping("/{id}/follow")
     public Result<Map<String, Boolean>> unfollowArtisan(@PathVariable Long id, HttpServletRequest request) {
-        Long userId = extractUserId(request);
+        Long userId = currentUserUtil.extractUserId(request);
 
         // 删除关注
         userFollowRepository.findByUserIdAndArtisanId(userId, id);
@@ -157,7 +157,7 @@ public class ArtisanController {
      */
     @GetMapping("/{id}/follow/check")
     public Result<Map<String, Boolean>> checkFollow(@PathVariable Long id, HttpServletRequest request) {
-        Long userId = extractUserId(request);
+        Long userId = currentUserUtil.extractUserId(request);
 
         UserFollow follow = userFollowRepository.findByUserIdAndArtisanId(userId, id);
 
@@ -171,7 +171,7 @@ public class ArtisanController {
      */
     @GetMapping("/follow/list")
     public Result<List<Map<String, Object>>> getFollowList(HttpServletRequest request) {
-        Long userId = extractUserId(request);
+        Long userId = currentUserUtil.extractUserId(request);
 
         List<UserFollow> follows = userFollowRepository.findByUserId(userId);
 
@@ -199,20 +199,12 @@ public class ArtisanController {
      */
     @GetMapping("/follow/count")
     public Result<Long> getFollowCount(HttpServletRequest request) {
-        Long userId = extractUserId(request);
+        Long userId = currentUserUtil.extractUserId(request);
 
         com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<UserFollow> wrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
         wrapper.eq("user_id", userId);
         long count = userFollowRepository.selectCount(wrapper);
 
         return Result.success(count);
-    }
-
-    /**
-     * 从请求中提取用户ID
-     */
-    private Long extractUserId(HttpServletRequest request) {
-        String token = jwtUtil.extractToken(request.getHeader("Authorization"));
-        return jwtUtil.parseUserId(token);
     }
 }

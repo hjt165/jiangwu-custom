@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../app/constants.dart';
+import '../../app/constants.dart';
 
 /// 通用弹窗组件
 /// 提供确认弹窗、输入弹窗、选择弹窗等

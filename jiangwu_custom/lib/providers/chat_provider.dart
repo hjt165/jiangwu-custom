@@ -71,7 +71,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   Future<void> connect() async {
     final user = _authService.currentUser;
     if (user != null) {
-      await _chatService.connect(user.id);
+      await _chatService.connect(int.parse(user.id));
     }
   }
 
@@ -86,7 +86,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     try {
       final user = _authService.currentUser;
       if (user != null) {
-        final conversations = await _chatService.getConversations(user.id);
+        final conversations = await _chatService.getConversations(int.parse(user.id));
         state = state.copyWith(
           conversations: conversations,
           isLoadingConversations: false,
@@ -150,7 +150,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
         try {
           await _chatService.sendMessageRest(
             conversationId,
-            user.id,
+            int.parse(user.id),
             content,
             messageType: messageType,
           );
@@ -222,7 +222,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     if (user == null) throw Exception('用户未登录');
 
     final conversation = await _chatService.getOrCreateConversation(
-      user.id,
+      int.parse(user.id),
       artisanId,
       orderId: orderId,
     );
