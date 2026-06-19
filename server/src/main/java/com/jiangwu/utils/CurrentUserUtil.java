@@ -1,5 +1,7 @@
 package com.jiangwu.utils;
 
+import com.jiangwu.exception.BusinessException;
+import com.jiangwu.exception.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,7 +22,7 @@ public class CurrentUserUtil {
     public Long extractUserId(HttpServletRequest request) {
         String token = jwtUtil.extractToken(request.getHeader("Authorization"));
         if (token == null) {
-            throw new RuntimeException("未提供认证Token");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
         return jwtUtil.parseUserId(token);
     }

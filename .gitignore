@@ -120,3 +120,6 @@ local.properties
 *.cert
 *.p12
 *.pfx
+
+# Logs
+*.log
