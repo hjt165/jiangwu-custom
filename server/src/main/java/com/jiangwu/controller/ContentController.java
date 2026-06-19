@@ -14,7 +14,7 @@ import java.util.Map;
  * 内容审核控制器
  */
 @RestController
-@RequestMapping("/content")
+@RequestMapping("/admin/content")
 @RequiredArgsConstructor
 public class ContentController {
 

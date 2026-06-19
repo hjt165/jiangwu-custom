@@ -5,9 +5,12 @@ import com.jiangwu.entity.Order;
 import com.jiangwu.entity.User;
 import com.jiangwu.enums.OrderStatus;
 import com.jiangwu.enums.UserRole;
+import com.jiangwu.exception.BusinessException;
+import com.jiangwu.exception.ErrorCode;
 import com.jiangwu.repository.OrderRepository;
 import com.jiangwu.repository.UserRepository;
 import com.jiangwu.utils.JWTUtil;
+import com.jiangwu.utils.PasswordUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -31,11 +34,11 @@ public class AdminService {
      */
     public Map<String, Object> login(String phone, String password) {
         User user = userRepository.findByPhone(phone);
-        if (user == null || !user.getPassword().equals(password)) {
-            throw new RuntimeException("手机号或密码错误");
+        if (user == null || !PasswordUtil.verify(password, user.getPassword())) {
+            throw new BusinessException(ErrorCode.USER_PASSWORD_ERROR);
         }
         if (user.getRole() != UserRole.ADMIN) {
-            throw new RuntimeException("无管理员权限");
+            throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 
         String token = jwtUtil.generateToken(user.getId());
@@ -76,7 +79,7 @@ public class AdminService {
     public User getUserDetail(Long id) {
         User user = userRepository.findById(id);
         if (user == null) {
-            throw new RuntimeException("用户不存在");
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
         return user;
     }
@@ -122,7 +125,7 @@ public class AdminService {
     public Order getOrderDetail(Long id) {
         Order order = orderRepository.findById(id);
         if (order == null) {
-            throw new RuntimeException("订单不存在");
+            throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
         }
         return order;
     }
@@ -145,7 +148,16 @@ public class AdminService {
     public void resolveDispute(Long id, String resolution) {
         Order order = orderRepository.findById(id);
         if (order != null) {
-            order.setStatus(OrderStatus.COMPLETED);
+            if ("user".equals(resolution)) {
+                // 支持用户：退款
+                order.setStatus(OrderStatus.CANCELLED);
+            } else if ("artisan".equals(resolution)) {
+                // 支持手作人：继续完成
+                order.setStatus(OrderStatus.PRODUCING);
+            } else {
+                // 默认完成
+                order.setStatus(OrderStatus.COMPLETED);
+            }
             orderRepository.updateById(order);
         }
     }

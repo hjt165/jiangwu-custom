@@ -11,7 +11,6 @@ import java.util.List;
 @Data
 public class CreateOrderRequest {
 
-    @NotNull(message = "手作人ID不能为空")
     private Long artisanId;
 
     private Long productId;

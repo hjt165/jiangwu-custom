@@ -9,7 +9,9 @@ import '../../widgets/common/loading_widget.dart';
 /// 分类浏览、搜索、手作人主页入口
 
 class DiscoverScreen extends ConsumerStatefulWidget {
-  const DiscoverScreen({super.key});
+  final bool showAppBar;
+
+  const DiscoverScreen({super.key, this.showAppBar = false});
 
   @override
   ConsumerState<DiscoverScreen> createState() => _DiscoverScreenState();
@@ -49,17 +51,11 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     final productState = ref.watch(productProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('发现'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              Navigator.of(context).pushNamed(AppRoutes.search);
-            },
-          ),
-        ],
-      ),
+      appBar: widget.showAppBar
+          ? AppBar(
+              title: const Text('发现'),
+            )
+          : null,
       body: Column(
         children: [
           _buildSearchBar(context),
@@ -82,7 +78,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
           Navigator.of(context).pushNamed(AppRoutes.search);
         },
         child: Container(
-          height: 44,
+          height: 40,
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(AppSizes.radiusSmall),

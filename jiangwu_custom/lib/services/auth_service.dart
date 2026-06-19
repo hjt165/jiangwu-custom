@@ -81,6 +81,23 @@ class AuthService {
     return true;
   }
 
+  /// 重置密码
+  Future<bool> resetPassword({
+    required String phone,
+    required String code,
+    required String newPassword,
+  }) async {
+    await _apiService.post<void>(
+      '/user/reset-password',
+      data: {
+        'phone': phone,
+        'code': code,
+        'newPassword': newPassword,
+      },
+    );
+    return true;
+  }
+
   /// 获取当前用户信息（从服务器刷新）
   Future<User?> fetchCurrentUser() async {
     try {
@@ -110,7 +127,18 @@ class AuthService {
     if (token == null || token.isEmpty) return null;
 
     // Token存在，尝试获取用户信息
-    return await fetchCurrentUser();
+    try {
+      final user = await fetchCurrentUser();
+      if (user != null) {
+        // /user/info 不返回 token，需要手动补上本地存储的 token
+        _currentUser = user.copyWith(token: token);
+        return _currentUser;
+      }
+    } catch (e) {
+      // 后端不可用，清除无效token，返回null
+      await _apiService.clearToken();
+    }
+    return null;
   }
 }
 

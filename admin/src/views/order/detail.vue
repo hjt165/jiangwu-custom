@@ -34,9 +34,8 @@
         <el-card>
           <template #header>操作</template>
           <el-space direction="vertical" fill>
-            <el-button type="primary" block>查看详情</el-button>
-            <el-button type="warning" block>联系用户</el-button>
-            <el-button type="danger" block>取消订单</el-button>
+            <el-button type="warning" block @click="$router.back()">返回列表</el-button>
+            <el-button type="danger" block :disabled="order.status === 'cancelled'" @click="handleCancel">取消订单</el-button>
           </el-space>
         </el-card>
       </el-col>
@@ -47,7 +46,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { getOrderDetail } from '@/api/order'
+import { getOrderDetail, cancelOrder } from '@/api/order'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const route = useRoute()
 const order = ref({})
@@ -74,6 +74,23 @@ async function loadOrder() {
     order.value = res.data || {}
   } catch (e) {
     console.error('加载订单详情失败:', e)
+  }
+}
+
+async function handleCancel() {
+  try {
+    await ElMessageBox.confirm('确定要取消该订单吗？此操作不可撤销。', '取消订单', {
+      confirmButtonText: '确定取消',
+      cancelButtonText: '返回',
+      type: 'warning'
+    })
+    await cancelOrder(order.value.id || order.value.orderNo, '管理员取消')
+    ElMessage.success('订单已取消')
+    loadOrder()
+  } catch (e) {
+    if (e !== 'cancel') {
+      ElMessage.error('取消订单失败')
+    }
   }
 }
 

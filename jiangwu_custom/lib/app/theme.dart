@@ -31,8 +31,9 @@ class AppTheme {
         foregroundColor: AppColors.white,
         elevation: 0,
         centerTitle: true,
+        toolbarHeight: 44,
         titleTextStyle: TextStyle(
-          fontSize: 18,
+          fontSize: 14,
           fontWeight: FontWeight.bold,
           color: AppColors.white,
         ),
@@ -62,7 +63,7 @@ class AppTheme {
             borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
           ),
           textStyle: const TextStyle(
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -73,7 +74,7 @@ class AppTheme {
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primary,
           textStyle: const TextStyle(
-            fontSize: 14,
+            fontSize: 12,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -140,8 +141,9 @@ class AppTheme {
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
+        toolbarHeight: 44,
         titleTextStyle: TextStyle(
-          fontSize: 18,
+          fontSize: 14,
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),

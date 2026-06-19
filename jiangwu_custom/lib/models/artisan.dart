@@ -40,12 +40,12 @@ class Artisan {
   final List<Product> works;
   final List<String> certifications;
   final DateTime? verifiedAt;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   const Artisan({
     required this.id,
-    required this.userId,
+    this.userId = '',
     required this.name,
     this.avatar,
     this.description,
@@ -71,7 +71,7 @@ class Artisan {
       userId: json['userId'] ?? '',
       name: json['name'] ?? '',
       avatar: json['avatar'],
-      description: json['description'],
+      description: json['description'] ?? json['bio'],
       specialty: json['specialty'],
       categories: List<String>.from(json['categories'] ?? []),
       status: ArtisanStatus.fromString(json['status'] ?? ''),
@@ -86,9 +86,9 @@ class Artisan {
               .toList() ??
           [],
       certifications: List<String>.from(json['certifications'] ?? []),
-      verifiedAt: json['verifiedAt'] != null ? DateTime.parse(json['verifiedAt']) : null,
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      verifiedAt: json['verifiedAt'] != null ? DateTime.tryParse(json['verifiedAt']) : null,
+      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
+      updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt']) : null,
     );
   }
 
@@ -111,8 +111,8 @@ class Artisan {
       'works': works.map((e) => e.toJson()).toList(),
       'certifications': certifications,
       'verifiedAt': verifiedAt?.toIso8601String(),
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 

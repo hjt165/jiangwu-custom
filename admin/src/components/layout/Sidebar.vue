@@ -35,6 +35,16 @@
         <el-menu-item index="/order/dispute">争议仲裁</el-menu-item>
       </el-sub-menu>
 
+      <el-menu-item index="/product/list">
+        <el-icon><Goods /></el-icon>
+        <span>作品管理</span>
+      </el-menu-item>
+
+      <el-menu-item index="/artisan/list">
+        <el-icon><Avatar /></el-icon>
+        <span>手作人管理</span>
+      </el-menu-item>
+
       <el-sub-menu index="content">
         <template #title>
           <el-icon><Picture /></el-icon>

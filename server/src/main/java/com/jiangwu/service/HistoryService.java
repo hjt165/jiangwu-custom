@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -44,18 +45,36 @@ public class HistoryService {
     }
 
     /**
-     * 获取浏览历史列表（分页）
+     * 获取浏览历史列表（批量查询优化，避免 N+1）
      */
     public List<ProductResponse> getHistoryList(Long userId) {
         List<Long> productIds = historyRepository.findProductIdsByUserId(userId);
+        if (productIds.isEmpty()) {
+            return List.of();
+        }
+
+        // 批量查询产品
+        List<Product> products = productRepository.findByIds(productIds);
+        Map<Long, Product> productMap = products.stream()
+                .collect(Collectors.toMap(Product::getId, p -> p));
+
+        // 批量查询图片
+        Map<Long, List<String>> imagesMap = new java.util.HashMap<>();
+        for (Long pid : productIds) {
+            List<String> images = productImageRepository.findImageUrlsByProductId(pid);
+            if (!images.isEmpty()) {
+                imagesMap.put(pid, images);
+            }
+        }
 
         return productIds.stream()
                 .map(id -> {
-                    Product product = productRepository.findById(id);
+                    Product product = productMap.get(id);
                     if (product == null) return null;
                     ProductResponse response = ProductResponse.fromEntity(product);
-                    List<String> images = productImageRepository.findImageUrlsByProductId(product.getId());
-                    response.setImagesFromUrls(images);
+                    if (imagesMap.containsKey(id)) {
+                        response.setImagesFromUrls(imagesMap.get(id));
+                    }
                     return response;
                 })
                 .filter(r -> r != null)

@@ -21,9 +21,9 @@ public enum OrderStatus {
     DISPUTED("disputed", "争议中");
 
     @EnumValue
+    @JsonValue
     private final String code;
 
-    @JsonValue
     private final String label;
 
     OrderStatus(String code, String label) {

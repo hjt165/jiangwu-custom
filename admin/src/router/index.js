@@ -50,6 +50,18 @@ const routes = [
         meta: { title: '争议仲裁' },
       },
       {
+        path: 'product/list',
+        name: 'ProductList',
+        component: () => import('@/views/product/list.vue'),
+        meta: { title: '作品管理' },
+      },
+      {
+        path: 'artisan/list',
+        name: 'ArtisanList',
+        component: () => import('@/views/artisan/list.vue'),
+        meta: { title: '手作人管理' },
+      },
+      {
         path: 'content/image',
         name: 'ContentImage',
         component: () => import('@/views/content/image.vue'),
@@ -80,6 +92,10 @@ const routes = [
         meta: { title: '系统设置' },
       },
     ],
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/dashboard',
   },
 ]
 

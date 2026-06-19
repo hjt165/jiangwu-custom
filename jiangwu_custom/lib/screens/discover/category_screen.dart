@@ -79,7 +79,7 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
           products.sort((a, b) => b.rating.compareTo(a.rating));
           break;
         case SortType.newest:
-          products.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          products.sort((a, b) => (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
           break;
         case SortType.comprehensive:
           products.sort((a, b) {
@@ -116,29 +116,6 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.category.label),
-        actions: [
-          IconButton(
-            icon: Stack(
-              children: [
-                const Icon(Icons.filter_list),
-                if (_filterOptions.hasFilter)
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: AppColors.error,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            onPressed: _showFilterSheet,
-          ),
-        ],
       ),
       body: Column(
         children: [

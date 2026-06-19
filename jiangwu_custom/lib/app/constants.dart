@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// 应用常量定义
@@ -128,6 +129,13 @@ class AppRoutes {
   static const String favorites = '/profile/favorites';
   static const String history = '/profile/history';
   static const String settings = '/profile/settings';
+  static const String agreement = '/profile/agreement';
+  static const String privacy = '/profile/privacy';
+  static const String helpCenter = '/profile/help-center';
+  static const String feedback = '/profile/feedback';
+  static const String changePassword = '/profile/change-password';
+  static const String addressList = '/profile/address-list';
+  static const String addressEdit = '/profile/address-edit';
 
   // 手作人模块
   static const String artisanWork = '/artisan/work';
@@ -152,8 +160,8 @@ class ApiConstants {
   // 生产环境
   static const String prodBaseUrl = 'https://api.jiangwu.com/api';
 
-  // 当前使用开发环境
-  static const String baseUrl = devBaseUrl;
+  // Web 平台使用 localhost，其他平台使用 10.0.2.2（Android模拟器）
+  static String get baseUrl => kIsWeb ? 'http://localhost:8080/api' : devBaseUrl;
 
   // 超时时间（毫秒）
   static const int connectTimeout = 15000;

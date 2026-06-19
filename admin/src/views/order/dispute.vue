@@ -14,8 +14,8 @@
         <el-table-column label="操作" fixed="right" width="180">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="handleResolve(row)">仲裁</el-button>
-            <el-button type="success" link size="small">支持用户</el-button>
-            <el-button type="warning" link size="small">支持手作人</el-button>
+            <el-button type="success" link size="small" @click="handleQuickResolve(row, 'user')">支持用户</el-button>
+            <el-button type="warning" link size="small" @click="handleQuickResolve(row, 'artisan')">支持手作人</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -77,6 +77,20 @@ async function submitResolve() {
       remark: remark.value
     })
     dialogVisible.value = false
+    ElMessage.success('仲裁完成')
+    loadData()
+  } catch (e) {
+    ElMessage.error('仲裁操作失败')
+  }
+}
+
+async function handleQuickResolve(row, side) {
+  const label = side === 'user' ? '支持用户' : '支持手作人'
+  try {
+    await resolveDispute(row.id, {
+      resolution: side,
+      remark: `管理员${label}`
+    })
     ElMessage.success('仲裁完成')
     loadData()
   } catch (e) {

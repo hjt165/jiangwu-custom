@@ -1,6 +1,8 @@
 package com.jiangwu.service;
 
 import com.jiangwu.entity.BlockchainRecord;
+import com.jiangwu.exception.BusinessException;
+import com.jiangwu.exception.ErrorCode;
 import com.jiangwu.repository.BlockchainRecordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +63,7 @@ public class BlockchainService {
 
         BlockchainRecord record = blockchainRecordRepository.findById(id);
         if (record == null) {
-            throw new RuntimeException("溯源记录不存在");
+            throw new BusinessException(ErrorCode.BLOCKCHAIN_RECORD_NOT_FOUND);
         }
 
         Map<String, Object> result = new HashMap<>();
@@ -89,7 +91,7 @@ public class BlockchainService {
 
         BlockchainRecord record = blockchainRecordRepository.findById(recordId);
         if (record == null) {
-            throw new RuntimeException("溯源记录不存在");
+            throw new BusinessException(ErrorCode.BLOCKCHAIN_RECORD_NOT_FOUND);
         }
 
         if (mockEnabled) {
@@ -156,7 +158,7 @@ public class BlockchainService {
 
         BlockchainRecord record = blockchainRecordRepository.findById(recordId);
         if (record == null) {
-            throw new RuntimeException("溯源记录不存在");
+            throw new BusinessException(ErrorCode.BLOCKCHAIN_RECORD_NOT_FOUND);
         }
 
         Map<String, String> result = new HashMap<>();

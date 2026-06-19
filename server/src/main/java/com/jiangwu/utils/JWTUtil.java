@@ -27,18 +27,38 @@ public class JWTUtil {
     }
 
     /**
-     * 生成 Token
+     * 生成 Token（包含用户角色）
      */
-    public String generateToken(Long userId) {
+    public String generateToken(Long userId, int roleCode) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiration);
 
         return Jwts.builder()
                 .subject(String.valueOf(userId))
+                .claim("role", roleCode)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getSigningKey())
                 .compact();
+    }
+
+    /**
+     * 生成 Token（默认普通用户角色）
+     */
+    public String generateToken(Long userId) {
+        return generateToken(userId, 0);
+    }
+
+    /**
+     * 从 Token 中解析用户角色
+     */
+    public int parseUserRole(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return claims.get("role", Integer.class);
     }
 
     /**

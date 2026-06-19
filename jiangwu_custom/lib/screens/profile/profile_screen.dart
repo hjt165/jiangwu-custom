@@ -45,9 +45,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final userState = ref.watch(userProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('我的'),
-      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -114,7 +111,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         Text(
                           user?.nickname ?? '用户',
                           style: const TextStyle(
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: AppColors.white,
                           ),
@@ -123,8 +120,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         Text(
                           user?.phone ?? '',
                           style: TextStyle(
-                            fontSize: 14,
-                            color: AppColors.white.withValues(alpha: 0.8),
+                        fontSize: 12,
+                        color: AppColors.white.withValues(alpha: 0.8),
                           ),
                         ),
                       ],
@@ -136,7 +133,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       child: const Text(
                         '点击登录',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: AppColors.white,
                         ),
@@ -172,7 +169,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               const Text(
                 '我的订单',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
@@ -260,7 +257,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 leading: Icon(item['icon'] as IconData, color: AppColors.primary),
                 title: Text(
                   item['title'] as String,
-                  style: const TextStyle(fontSize: 16, color: AppColors.textPrimary),
+                  style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
                 ),
                 trailing: const Icon(Icons.chevron_right, color: AppColors.textHint),
                 onTap: () {

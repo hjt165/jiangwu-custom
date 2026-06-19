@@ -79,13 +79,13 @@ const formatAmount = (val) => {
   return Number(val).toLocaleString('zh-CN', { maximumFractionDigits: 0 })
 }
 
-const initTrendChart = (data) => {
+const initTrendChart = (trendData) => {
   if (!trendChartRef.value) return
   trendChart = echarts.init(trendChartRef.value)
   
-  const months = ['1月', '2月', '3月', '4月', '5月', '6月']
-  const orderData = [12, 19, 15, 25, 22, 30]
-  const amountData = [4800, 7600, 6000, 10000, 8800, 12000]
+  const months = trendData?.months || []
+  const orderData = trendData?.orderCounts || []
+  const amountData = trendData?.amounts || []
 
   trendChart.setOption({
     tooltip: {
@@ -139,7 +139,7 @@ const initTrendChart = (data) => {
   })
 }
 
-const initPieChart = () => {
+const initPieChart = (statusData) => {
   if (!pieChartRef.value) return
   pieChart = echarts.init(pieChartRef.value)
 
@@ -177,12 +177,12 @@ const initPieChart = () => {
           }
         },
         labelLine: { show: false },
-        data: [
-          { value: 148, name: '已完成', itemStyle: { color: '#27AE60' } },
-          { value: 35, name: '制作中', itemStyle: { color: '#3498DB' } },
-          { value: 12, name: '待支付', itemStyle: { color: '#F39C12' } },
-          { value: 8, name: '已取消', itemStyle: { color: '#95A5A6' } },
-          { value: 5, name: '争议中', itemStyle: { color: '#E74C3C' } }
+        data: statusData || [
+          { value: 0, name: '已完成', itemStyle: { color: '#27AE60' } },
+          { value: 0, name: '制作中', itemStyle: { color: '#3498DB' } },
+          { value: 0, name: '待支付', itemStyle: { color: '#F39C12' } },
+          { value: 0, name: '已取消', itemStyle: { color: '#95A5A6' } },
+          { value: 0, name: '争议中', itemStyle: { color: '#E74C3C' } }
         ]
       }
     ]
@@ -202,8 +202,10 @@ const fetchData = async () => {
     stats.completionRate = data.orderCount > 0 
       ? Math.round((data.completedCount || 0) / data.orderCount * 100) 
       : 0
+    return data
   } catch (e) {
     console.error('获取交易统计失败:', e)
+    return {}
   }
 }
 
@@ -213,10 +215,10 @@ const handleResize = () => {
 }
 
 onMounted(async () => {
-  await fetchData()
+  const data = await fetchData()
   await nextTick()
-  initTrendChart()
-  initPieChart()
+  initTrendChart(data.trendData)
+  initPieChart(data.statusDistribution)
   window.addEventListener('resize', handleResize)
 })
 

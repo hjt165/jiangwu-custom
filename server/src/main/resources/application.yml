@@ -8,6 +8,10 @@ spring:
     active: dev
   application:
     name: jiangwu-server
+  sql:
+    init:
+      mode: always
+      continue-on-error: true
   cache:
     type: redis
     redis:

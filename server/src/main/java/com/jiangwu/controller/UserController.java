@@ -1,8 +1,12 @@
 package com.jiangwu.controller;
 
 import com.jiangwu.common.Result;
+import com.jiangwu.dto.request.ChangePasswordRequest;
 import com.jiangwu.dto.request.LoginRequest;
 import com.jiangwu.dto.request.RegisterRequest;
+import com.jiangwu.dto.request.ResetPasswordRequest;
+import com.jiangwu.dto.request.SendCodeRequest;
+import com.jiangwu.dto.request.UpdateUserRequest;
 import com.jiangwu.dto.response.UserResponse;
 import com.jiangwu.service.UserService;
 import com.jiangwu.utils.CurrentUserUtil;
@@ -21,6 +25,15 @@ public class UserController {
 
     private final UserService userService;
     private final CurrentUserUtil currentUserUtil;
+
+    /**
+     * 发送验证码
+     */
+    @PostMapping("/send-code")
+    public Result<Void> sendCode(@Valid @RequestBody SendCodeRequest request) {
+        userService.sendCode(request.getPhone());
+        return Result.success(null);
+    }
 
     /**
      * 用户注册
@@ -55,10 +68,29 @@ public class UserController {
      */
     @PutMapping("/update")
     public Result<UserResponse> updateUser(HttpServletRequest request,
-                                          @RequestParam(required = false) String nickname,
-                                          @RequestParam(required = false) String avatar) {
+                                          @RequestBody UpdateUserRequest body) {
         Long userId = currentUserUtil.extractUserId(request);
-        UserResponse response = userService.updateUser(userId, nickname, avatar);
+        UserResponse response = userService.updateUser(userId, body.getNickname(), body.getAvatar());
         return Result.success(response);
     }
-}
+
+    /**
+     * 修改密码
+     */
+    @PostMapping("/change-password")
+    public Result<Void> changePassword(HttpServletRequest request,
+                                        @Valid @RequestBody ChangePasswordRequest passwordRequest) {
+        Long userId = currentUserUtil.extractUserId(request);
+        userService.changePassword(userId, passwordRequest);
+        return Result.success(null);
+    }
+
+    /**
+     * 重置密码
+     */
+    @PostMapping("/reset-password")
+    public Result<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        userService.resetPassword(request.getPhone(), request.getCode(), request.getNewPassword());
+        return Result.success(null);
+    }
+  }

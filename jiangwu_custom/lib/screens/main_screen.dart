@@ -51,8 +51,19 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_isArtisanMode ? '匠物定制 · 手作人' : '匠物定制'),
+        titleTextStyle: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
         actions: [
-          // 模式切换按钮
+          if (!_isArtisanMode && _currentIndex == 0)
+            IconButton(
+              icon: const Icon(Icons.search, size: 20),
+              onPressed: () {
+                Navigator.of(context).pushNamed(AppRoutes.search);
+              },
+            ),
           Padding(
             padding: const EdgeInsets.only(right: AppSizes.paddingMedium),
             child: GestureDetector(
@@ -78,14 +89,14 @@ class _MainScreenState extends State<MainScreen> {
                   children: [
                     Icon(
                       _isArtisanMode ? Icons.work : Icons.shopping_bag,
-                      size: 14,
+                      size: 12,
                       color: AppColors.white,
                     ),
                     const SizedBox(width: AppSizes.spacingXSmall),
                     Text(
                       _isArtisanMode ? '手作人' : '买家',
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: 11,
                         color: AppColors.white,
                         fontWeight: FontWeight.bold,
                       ),

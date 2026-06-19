@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:dio/dio.dart';
 import 'api_service.dart';
 
@@ -39,7 +38,6 @@ class OSSService {
       final signature = await getSignature(directory);
 
       // 2. 构建文件名
-      final file = File(filePath);
       final ext = filePath.split('.').last;
       final fileName =
           '${DateTime.now().millisecondsSinceEpoch}_${DateTime.now().microsecond}.$ext';
@@ -93,7 +91,6 @@ class OSSService {
     ProgressCallback? onProgress,
   }) async {
     try {
-      final file = File(filePath);
       final fileName = filePath.split('/').last;
 
       final formData = FormData.fromMap({

@@ -29,32 +29,24 @@ public class ProductService {
     private final HistoryService historyService;
 
     /**
-     * 获取作品列表（分页 + 分类筛选）
+     * 获取作品列表（数据库分页 + 分类筛选）
      */
     @Cacheable(value = "products", key = "'list:' + #page + ':' + #size + ':' + (#category ?: 'all')")
     public PageResult<ProductResponse> getProductList(int page, int size, String category) {
         Page<Product> pageParam = new Page<>(page, size);
 
-        List<Product> products;
         if (category != null && !category.isEmpty()) {
             ProductCategory cat = ProductCategory.valueOf(category.toUpperCase());
-            products = productRepository.findByCategory(cat);
+            productRepository.findByCategoryPage(pageParam, cat);
         } else {
-            products = productRepository.findFeatured();
+            productRepository.findFeaturedPage(pageParam);
         }
 
-        // 手动分页
-        int start = (page - 1) * size;
-        int end = Math.min(start + size, products.size());
-        List<Product> pageProducts = start < products.size() ? products.subList(start, end) : List.of();
-
-        List<ProductResponse> responses = pageProducts.stream()
+        List<ProductResponse> responses = pageParam.getRecords().stream()
                 .map(this::toResponseWithImages)
                 .collect(Collectors.toList());
 
-        long total = products.size();
-        long pages = (total + size - 1) / size;
-        return new PageResult<>(total, responses, page, size, pages);
+        return new PageResult<>(pageParam.getTotal(), responses, page, size, pageParam.getPages());
     }
 
     /**
@@ -87,22 +79,17 @@ public class ProductService {
     }
 
     /**
-     * 搜索作品
+     * 搜索作品（数据库分页）
      */
     public PageResult<ProductResponse> searchProducts(String keyword, int page, int size) {
-        List<Product> products = productRepository.search(keyword);
+        Page<Product> pageParam = new Page<>(page, size);
+        productRepository.searchPage(pageParam, keyword);
 
-        int start = (page - 1) * size;
-        int end = Math.min(start + size, products.size());
-        List<Product> pageProducts = start < products.size() ? products.subList(start, end) : List.of();
-
-        List<ProductResponse> responses = pageProducts.stream()
+        List<ProductResponse> responses = pageParam.getRecords().stream()
                 .map(this::toResponseWithImages)
                 .collect(Collectors.toList());
 
-        long total = products.size();
-        long pages = (total + size - 1) / size;
-        return new PageResult<>(total, responses, page, size, pages);
+        return new PageResult<>(pageParam.getTotal(), responses, page, size, pageParam.getPages());
     }
 
     /**
@@ -116,22 +103,17 @@ public class ProductService {
     }
 
     /**
-     * 获取手作人的作品列表
+     * 获取手作人的作品列表（数据库分页）
      */
     public PageResult<ProductResponse> getArtisanProducts(Long artisanId, int page, int size) {
-        List<Product> products = productRepository.findByArtisanId(artisanId);
+        Page<Product> pageParam = new Page<>(page, size);
+        productRepository.findByArtisanIdPage(pageParam, artisanId);
 
-        int start = (page - 1) * size;
-        int end = Math.min(start + size, products.size());
-        List<Product> pageProducts = start < products.size() ? products.subList(start, end) : List.of();
-
-        List<ProductResponse> responses = pageProducts.stream()
+        List<ProductResponse> responses = pageParam.getRecords().stream()
                 .map(this::toResponseWithImages)
                 .collect(Collectors.toList());
 
-        long total = products.size();
-        long pages = (total + size - 1) / size;
-        return new PageResult<>(total, responses, page, size, pages);
+        return new PageResult<>(pageParam.getTotal(), responses, page, size, pageParam.getPages());
     }
 
     /**

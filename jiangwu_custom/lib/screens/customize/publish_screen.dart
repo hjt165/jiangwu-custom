@@ -17,7 +17,8 @@ class _PublishScreenState extends State<PublishScreen> {
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
   String? _selectedCategory;
-  List<String> _selectedImages = [];
+  List<String> _images = [];
+  bool _isPublishing = false;
 
   @override
   void dispose() {
@@ -56,7 +57,7 @@ class _PublishScreenState extends State<PublishScreen> {
 
   Future<void> _pickImages(ImageSource source) async {
     final picker = ImagePicker();
-    final remaining = 9 - _selectedImages.length;
+    final remaining = 9 - _images.length;
 
     if (remaining <= 0) return;
 
@@ -67,26 +68,34 @@ class _PublishScreenState extends State<PublishScreen> {
 
     if (pickedFiles.isNotEmpty) {
       setState(() {
-        _selectedImages = [..._selectedImages, ...pickedFiles.map((f) => f.path)];
+        _images = [..._images, ...pickedFiles.map((f) => f.path).toList()];
       });
     }
+  }
+
+  Future<List<String>> _uploadImages(List<String> imagePaths) async {
+    final api = ApiService();
+    final urls = <String>[];
+    for (final path in imagePaths) {
+      try {
+        final result = await api.upload<Map<String, dynamic>>(
+          '/file/upload',
+          filePath: path,
+          fromJson: (data) => Map<String, dynamic>.from(data),
+        );
+        if (result['url'] != null) {
+          urls.add(result['url']);
+        }
+      } catch (e) {
+        debugPrint('图片上传失败: $e');
+      }
+    }
+    return urls;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('发布需求'),
-        actions: [
-          TextButton(
-            onPressed: () => _handlePublish(),
-            child: const Text(
-              '发布',
-              style: TextStyle(color: AppColors.white),
-            ),
-          ),
-        ],
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSizes.paddingMedium),
         child: Form(
@@ -94,27 +103,30 @@ class _PublishScreenState extends State<PublishScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 图片上传区域
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    '发布需求',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: _isPublishing ? null : () => _handlePublish(),
+                    child: const Text('发布'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSizes.spacingMedium),
               _buildImageUploadSection(),
-
               const SizedBox(height: AppSizes.spacingLarge),
-
-              // 工艺分类选择
               _buildCategorySection(),
-
               const SizedBox(height: AppSizes.spacingLarge),
-
-              // 需求描述
               _buildDescriptionSection(),
-
               const SizedBox(height: AppSizes.spacingLarge),
-
-              // 参考图片
-              _buildReferenceSection(),
-
-              const SizedBox(height: AppSizes.spacingLarge),
-
-              // 提交按钮
               _buildSubmitButton(),
             ],
           ),
@@ -148,11 +160,15 @@ class _PublishScreenState extends State<PublishScreen> {
           spacing: AppSizes.spacingSmall,
           runSpacing: AppSizes.spacingSmall,
           children: [
-            // 已选择的图片
-            ..._selectedImages.map((image) => _buildSelectedImage(image)),
-
-            // 添加图片按钮
-            if (_selectedImages.length < 9)
+            ..._images.map((image) => _buildSelectedImage(
+              image,
+              onRemove: () {
+                setState(() {
+                  _images.remove(image);
+                });
+              },
+            )),
+            if (_images.length < 9)
               GestureDetector(
                 onTap: () => _showImageSourceDialog(),
                 child: Container(
@@ -192,7 +208,7 @@ class _PublishScreenState extends State<PublishScreen> {
     );
   }
 
-  Widget _buildSelectedImage(String imagePath) {
+  Widget _buildSelectedImage(String imagePath, {required VoidCallback onRemove}) {
     return Stack(
       children: [
         Container(
@@ -202,11 +218,14 @@ class _PublishScreenState extends State<PublishScreen> {
             color: AppColors.divider,
             borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
           ),
-          child: const Center(
-            child: Icon(
-              Icons.image,
-              size: 24,
-              color: AppColors.textHint,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
+            child: Image.network(
+              imagePath,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => const Center(
+                child: Icon(Icons.image, size: 24, color: AppColors.textHint),
+              ),
             ),
           ),
         ),
@@ -214,11 +233,7 @@ class _PublishScreenState extends State<PublishScreen> {
           top: 4,
           right: 4,
           child: GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedImages.remove(imagePath);
-              });
-            },
+            onTap: onRemove,
             child: Container(
               width: 20,
               height: 20,
@@ -319,71 +334,21 @@ class _PublishScreenState extends State<PublishScreen> {
     );
   }
 
-  Widget _buildReferenceSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          '参考图片',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: AppSizes.spacingSmall),
-        const Text(
-          '上传参考图片，帮助手作人更好地理解您的需求',
-          style: TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-          ),
-        ),
-        const SizedBox(height: AppSizes.spacingMedium),
-        GestureDetector(
-          onTap: () => _showImageSourceDialog(),
-          child: Container(
-            height: 120,
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
-              border: Border.all(
-                color: AppColors.divider,
-                style: BorderStyle.solid,
-              ),
-            ),
-            child: const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.add_photo_alternate_outlined,
-                    size: 32,
-                    color: AppColors.textHint,
-                  ),
-                  SizedBox(height: AppSizes.spacingSmall),
-                  Text(
-                    '点击上传参考图片',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textHint,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildSubmitButton() {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () => _handlePublish(),
-        child: const Text('发布需求'),
+        onPressed: _isPublishing ? null : () => _handlePublish(),
+        child: _isPublishing
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.white,
+                ),
+              )
+            : const Text('发布需求'),
       ),
     );
   }
@@ -401,7 +366,7 @@ class _PublishScreenState extends State<PublishScreen> {
       return;
     }
 
-    if (_selectedImages.isEmpty) {
+    if (_images.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('请至少上传一张图片'),
@@ -411,13 +376,17 @@ class _PublishScreenState extends State<PublishScreen> {
       return;
     }
 
+    setState(() => _isPublishing = true);
+
     try {
+      final uploadedUrls = await _uploadImages(_images);
+
       final response = await ApiService().post<Map<String, dynamic>>(
         '/order/create',
         data: {
-          'description': _descriptionController.text,
-          'category': _selectedCategory,
-          'images': _selectedImages,
+          'specialRequests': _descriptionController.text,
+          'referenceImages': uploadedUrls,
+          'remark': '分类: $_selectedCategory',
         },
       );
 
@@ -428,7 +397,16 @@ class _PublishScreenState extends State<PublishScreen> {
             backgroundColor: AppColors.success,
           ),
         );
-        Navigator.of(context).pop();
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        } else {
+          _formKey.currentState?.reset();
+          setState(() {
+            _images.clear();
+            _selectedCategory = null;
+            _descriptionController.clear();
+          });
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -438,6 +416,10 @@ class _PublishScreenState extends State<PublishScreen> {
             backgroundColor: AppColors.error,
           ),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isPublishing = false);
       }
     }
   }

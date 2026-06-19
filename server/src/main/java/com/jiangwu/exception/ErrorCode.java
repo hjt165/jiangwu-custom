@@ -23,6 +23,7 @@ public enum ErrorCode {
     USER_CODE_EXPIRED(1004, "验证码已过期"),
     USER_CODE_ERROR(1005, "验证码错误"),
     USER_DISABLED(1006, "账号已被禁用"),
+    USER_CODE_FREQUENT(1007, "验证码发送过于频繁，请稍后再试"),
 
     // 手作人模块 2xxx
     ARTISAN_NOT_FOUND(2001, "手作人不存在"),
@@ -54,7 +55,17 @@ public enum ErrorCode {
 
     // 收藏模块 8xxx
     FAVORITE_ALREADY_EXISTS(8001, "已收藏该作品"),
-    FAVORITE_NOT_FOUND(8002, "收藏记录不存在");
+    FAVORITE_NOT_FOUND(8002, "收藏记录不存在"),
+
+    // 地址模块 9xxx
+    ADDRESS_NOT_FOUND(9001, "地址不存在"),
+
+    // 内容审核模块 10xxx
+    CONTENT_IMAGE_NOT_FOUND(10001, "图片不存在"),
+    CONTENT_COMMENT_NOT_FOUND(10002, "评论不存在"),
+
+    // 区块链模块 11xxx
+    BLOCKCHAIN_RECORD_NOT_FOUND(11001, "溯源记录不存在");
 
     private final int code;
     private final String message;

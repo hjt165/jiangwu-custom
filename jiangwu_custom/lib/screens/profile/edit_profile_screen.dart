@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../app/constants.dart';
+import '../../services/api_service.dart';
 import '../../providers/user_provider.dart';
 import '../../widgets/common/button_widget.dart';
 import '../../widgets/common/image_widget.dart';
@@ -93,9 +93,21 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     });
 
     try {
+      String? avatarUrl = _avatarUrl;
+
+      // 如果头像是本地文件路径，先上传获取 URL
+      if (avatarUrl != null && !avatarUrl.startsWith('http')) {
+        final uploadedUrl = await ApiService().upload<Map<String, dynamic>>(
+          '/file/upload',
+          filePath: avatarUrl,
+          fromJson: (data) => Map<String, dynamic>.from(data),
+        );
+        avatarUrl = uploadedUrl['url'];
+      }
+
       final success = await ref.read(userProvider.notifier).updateProfile(
             nickname: _nicknameController.text.trim(),
-            avatar: _avatarUrl,
+            avatar: avatarUrl,
           );
 
       if (success && mounted) {

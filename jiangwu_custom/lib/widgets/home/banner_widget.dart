@@ -106,7 +106,7 @@ class _HomeBannerState extends State<HomeBanner> {
             Text(
               '匠物定制',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: AppColors.white,
               ),

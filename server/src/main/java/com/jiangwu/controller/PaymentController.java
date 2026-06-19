@@ -1,6 +1,9 @@
 package com.jiangwu.controller;
 
 import com.jiangwu.common.Result;
+import com.jiangwu.entity.Order;
+import com.jiangwu.enums.OrderStatus;
+import com.jiangwu.repository.OrderRepository;
 import com.jiangwu.utils.CurrentUserUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -24,6 +29,7 @@ import java.util.UUID;
 public class PaymentController {
 
     private final CurrentUserUtil currentUserUtil;
+    private final OrderRepository orderRepository;
 
     @Value("${payment.wechat.app-id:wx_test_app_id}")
     private String appId;
@@ -86,8 +92,17 @@ public class PaymentController {
         log.info("微信支付回调: orderId={}, transactionId={}, mock={}", orderId, transactionId, mockEnabled);
 
         if (mockEnabled) {
-            // Mock模式：模拟支付成功
+            // Mock模式：模拟支付成功，更新订单状态
             log.info("Mock模式：模拟支付成功，orderId={}", orderId);
+            if (orderId != null) {
+                Order order = orderRepository.findByOrderNo(orderId);
+                if (order == null) {
+                    order = orderRepository.findById(Long.parseLong(orderId));
+                }
+                if (order != null) {
+                    orderRepository.updatePaid(order.getId(), OrderStatus.PAID, LocalDateTime.now(), order.getTotalAmount());
+                }
+            }
             return Result.success();
         }
 

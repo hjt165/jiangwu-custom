@@ -45,20 +45,42 @@ class _OrderListScreenState extends ConsumerState<OrderListScreen>
     final orderState = ref.watch(orderProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('我的订单'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: _tabs.map((tab) => Tab(text: tab)).toList(),
-          indicatorColor: AppColors.white,
-          indicatorWeight: 3,
-          labelColor: AppColors.white,
-          unselectedLabelColor: AppColors.white.withValues(alpha: 0.7),
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: _tabs.map((tab) => _buildOrderList(tab, orderState)).toList(),
+      body: Column(
+        children: [
+          // 页面标题
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '我的订单',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+          ),
+          // 状态筛选Tab
+          TabBar(
+            controller: _tabController,
+            tabs: _tabs.map((tab) => Tab(text: tab)).toList(),
+            indicatorColor: AppColors.primary,
+            indicatorWeight: 3,
+            labelColor: AppColors.primary,
+            unselectedLabelColor: AppColors.textHint,
+            labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+            unselectedLabelStyle: const TextStyle(fontSize: 13),
+          ),
+          // 订单列表
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: _tabs.map((tab) => _buildOrderList(tab, orderState)).toList(),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -214,7 +236,7 @@ class _OrderListScreenState extends ConsumerState<OrderListScreen>
                         Text(
                           order.product?.title ?? '定制作品',
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 14,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textPrimary,
                           ),
@@ -235,7 +257,7 @@ class _OrderListScreenState extends ConsumerState<OrderListScreen>
                         Text(
                           '¥${order.totalAmount.toStringAsFixed(2)}',
                           style: const TextStyle(
-                            fontSize: 18,
+                            fontSize: 15,
                             fontWeight: FontWeight.bold,
                             color: AppColors.accent,
                           ),

@@ -128,7 +128,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           _searchResults.sort((a, b) => b.rating.compareTo(a.rating));
           break;
         case SortType.newest:
-          _searchResults.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          _searchResults.sort((a, b) => (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
           break;
         case SortType.comprehensive:
           _searchResults.sort((a, b) {
@@ -174,31 +174,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, size: 20),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         title: _buildSearchBar(),
-        actions: [
-          // 筛选按钮
-          IconButton(
-            icon: Stack(
-              children: [
-                const Icon(Icons.filter_list),
-                if (_filterOptions.hasFilter)
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: AppColors.error,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            onPressed: _showFilterSheet,
-          ),
-        ],
       ),
       body: _buildBody(),
     );
@@ -206,36 +186,36 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   Widget _buildSearchBar() {
     return Container(
-      height: 40,
+      height: 36,
       decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
         children: [
-          const SizedBox(width: AppSizes.paddingSmall),
+          const SizedBox(width: 12),
           const Icon(
             Icons.search,
-            color: AppColors.textHint,
-            size: 20,
+            color: Colors.white70,
+            size: 18,
           ),
-          const SizedBox(width: AppSizes.spacingSmall),
+          const SizedBox(width: 8),
           Expanded(
             child: TextField(
               controller: _searchController,
               focusNode: _focusNode,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: '搜索手作作品、手作人...',
                 hintStyle: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textHint,
+                  fontSize: 13,
+                  color: Colors.white.withValues(alpha: 0.5),
                 ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(vertical: 10),
+                contentPadding: const EdgeInsets.symmetric(vertical: 8),
               ),
               style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textPrimary,
+                fontSize: 13,
+                color: Colors.white,
               ),
               onSubmitted: _performSearch,
             ),
@@ -250,35 +230,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   _searchResults = [];
                 });
               },
-              child: const Icon(
+              child: Icon(
                 Icons.close,
-                color: AppColors.textHint,
-                size: 18,
+                color: Colors.white.withValues(alpha: 0.6),
+                size: 16,
               ),
             ),
-          const SizedBox(width: AppSizes.spacingSmall),
-          GestureDetector(
-            onTap: () => _performSearch(_searchController.text),
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 6,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
-              ),
-              child: const Text(
-                '搜索',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: AppSizes.paddingSmall),
+          const SizedBox(width: 8),
         ],
       ),
     );

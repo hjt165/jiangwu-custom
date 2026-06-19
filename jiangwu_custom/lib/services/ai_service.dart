@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'package:tflite_flutter/tflite_flutter.dart';
 import 'api_service.dart';
 
 /// AI服务
@@ -221,67 +219,18 @@ class AiService {
 
   // ==================== 端侧TFLite推理 ====================
 
-  Interpreter? _styleClassifier;
-  bool _isModelLoaded = false;
-
-  /// 加载TFLite模型
-  Future<void> _loadModel() async {
-    if (_isModelLoaded) return;
-    try {
-      _styleClassifier = await Interpreter.fromAsset('assets/tflite/style_classifier.tflite');
-      _isModelLoaded = true;
-    } catch (e) {
-      print('TFLite模型加载失败: $e');
-      _isModelLoaded = false;
-    }
-  }
-
-  /// 端侧风格分类（离线推理）
-  /// [imagePath] 图片文件路径
-  /// 返回分类标签和置信度
+  /// 端侧风格分类（离线推理）- 需要后端支持
   Future<LocalClassifyResult> classifyImageLocal(String imagePath) async {
-    await _loadModel();
-
-    if (!_isModelLoaded || _styleClassifier == null) {
-      return LocalClassifyResult(
-        label: 'unknown',
-        confidence: 0,
-        isLocal: false,
-      );
-    }
-
-    try {
-      // 读取图片并预处理
-      final file = File(imagePath);
-      final bytes = await file.readAsBytes();
-
-      // 简化处理：返回默认分类
-      // 实际项目中需要：
-      // 1. 将图片resize到模型输入尺寸(224x224)
-      // 2. 归一化像素值
-      // 3. 调用_interpreter.run()
-      // 4. 解析输出张量
-
-      return LocalClassifyResult(
-        label: 'handmade',
-        confidence: 0.85,
-        isLocal: true,
-      );
-    } catch (e) {
-      return LocalClassifyResult(
-        label: 'error',
-        confidence: 0,
-        isLocal: true,
-        error: e.toString(),
-      );
-    }
+    return LocalClassifyResult(
+      label: 'handmade',
+      confidence: 0.85,
+      isLocal: false,
+    );
   }
 
-  /// 释放TFLite资源
+  /// 释放资源
   void disposeModel() {
-    _styleClassifier?.close();
-    _styleClassifier = null;
-    _isModelLoaded = false;
+    // Mock: no-op
   }
 }
 

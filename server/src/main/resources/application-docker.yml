@@ -42,6 +42,10 @@ ai:
     timeout: 30000
     connect-timeout: 5000
 
+# CORS 允许的域名（Docker 环境）
+cors:
+  allowed-origins: http://localhost:3000,http://localhost:5173
+
 # MyBatis-Plus (生产环境关闭 SQL 日志)
 mybatis-plus:
   configuration:

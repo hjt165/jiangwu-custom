@@ -4,17 +4,17 @@
 
 USE `jiangwu_custom`;
 
--- 管理员账号（密码: admin123，SHA-256 加密）
+-- 管理员账号（密码: admin123，BCrypt 加密）
 INSERT INTO `t_user` (`id`, `phone`, `password`, `nickname`, `role`, `status`)
-VALUES (1, '13800000000', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', '管理员', 2, 1);
+VALUES (1, '13800000000', '$2b$12$tmVqXo61qdobp6cgwrfQCOwwBO/WuwRSQNGIpDqWyUEeRCwzl6MsW', '管理员', 2, 1);
 
 -- 测试用户账号（密码: user123）
 INSERT INTO `t_user` (`id`, `phone`, `password`, `nickname`, `role`, `status`)
-VALUES (2, '13800000001', '0457b427d6f35a33e330d80b48e1004f3e0308b2e0e4a6b1c2d3e4f5a6b7c8d9', '测试用户', 0, 1);
+VALUES (2, '13800000001', '$2b$12$GzUSG8qhbwygUC9NmaTfC.n993Be9xoAsCzPI7wzdFbpsT8l6IvgW', '测试用户', 0, 1);
 
 -- 测试手作人账号（密码: artisan123）
 INSERT INTO `t_user` (`id`, `phone`, `password`, `nickname`, `role`, `status`)
-VALUES (3, '13800000002', 'f6a8d7e9c0b1a2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7', '手作达人', 1, 1);
+VALUES (3, '13800000002', '$2b$12$F76sCxCBRWZCHwSZNQe4UORmLlMyek3OTckxLkVUY8wYWtgOFsSpu', '手作达人', 1, 1);
 
 -- 测试手作人资料
 INSERT INTO `t_artisan` (`id`, `user_id`, `name`, `bio`, `specialty`, `years_of_exp`, `location`, `rating`, `order_count`, `status`)

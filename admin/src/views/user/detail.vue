@@ -37,7 +37,7 @@
               <el-button type="primary" style="margin-left: 12px" @click="updateCredit">调整</el-button>
             </el-form-item>
             <el-form-item label="账号状态">
-              <el-switch v-model="user.status" :active-value="1" :inactive-value="0" active-text="正常" inactive-text="禁用" />
+              <el-switch v-model="user.status" :active-value="1" :inactive-value="0" active-text="正常" inactive-text="禁用" @change="handleStatusChange" />
             </el-form-item>
           </el-form>
         </el-card>
@@ -73,6 +73,16 @@ async function updateCredit() {
     ElMessage.success('信用分调整成功')
   } catch (e) {
     ElMessage.error('信用分调整失败')
+  }
+}
+
+async function handleStatusChange(val) {
+  try {
+    await updateUserStatus(user.value.id, val)
+    ElMessage.success(val === 1 ? '账号已启用' : '账号已禁用')
+  } catch (e) {
+    user.value.status = val === 1 ? 0 : 1
+    ElMessage.error('状态更新失败')
   }
 }
 

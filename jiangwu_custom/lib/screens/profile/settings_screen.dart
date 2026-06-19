@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/constants.dart';
+import '../../providers/user_provider.dart';
 
 /// 设置页面
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('设置'),
@@ -20,20 +22,12 @@ class SettingsScreen extends StatelessWidget {
               _buildMenuItem(
                 icon: Icons.location_on,
                 title: '收货地址',
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('收货地址功能开发中...')),
-                  );
-                },
+                onTap: () => Navigator.pushNamed(context, AppRoutes.addressList),
               ),
               _buildMenuItem(
                 icon: Icons.lock_outline,
                 title: '修改密码',
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('修改密码功能开发中...')),
-                  );
-                },
+                onTap: () => Navigator.pushNamed(context, AppRoutes.changePassword),
               ),
             ],
           ),
@@ -43,38 +37,22 @@ class SettingsScreen extends StatelessWidget {
               _buildMenuItem(
                 icon: Icons.description,
                 title: '用户协议',
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('用户协议功能开发中...')),
-                  );
-                },
+                onTap: () => Navigator.pushNamed(context, AppRoutes.agreement),
               ),
               _buildMenuItem(
                 icon: Icons.privacy_tip,
                 title: '隐私政策',
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('隐私政策功能开发中...')),
-                  );
-                },
+                onTap: () => Navigator.pushNamed(context, AppRoutes.privacy),
               ),
               _buildMenuItem(
                 icon: Icons.help_outline,
                 title: '帮助中心',
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('帮助中心功能开发中...')),
-                  );
-                },
+                onTap: () => Navigator.pushNamed(context, AppRoutes.helpCenter),
               ),
               _buildMenuItem(
                 icon: Icons.feedback,
                 title: '意见反馈',
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('意见反馈功能开发中...')),
-                  );
-                },
+                onTap: () => Navigator.pushNamed(context, AppRoutes.feedback),
               ),
             ],
           ),
@@ -84,7 +62,7 @@ class SettingsScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
             child: OutlinedButton(
               onPressed: () {
-                _showLogoutDialog(context);
+                _showLogoutDialog(context, ref);
               },
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.error,
@@ -129,7 +107,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
+  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -141,13 +119,15 @@ class SettingsScreen extends StatelessWidget {
             child: const Text('取消'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
-              // 清除token并跳转登录
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                AppRoutes.login,
-                (route) => false,
-              );
+              await ref.read(userProvider.notifier).logout();
+              if (context.mounted) {
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  AppRoutes.login,
+                  (route) => false,
+                );
+              }
             },
             child: const Text('确定', style: TextStyle(color: AppColors.error)),
           ),

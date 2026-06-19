@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,11 +29,19 @@ public interface OrderRepository extends BaseMapper<Order> {
     @Select("SELECT * FROM t_order WHERE user_id = #{userId} AND status = #{status} AND deleted = 0 ORDER BY created_at DESC")
     List<Order> findByUserIdAndStatus(Long userId, OrderStatus status);
 
+    // ========== SQL 聚合查询（避免全表加载到内存） ==========
+
+    @Select("SELECT COALESCE(SUM(total_amount), 0) FROM t_order WHERE status = 'completed' AND deleted = 0")
+    BigDecimal sumCompletedRevenue();
+
+    @Select("SELECT COALESCE(SUM(total_amount), 0) FROM t_order WHERE status = 'completed' AND deleted = 0 AND created_at >= #{startDate}")
+    BigDecimal sumCompletedRevenueFrom(java.time.LocalDateTime startDate);
+
     @Update("UPDATE t_order SET status = #{status}, updated_at = NOW() WHERE id = #{id}")
     int updateStatus(Long id, OrderStatus status);
 
     @Update("UPDATE t_order SET status = #{status}, paid_at = #{paidAt}, paid_amount = #{paidAmount}, updated_at = NOW() WHERE id = #{id}")
-    int updatePaid(Long id, OrderStatus status, LocalDateTime paidAt, java.math.BigDecimal paidAmount);
+    int updatePaid(Long id, OrderStatus status, LocalDateTime paidAt, BigDecimal paidAmount);
 
     @Update("UPDATE t_order SET status = #{status}, completed_at = #{completedAt}, updated_at = NOW() WHERE id = #{id}")
     int updateCompleted(Long id, OrderStatus status, LocalDateTime completedAt);

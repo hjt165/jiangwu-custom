@@ -74,18 +74,12 @@ const stats = reactive({
   avgOrderAmount: 0
 })
 
-const initGrowthChart = () => {
+const initGrowthChart = (growthData) => {
   if (!growthChartRef.value) return
   growthChart = echarts.init(growthChartRef.value)
 
-  const days = []
-  const data = []
-  for (let i = 29; i >= 0; i--) {
-    const d = new Date()
-    d.setDate(d.getDate() - i)
-    days.push(`${d.getMonth() + 1}/${d.getDate()}`)
-    data.push(Math.floor(Math.random() * 20) + 5)
-  }
+  const days = growthData?.days || []
+  const data = growthData?.values || []
 
   growthChart.setOption({
     tooltip: {
@@ -129,7 +123,7 @@ const initGrowthChart = () => {
   })
 }
 
-const initComposeChart = () => {
+const initComposeChart = (roleData) => {
   if (!composeChartRef.value) return
   composeChart = echarts.init(composeChartRef.value)
 
@@ -166,10 +160,10 @@ const initComposeChart = () => {
             fontWeight: 'bold'
           }
         },
-        data: [
-          { value: 980, name: '普通用户', itemStyle: { color: '#3498DB' } },
-          { value: 45, name: '手作人', itemStyle: { color: '#E74C3C' } },
-          { value: 3, name: '管理员', itemStyle: { color: '#F39C12' } }
+        data: roleData || [
+          { value: 0, name: '普通用户', itemStyle: { color: '#3498DB' } },
+          { value: 0, name: '手作人', itemStyle: { color: '#E74C3C' } },
+          { value: 0, name: '管理员', itemStyle: { color: '#F39C12' } }
         ]
       }
     ]
@@ -185,8 +179,10 @@ const fetchData = async () => {
     stats.newUsers = data.newUsers || 0
     stats.retentionRate = data.retentionRate || 0
     stats.avgOrderAmount = data.avgOrderAmount || 0
+    return data
   } catch (e) {
     console.error('获取用户统计失败:', e)
+    return {}
   }
 }
 
@@ -196,10 +192,10 @@ const handleResize = () => {
 }
 
 onMounted(async () => {
-  await fetchData()
+  const data = await fetchData()
   await nextTick()
-  initGrowthChart()
-  initComposeChart()
+  initGrowthChart(data.growthTrend)
+  initComposeChart(data.roleDistribution)
   window.addEventListener('resize', handleResize)
 })
 

@@ -1,6 +1,7 @@
 package com.jiangwu.repository;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jiangwu.entity.Product;
 import com.jiangwu.enums.ProductCategory;
 import org.apache.ibatis.annotations.Mapper;
@@ -16,6 +17,9 @@ public interface ProductRepository extends BaseMapper<Product> {
     @Select("SELECT * FROM t_product WHERE id = #{id} AND deleted = 0")
     Product findById(Long id);
 
+    @Select("SELECT * FROM t_product WHERE id IN (#{ids}) AND deleted = 0")
+    List<Product> findByIds(@org.apache.ibatis.annotations.Param("ids") List<Long> ids);
+
     @Select("SELECT * FROM t_product WHERE artisan_id = #{artisanId} AND deleted = 0 ORDER BY created_at DESC")
     List<Product> findByArtisanId(Long artisanId);
 
@@ -27,6 +31,20 @@ public interface ProductRepository extends BaseMapper<Product> {
 
     @Select("SELECT * FROM t_product WHERE deleted = 0 AND (title LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%')) ORDER BY created_at DESC")
     List<Product> search(String keyword);
+
+    // ========== 分页查询方法（数据库层分页） ==========
+
+    @Select("SELECT * FROM t_product WHERE is_featured = 1 AND is_available = 1 AND deleted = 0 ORDER BY created_at DESC")
+    Page<Product> findFeaturedPage(Page<Product> page);
+
+    @Select("SELECT * FROM t_product WHERE category = #{category} AND is_available = 1 AND deleted = 0 ORDER BY created_at DESC")
+    Page<Product> findByCategoryPage(Page<Product> page, ProductCategory category);
+
+    @Select("SELECT * FROM t_product WHERE deleted = 0 AND (title LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%')) ORDER BY created_at DESC")
+    Page<Product> searchPage(Page<Product> page, String keyword);
+
+    @Select("SELECT * FROM t_product WHERE artisan_id = #{artisanId} AND deleted = 0 ORDER BY created_at DESC")
+    Page<Product> findByArtisanIdPage(Page<Product> page, Long artisanId);
 
     @Update("UPDATE t_product SET view_count = view_count + 1, updated_at = NOW() WHERE id = #{id}")
     int incrementViewCount(Long id);

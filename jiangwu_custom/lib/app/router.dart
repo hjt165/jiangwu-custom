@@ -19,6 +19,13 @@ import '../screens/profile/edit_profile_screen.dart';
 import '../screens/profile/favorites_screen.dart';
 import '../screens/profile/history_screen.dart';
 import '../screens/profile/settings_screen.dart';
+import '../screens/profile/agreement_screen.dart';
+import '../screens/profile/privacy_screen.dart';
+import '../screens/profile/help_center_screen.dart';
+import '../screens/profile/feedback_screen.dart';
+import '../screens/profile/change_password_screen.dart';
+import '../screens/profile/address_list_screen.dart';
+import '../screens/profile/address_edit_screen.dart';
 import '../screens/customize/preview_screen.dart';
 import '../models/product.dart';
 import '../screens/profile/profile_screen.dart';
@@ -56,7 +63,7 @@ class AppRouter {
 
       // 发现模块
       case AppRoutes.discover:
-        return _buildRoute(const DiscoverScreen(), settings);
+        return _buildRoute(const DiscoverScreen(showAppBar: true), settings);
       case AppRoutes.category:
         final categoryName = args as String? ?? '其他';
         final category = ProductCategory.fromString(categoryName);
@@ -128,6 +135,20 @@ class AppRouter {
         return _buildRoute(const HistoryScreen(), settings);
       case AppRoutes.settings:
         return _buildRoute(const SettingsScreen(), settings);
+      case AppRoutes.agreement:
+        return _buildRoute(const AgreementScreen(), settings);
+      case AppRoutes.privacy:
+        return _buildRoute(const PrivacyScreen(), settings);
+      case AppRoutes.helpCenter:
+        return _buildRoute(const HelpCenterScreen(), settings);
+      case AppRoutes.feedback:
+        return _buildRoute(const FeedbackScreen(), settings);
+      case AppRoutes.changePassword:
+        return _buildRoute(const ChangePasswordScreen(), settings);
+      case AppRoutes.addressList:
+        return _buildRoute(const AddressListScreen(), settings);
+      case AppRoutes.addressEdit:
+        return _buildRoute(const AddressEditScreen(), settings);
 
       // 手作人模块
       case AppRoutes.artisanWork:
@@ -154,7 +175,7 @@ class AppRouter {
         );
 
       // 作品模块
-      case '/product/':
+      case AppRoutes.productDetail:
         final productId = args as String? ?? '';
         return _buildRoute(
           ProductDetailScreen(productId: productId),

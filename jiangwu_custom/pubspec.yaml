@@ -53,17 +53,19 @@ dependencies:
   # 3D Rendering
   # flutter_unity_widget: ^4.6.0  # 暂时注释，需要Unity环境
 
-  # AI Inference
-  tflite_flutter: ^0.10.4
+  # AI Inference (tflite_flutter disabled - AGP/Kotlin incompatible)
+  # tflite_flutter: ^0.10.4
 
-  # Push
-  jpush_flutter: ^3.0.0
+  # Push (disabled - jpush_flutter incompatible with AGP 9.x)
+  # jpush_flutter: ^3.0.0
 
-  # Payment
-  fluwx: ^4.6.0
+  # Payment (disabled - fluwx incompatible with Kotlin 2.x)
+  # fluwx: ^4.6.0
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
 
   # Lints
@@ -85,7 +87,6 @@ flutter:
     - assets/fonts/
     - assets/animations/
     - assets/models/
-    - assets/tflite/
 
   # fonts:
   #   - family: NotoSerifSC

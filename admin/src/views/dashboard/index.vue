@@ -97,7 +97,6 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { getDashboardData } from '@/api/stats'
-import { Refresh } from '@element-plus/icons-vue'
 
 const stats = reactive({
   totalUsers: 0,

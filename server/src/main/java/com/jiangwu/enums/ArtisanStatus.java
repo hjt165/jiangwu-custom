@@ -16,9 +16,9 @@ public enum ArtisanStatus {
     SUSPENDED(3, "已封禁");
 
     @EnumValue
+    @JsonValue
     private final int code;
 
-    @JsonValue
     private final String label;
 
     ArtisanStatus(int code, String label) {

@@ -23,7 +23,7 @@ enum OrderStatus {
 
   static OrderStatus fromString(String value) {
     return OrderStatus.values.firstWhere(
-      (e) => e.name == value,
+      (e) => e.name == value || e.label == value,
       orElse: () => OrderStatus.pendingPayment,
     );
   }

@@ -14,7 +14,7 @@
           <el-option label="已完成" value="completed" />
           <el-option label="已取消" value="cancelled" />
         </el-select>
-        <el-button type="primary" @click="loadData">搜索</el-button>
+        <el-button type="primary" @click="handleSearch">搜索</el-button>
       </div>
 
       <el-table :data="tableData" stripe v-loading="loading">
@@ -88,6 +88,11 @@ async function loadData() {
   } finally {
     loading.value = false
   }
+}
+
+function handleSearch() {
+  page.value = 1
+  loadData()
 }
 
 function viewDetail(id) { router.push(`/order/${id}`) }

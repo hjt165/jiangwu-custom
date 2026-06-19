@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.jiangwu.entity.ProductImage;
 import com.jiangwu.entity.Review;
 import com.jiangwu.entity.User;
+import com.jiangwu.exception.BusinessException;
+import com.jiangwu.exception.ErrorCode;
 import com.jiangwu.repository.ProductImageRepository;
 import com.jiangwu.repository.ReviewRepository;
 import com.jiangwu.repository.UserRepository;
@@ -72,7 +74,7 @@ public class ContentService {
     public void reviewImage(Long id, String action, String remark, Long reviewerId) {
         ProductImage image = imageRepository.selectById(id);
         if (image == null) {
-            throw new RuntimeException("图片不存在");
+            throw new BusinessException(ErrorCode.CONTENT_IMAGE_NOT_FOUND);
         }
 
         image.setReviewStatus("pass".equals(action) ? 1 : 2);
@@ -164,7 +166,7 @@ public class ContentService {
     public void reviewComment(Long id, String action, String remark, Long reviewerId) {
         Review review = reviewRepository.selectById(id);
         if (review == null) {
-            throw new RuntimeException("评论不存在");
+            throw new BusinessException(ErrorCode.CONTENT_COMMENT_NOT_FOUND);
         }
 
         review.setReviewStatus("pass".equals(action) ? 1 : 2);

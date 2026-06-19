@@ -12,7 +12,7 @@
           <el-option label="手作人" :value="1" />
           <el-option label="管理员" :value="2" />
         </el-select>
-        <el-button type="primary" @click="loadData">搜索</el-button>
+        <el-button type="primary" @click="handleSearch">搜索</el-button>
       </div>
 
       <el-table :data="tableData" stripe v-loading="loading">
@@ -85,6 +85,11 @@ async function loadData() {
   } finally {
     loading.value = false
   }
+}
+
+function handleSearch() {
+  page.value = 1
+  loadData()
 }
 
 function viewDetail(id) {

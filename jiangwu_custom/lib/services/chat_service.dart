@@ -35,7 +35,8 @@ class ChatService {
   Future<void> connect(int userId) async {
     _currentUserId = userId;
     try {
-      final wsUrl = ApiConstants.baseUrl.replaceFirst('http', 'ws') + '/ws/chat?userId=$userId';
+      final token = await _apiService.getToken();
+      final wsUrl = ApiConstants.baseUrl.replaceFirst('http', 'ws') + '/ws/chat?token=$token';
       _channel = WebSocketChannel.connect(Uri.parse(wsUrl));
 
       _channel!.stream.listen(

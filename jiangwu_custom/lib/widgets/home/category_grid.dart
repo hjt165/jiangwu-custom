@@ -31,19 +31,20 @@ class CategoryGrid extends StatelessWidget {
           const Text(
             '工艺分类',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 15,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: AppSizes.spacingMedium),
+          const SizedBox(height: AppSizes.spacingSmall),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 4,
-              mainAxisSpacing: AppSizes.spacingMedium,
-              crossAxisSpacing: AppSizes.spacingMedium,
+              mainAxisSpacing: AppSizes.spacingSmall,
+              crossAxisSpacing: AppSizes.spacingSmall,
+              childAspectRatio: 1.1,
             ),
             itemCount: _categories.length,
             itemBuilder: (context, index) {
@@ -76,19 +77,19 @@ class CategoryGrid extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            width: 50,
-            height: 50,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
               color: AppColors.background,
               borderRadius: BorderRadius.circular(AppSizes.radiusCircle),
             ),
-            child: Icon(icon, color: AppColors.primary),
+            child: Icon(icon, color: AppColors.primary, size: 20),
           ),
           const SizedBox(height: AppSizes.spacingXSmall),
           Text(
             name,
             style: const TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               color: AppColors.textSecondary,
             ),
           ),

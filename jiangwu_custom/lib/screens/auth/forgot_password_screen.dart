@@ -80,13 +80,20 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     });
 
     try {
-      // 模拟重置密码过程
-      await Future.delayed(const Duration(seconds: 2));
+      final success = await ref.read(userProvider.notifier).resetPassword(
+        phone: _phoneController.text.trim(),
+        code: _codeController.text.trim(),
+        newPassword: _passwordController.text,
+      );
 
       if (mounted) {
-        _showSuccess('密码重置成功');
-        // 返回登录页
-        Navigator.of(context).pop();
+        if (success) {
+          _showSuccess('密码重置成功');
+          // 返回登录页
+          Navigator.of(context).pop();
+        } else {
+          _showError('重置密码失败：${ref.read(userProvider).error}');
+        }
       }
     } catch (e) {
       if (mounted) {

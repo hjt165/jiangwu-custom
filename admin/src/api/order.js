@@ -27,3 +27,10 @@ export function getDisputeList(params) {
 export function resolveDispute(orderId, data) {
   return request.put(`/admin/order/${orderId}/dispute`, data)
 }
+
+/**
+ * 取消订单（管理员操作）
+ */
+export function cancelOrder(orderId, reason) {
+  return request.put(`/admin/order/${orderId}/cancel`, { reason })
+}

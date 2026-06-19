@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../app/constants.dart';
@@ -51,13 +51,21 @@ class ImagePickerGrid extends StatelessWidget {
             child: isLocal
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
-                    child: Image.file(
-                      File(imageUrl),
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return _buildPlaceholder();
-                      },
-                    ),
+                    child: kIsWeb
+                        ? Image.network(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return _buildPlaceholder();
+                            },
+                          )
+                        : Image.network(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return _buildPlaceholder();
+                            },
+                          ),
                   )
                 : ClipRRect(
                     borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
@@ -223,10 +231,15 @@ class _ImagePreviewPage extends StatelessWidget {
           minScale: 0.5,
           maxScale: 4.0,
           child: isLocal
-              ? Image.file(
-                  File(imageUrl),
-                  fit: BoxFit.contain,
-                )
+              ? (kIsWeb
+                  ? Image.network(
+                      imageUrl,
+                      fit: BoxFit.contain,
+                    )
+                  : Image.network(
+                      imageUrl,
+                      fit: BoxFit.contain,
+                    ))
               : Image.network(
                   imageUrl,
                   fit: BoxFit.contain,

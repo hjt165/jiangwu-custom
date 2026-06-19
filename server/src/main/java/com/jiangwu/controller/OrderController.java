@@ -48,11 +48,12 @@ public class OrderController {
     }
 
     /**
-     * 获取订单详情
+     * 获取订单详情（校验用户权限）
      */
     @GetMapping("/{id}")
-    public Result<OrderResponse> getOrderDetail(@PathVariable Long id) {
-        OrderResponse response = orderService.getOrderDetail(id);
+    public Result<OrderResponse> getOrderDetail(HttpServletRequest request, @PathVariable Long id) {
+        Long userId = currentUserUtil.extractUserId(request);
+        OrderResponse response = orderService.getOrderDetail(id, userId);
         return Result.success(response);
     }
 
@@ -69,16 +70,18 @@ public class OrderController {
     }
 
     /**
-     * 确认阶段交付
+     * 确认阶段交付（校验用户权限）
      */
     @PutMapping("/stage/confirm")
-    public Result<Void> confirmStage(@RequestParam Long orderId,
+    public Result<Void> confirmStage(HttpServletRequest request,
+                                     @RequestParam Long orderId,
                                      @RequestParam Long stageId,
                                      @RequestBody Map<String, Object> body) {
+        Long userId = currentUserUtil.extractUserId(request);
         @SuppressWarnings("unchecked")
         List<String> images = (List<String>) body.get("images");
         String note = (String) body.get("note");
-        orderService.confirmStage(orderId, stageId, images, note);
+        orderService.confirmStage(orderId, stageId, images, note, userId);
         return Result.success();
     }
 

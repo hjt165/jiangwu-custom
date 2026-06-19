@@ -147,6 +147,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 },
                 child: const Text('还没有账号？立即注册'),
               ),
+              // 忘记密码入口
+              TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRoutes.forgotPassword);
+                },
+                child: const Text('忘记密码？'),
+              ),
             ],
           ),
         ),

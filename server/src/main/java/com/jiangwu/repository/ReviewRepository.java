@@ -20,6 +20,9 @@ public interface ReviewRepository extends BaseMapper<Review> {
     @Select("SELECT * FROM t_review WHERE artisan_id = #{artisanId} AND deleted = 0 ORDER BY created_at DESC")
     List<Review> findByArtisanId(Long artisanId);
 
+    @Select("SELECT * FROM t_review WHERE order_id IN (SELECT id FROM t_order WHERE product_id = #{productId}) AND deleted = 0")
+    List<Review> findByProductId(Long productId);
+
     @Select("SELECT * FROM t_review WHERE user_id = #{userId} AND deleted = 0 ORDER BY created_at DESC")
     List<Review> findByUserId(Long userId);
 

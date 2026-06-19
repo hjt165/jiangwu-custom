@@ -37,48 +37,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final productState = ref.watch(productProvider);
     final artisanState = ref.watch(artisanProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppStrings.appName),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              Navigator.of(context).pushNamed(AppRoutes.search);
-            },
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await ref.read(productProvider.notifier).fetchFeaturedProducts();
-          await ref.read(artisanProvider.notifier).fetchArtisans();
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Banner轮播
-              const HomeBanner(),
+    return RefreshIndicator(
+      onRefresh: () async {
+        await ref.read(productProvider.notifier).fetchFeaturedProducts();
+        await ref.read(artisanProvider.notifier).fetchArtisans();
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Banner轮播
+            const HomeBanner(),
 
-              // 分类入口
-              CategoryGrid(
-                onCategoryTap: (code, name) {
-                  Navigator.of(context).pushNamed(
-                    AppRoutes.category,
-                    arguments: name,
-                  );
-                },
-              ),
+            // 分类入口
+            CategoryGrid(
+              onCategoryTap: (code, name) {
+                Navigator.of(context).pushNamed(
+                  AppRoutes.category,
+                  arguments: name,
+                );
+              },
+            ),
 
-              // 热门推荐
-              _buildHotSection(context, productState),
+            // 热门推荐
+            _buildHotSection(context, productState),
 
-              // 手作人推荐
-              _buildArtisanSection(context, artisanState),
-            ],
-          ),
+            // 手作人推荐
+            _buildArtisanSection(context, artisanState),
+          ],
         ),
       ),
     );
@@ -96,7 +83,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const Text(
                 '热门推荐',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 15,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
@@ -155,7 +142,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const Text(
                 '推荐手作人',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 15,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),

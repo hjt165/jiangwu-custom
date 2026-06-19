@@ -15,9 +15,9 @@ public enum UserRole {
     ADMIN(2, "管理员");
 
     @EnumValue
+    @JsonValue
     private final int code;
 
-    @JsonValue
     private final String label;
 
     UserRole(int code, String label) {

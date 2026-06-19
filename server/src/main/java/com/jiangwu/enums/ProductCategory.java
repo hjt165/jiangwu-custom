@@ -18,9 +18,9 @@ public enum ProductCategory {
     OTHER("other", "其他");
 
     @EnumValue
+    @JsonValue
     private final String code;
 
-    @JsonValue
     private final String label;
 
     ProductCategory(String code, String label) {

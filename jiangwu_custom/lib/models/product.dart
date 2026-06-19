@@ -103,12 +103,12 @@ class Product {
   final double rating;
   final bool isFeatured;
   final bool isAvailable;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   const Product({
     required this.id,
-    required this.artisanId,
+    this.artisanId = '',
     required this.title,
     this.description = '',
     this.category = ProductCategory.other,
@@ -125,8 +125,8 @@ class Product {
     this.rating = 0,
     this.isFeatured = false,
     this.isAvailable = true,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -151,8 +151,8 @@ class Product {
       rating: (json['rating'] ?? 0).toDouble(),
       isFeatured: json['isFeatured'] ?? false,
       isAvailable: json['isAvailable'] ?? true,
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
+      updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt']) : null,
     );
   }
 
@@ -176,8 +176,8 @@ class Product {
       'rating': rating,
       'isFeatured': isFeatured,
       'isAvailable': isAvailable,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 

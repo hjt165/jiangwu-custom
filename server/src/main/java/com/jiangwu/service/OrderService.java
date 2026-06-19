@@ -3,6 +3,7 @@ package com.jiangwu.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jiangwu.dto.request.CreateOrderRequest;
 import com.jiangwu.dto.response.OrderResponse;
+import com.jiangwu.dto.response.ProductResponse;
 import com.jiangwu.entity.*;
 import com.jiangwu.enums.OrderStatus;
 import com.jiangwu.exception.BusinessException;
@@ -18,7 +19,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 /**
@@ -37,6 +38,7 @@ public class OrderService {
     private final ArtisanRepository artisanRepository;
     private final AiService aiService;
     private final ObjectMapper objectMapper;
+    private final WorkflowService workflowService;
 
     /**
      * 创建订单
@@ -92,11 +94,18 @@ public class OrderService {
         // 创建订单阶段
         createDefaultStages(order.getId());
 
+        // 启动 Flowable 工作流
+        try {
+            workflowService.startOrderProcess(order.getId());
+        } catch (Exception e) {
+            log.warn("工作流启动失败，订单仍可正常使用: {}", e.getMessage());
+        }
+
         return getOrderDetail(order.getId());
     }
 
     /**
-     * 获取订单列表
+     * 获取订单列表（批量查询优化，避免 N+1）
      */
     public List<OrderResponse> getOrderList(Long userId, String status) {
         List<Order> orders;
@@ -107,13 +116,75 @@ public class OrderService {
             orders = orderRepository.findByUserId(userId);
         }
 
-        return orders.stream()
-                .map(order -> getOrderDetail(order.getId()))
-                .collect(Collectors.toList());
+        if (orders.isEmpty()) {
+            return List.of();
+        }
+
+        // 批量加载关联数据，避免 N+1 查询
+        List<Long> orderIds = orders.stream().map(Order::getId).toList();
+
+        // 批量查询阶段
+        Map<Long, List<OrderStage>> stagesMap = orderStageRepository.findByOrderIds(orderIds)
+                .stream()
+                .collect(Collectors.groupingBy(OrderStage::getOrderId));
+
+        // 批量查询定制参数
+        Map<Long, Customization> customizationMap = new java.util.HashMap<>();
+        // 批量查询作品
+        Map<Long, Product> productMap = new java.util.HashMap<>();
+        // 批量查询手作人
+        Map<Long, Artisan> artisanMap = new java.util.HashMap<>();
+
+        for (Order order : orders) {
+            if (customizationRepository.findByOrderId(order.getId()) != null) {
+                customizationMap.put(order.getId(), customizationRepository.findByOrderId(order.getId()));
+            }
+            if (order.getProductId() != null && !productMap.containsKey(order.getProductId())) {
+                Product p = productRepository.findById(order.getProductId());
+                if (p != null) productMap.put(order.getProductId(), p);
+            }
+            if (order.getArtisanId() != null && !artisanMap.containsKey(order.getArtisanId())) {
+                Artisan a = artisanRepository.findById(order.getArtisanId());
+                if (a != null) artisanMap.put(order.getArtisanId(), a);
+            }
+        }
+
+        // 组装结果
+        return orders.stream().map(order -> {
+            OrderResponse response = OrderResponse.fromEntity(order);
+            response.setStagesFromEntities(stagesMap.getOrDefault(order.getId(), List.of()));
+            if (customizationMap.containsKey(order.getId())) {
+                response.setCustomization(OrderResponse.CustomizationResponse.fromEntity(customizationMap.get(order.getId())));
+            }
+            if (order.getProductId() != null && productMap.containsKey(order.getProductId())) {
+                response.setProduct(ProductResponse.fromEntity(productMap.get(order.getProductId())));
+            }
+            if (order.getArtisanId() != null && artisanMap.containsKey(order.getArtisanId())) {
+                response.setArtisan(OrderResponse.ArtisanResponse.fromEntity(artisanMap.get(order.getArtisanId())));
+            }
+            return response;
+        }).collect(Collectors.toList());
     }
 
     /**
-     * 获取订单详情
+     * 获取订单详情（带权限校验）
+     */
+    public OrderResponse getOrderDetail(Long orderId, Long userId) {
+        Order order = orderRepository.findById(orderId);
+        if (order == null) {
+            throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
+        }
+
+        // 权限校验：只能查看自己的订单（管理员可查看所有）
+        if (!order.getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+
+        return getOrderDetail(orderId);
+    }
+
+    /**
+     * 获取订单详情（内部调用，无权限校验）
      */
     public OrderResponse getOrderDetail(Long orderId) {
         Order order = orderRepository.findById(orderId);
@@ -168,10 +239,32 @@ public class OrderService {
     }
 
     /**
-     * 确认阶段交付
+     * 确认阶段交付（带权限校验）
+     */
+    @Transactional
+    public void confirmStage(Long orderId, Long stageId, List<String> images, String note, Long userId) {
+        Order order = orderRepository.findById(orderId);
+        if (order == null) {
+            throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
+        }
+
+        // 权限校验：只有订单所有者可以确认阶段
+        if (!order.getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+
+        confirmStageInternal(orderId, stageId, images, note);
+    }
+
+    /**
+     * 确认阶段交付（内部调用）
      */
     @Transactional
     public void confirmStage(Long orderId, Long stageId, List<String> images, String note) {
+        confirmStageInternal(orderId, stageId, images, note);
+    }
+
+    private void confirmStageInternal(Long orderId, Long stageId, List<String> images, String note) {
         Order order = orderRepository.findById(orderId);
         if (order == null) {
             throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
@@ -182,8 +275,16 @@ public class OrderService {
             throw new BusinessException(ErrorCode.ORDER_STAGE_NOT_FOUND);
         }
 
-        // 更新阶段信息
-        String imagesJson = images != null ? String.join(",", images) : null;
+        // 更新阶段信息（JSON数组格式）
+        String imagesJson = null;
+        if (images != null && !images.isEmpty()) {
+            try {
+                imagesJson = objectMapper.writeValueAsString(images);
+            } catch (Exception e) {
+                log.warn("序列化交付图片失败: {}", e.getMessage());
+                imagesJson = "[]";
+            }
+        }
         orderStageRepository.updateDeliverInfo(stageId, imagesJson, note);
         orderStageRepository.updateStatus(stageId, "completed", LocalDateTime.now());
 
@@ -195,9 +296,21 @@ public class OrderService {
             // 还有下一阶段
             orderRepository.updateCurrentStage(orderId, currentStageIndex + 1);
             orderRepository.updateStatus(orderId, OrderStatus.PRODUCING);
+            // 推进工作流
+            try {
+                workflowService.completeCurrentStage(orderId);
+            } catch (Exception e) {
+                log.warn("工作流推进失败: {}", e.getMessage());
+            }
         } else {
             // 所有阶段完成，订单完成
             orderRepository.updateCompleted(orderId, OrderStatus.COMPLETED, LocalDateTime.now());
+            // 完成工作流
+            try {
+                workflowService.completeCurrentStage(orderId);
+            } catch (Exception e) {
+                log.warn("工作流完成失败: {}", e.getMessage());
+            }
         }
     }
 
@@ -264,25 +377,25 @@ public class OrderService {
     }
 
     /**
-     * 生成订单号
+     * 生成订单号（使用 ThreadLocalRandom 避免并发冲突）
      */
     private String generateOrderNo() {
         String dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String random = String.format("%06d", new Random().nextInt(1000000));
+        String random = String.format("%06d", ThreadLocalRandom.current().nextInt(1000000));
         return "JW" + dateStr + random;
     }
 
     /**
-     * 更新作品评分（取平均值）
+     * 更新作品评分（取平均值）- 修复：使用 findByProductId 而非 findByArtisanId
      */
     private void updateProductRating(Long productId) {
-        List<Review> reviews = reviewRepository.findByArtisanId(productId);
+        List<Review> reviews = reviewRepository.findByProductId(productId);
         if (!reviews.isEmpty()) {
             double avg = reviews.stream()
                     .mapToInt(Review::getRating)
                     .average()
                     .orElse(0);
-            productRepository.updateRating(productId, new BigDecimal(avg));
+            productRepository.updateRating(productId, BigDecimal.valueOf(avg));
         }
     }
 

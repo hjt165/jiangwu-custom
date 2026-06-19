@@ -12,8 +12,8 @@ class Customization {
   final String? description;
   final List<String> referenceImages;
   final Map<String, dynamic>? additionalParams;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   const Customization({
     required this.id,
@@ -25,8 +25,8 @@ class Customization {
     this.description,
     this.referenceImages = const [],
     this.additionalParams,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory Customization.fromJson(Map<String, dynamic> json) {
@@ -40,8 +40,8 @@ class Customization {
       description: json['description'],
       referenceImages: List<String>.from(json['referenceImages'] ?? []),
       additionalParams: json['additionalParams'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
+      updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt']) : null,
     );
   }
 
@@ -56,8 +56,8 @@ class Customization {
       'description': description,
       'referenceImages': referenceImages,
       'additionalParams': additionalParams,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 

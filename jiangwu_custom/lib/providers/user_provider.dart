@@ -84,6 +84,33 @@ class UserNotifier extends ChangeNotifier {
     }
   }
 
+  /// 重置密码
+  Future<bool> resetPassword({
+    required String phone,
+    required String code,
+    required String newPassword,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _authService.resetPassword(
+        phone: phone,
+        code: code,
+        newPassword: newPassword,
+      );
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// 退出登录
   Future<void> logout() async {
     await _authService.logout();

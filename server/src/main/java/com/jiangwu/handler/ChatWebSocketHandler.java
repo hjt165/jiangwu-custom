@@ -3,6 +3,7 @@ package com.jiangwu.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jiangwu.entity.Message;
 import com.jiangwu.service.ChatService;
+import com.jiangwu.utils.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     private final ChatService chatService;
     private final ObjectMapper objectMapper;
+    private final JWTUtil jwtUtil;
 
     // userId -> WebSocketSession
     private final ConcurrentHashMap<Long, WebSocketSession> sessions = new ConcurrentHashMap<>();
@@ -34,6 +36,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         if (userId != null) {
             sessions.put(userId, session);
             log.info("用户 {} 已连接WebSocket", userId);
+        } else {
+            log.warn("WebSocket连接认证失败，关闭连接");
+            session.close(CloseStatus.POLICY_VIOLATION);
         }
     }
 
@@ -138,12 +143,16 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             var uri = session.getUri();
             if (uri != null) {
                 var params = UriComponentsBuilder.fromUri(uri).build().getQueryParams();
-                var userIdParam = params.getFirst("userId");
-                if (userIdParam != null) {
-                    return Long.valueOf(userIdParam);
+                // 优先使用 token 鉴权
+                var token = params.getFirst("token");
+                if (token != null && jwtUtil.validateToken(token)) {
+                    return jwtUtil.parseUserId(token);
                 }
+                // token 无效则拒绝连接
+                log.warn("WebSocket连接缺少有效token，拒绝连接");
+                return null;
             }
-            // 从session attributes获取
+            // 从session attributes获取（仅当已通过HandshakeInterceptor设置时）
             var attrs = session.getAttributes();
             if (attrs.containsKey("userId")) {
                 return (Long) attrs.get("userId");
