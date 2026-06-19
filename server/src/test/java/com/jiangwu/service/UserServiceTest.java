@@ -113,8 +113,15 @@ class UserServiceTest {
     @Test
     void register_Success() {
         when(userRepository.findByPhone(anyString())).thenReturn(null);
-        when(userRepository.insert(any(User.class))).thenReturn(1);
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            user.setId(1L);
+            return 1;
+        }).when(userRepository).insert(any(User.class));
         when(jwtUtil.generateToken(anyLong(), anyInt())).thenReturn("test_token");
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get("code:13800138000")).thenReturn("123456");
+        when(redisTemplate.delete("code:13800138000")).thenReturn(true);
 
         UserResponse response = userService.register(registerRequest);
 

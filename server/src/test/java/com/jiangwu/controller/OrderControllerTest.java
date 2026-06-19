@@ -3,6 +3,8 @@ package com.jiangwu.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jiangwu.dto.request.CreateOrderRequest;
 import com.jiangwu.dto.response.OrderResponse;
+import com.jiangwu.exception.BusinessException;
+import com.jiangwu.exception.ErrorCode;
 import com.jiangwu.exception.GlobalExceptionHandler;
 import com.jiangwu.service.OrderService;
 import com.jiangwu.utils.CurrentUserUtil;
@@ -19,6 +21,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doAnswer;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -96,7 +99,8 @@ class OrderControllerTest {
 
     @Test
     void getOrderDetail_Success() throws Exception {
-        when(orderService.getOrderDetail(anyLong())).thenReturn(orderResponse);
+        when(currentUserUtil.extractUserId(any())).thenReturn(1L);
+        when(orderService.getOrderDetail(anyLong(), anyLong())).thenReturn(orderResponse);
 
         mockMvc.perform(get("/order/1")
                         .header("Authorization", "Bearer test_token"))
@@ -107,13 +111,14 @@ class OrderControllerTest {
 
     @Test
     void getOrderDetail_NotFound() throws Exception {
-        when(orderService.getOrderDetail(anyLong()))
-                .thenThrow(new RuntimeException("订单不存在"));
+        when(currentUserUtil.extractUserId(any())).thenReturn(1L);
+        when(orderService.getOrderDetail(anyLong(), anyLong()))
+                .thenThrow(new BusinessException(ErrorCode.ORDER_NOT_FOUND));
 
         mockMvc.perform(get("/order/999")
                         .header("Authorization", "Bearer test_token"))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.code").value(500));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(4001));
     }
 
     @Test

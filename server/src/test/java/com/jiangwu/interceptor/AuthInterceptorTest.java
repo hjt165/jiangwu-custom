@@ -67,6 +67,7 @@ class AuthInterceptorTest {
     @Test
     void preHandle_ValidToken_SetsUserIdAndRole() {
         when(request.getHeader("Authorization")).thenReturn("Bearer valid_token");
+        when(request.getRequestURI()).thenReturn("/order/list");
         when(jwtUtil.extractToken("Bearer valid_token")).thenReturn("valid_token");
         when(jwtUtil.validateToken("valid_token")).thenReturn(true);
         when(jwtUtil.parseUserId("valid_token")).thenReturn(1L);
@@ -84,7 +85,7 @@ class AuthInterceptorTest {
     @Test
     void preHandle_AdminEndpoint_NonAdmin_Returns403() throws IOException {
         when(request.getHeader("Authorization")).thenReturn("Bearer user_token");
-        when(request.getRequestURI()).thenReturn("/api/admin/users");
+        when(request.getRequestURI()).thenReturn("/admin/users");
         when(jwtUtil.extractToken("Bearer user_token")).thenReturn("user_token");
         when(jwtUtil.validateToken("user_token")).thenReturn(true);
         when(jwtUtil.parseUserId("user_token")).thenReturn(1L);
@@ -99,7 +100,7 @@ class AuthInterceptorTest {
     @Test
     void preHandle_AdminEndpoint_Admin_ReturnsTrue() {
         when(request.getHeader("Authorization")).thenReturn("Bearer admin_token");
-        when(request.getRequestURI()).thenReturn("/api/admin/users");
+        when(request.getRequestURI()).thenReturn("/admin/users");
         when(jwtUtil.extractToken("Bearer admin_token")).thenReturn("admin_token");
         when(jwtUtil.validateToken("admin_token")).thenReturn(true);
         when(jwtUtil.parseUserId("admin_token")).thenReturn(1L);

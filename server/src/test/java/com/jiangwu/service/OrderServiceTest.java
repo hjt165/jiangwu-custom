@@ -2,6 +2,7 @@ package com.jiangwu.service;
 
 import com.jiangwu.dto.request.CreateOrderRequest;
 import com.jiangwu.dto.response.OrderResponse;
+import com.jiangwu.entity.Customization;
 import com.jiangwu.entity.Order;
 import com.jiangwu.entity.OrderStage;
 import com.jiangwu.entity.Product;
@@ -54,6 +55,9 @@ class OrderServiceTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    private WorkflowService workflowService;
+
     @InjectMocks
     private OrderService orderService;
 
@@ -83,12 +87,19 @@ class OrderServiceTest {
         request.setArtisanId(1L);
         request.setProductId(1L);
 
-        when(orderRepository.insert(any(Order.class))).thenReturn(1);
-        when(customizationRepository.insert(any())).thenReturn(1);
+        doAnswer(invocation -> {
+            Order order = invocation.getArgument(0);
+            order.setId(1L);
+            return 1;
+        }).when(orderRepository).insert(any(Order.class));
+        when(customizationRepository.insert(any(Customization.class))).thenReturn(1);
         when(orderStageRepository.insert(any(OrderStage.class))).thenReturn(1);
         when(orderRepository.findById(anyLong())).thenReturn(testOrder);
         when(orderStageRepository.findByOrderId(anyLong())).thenReturn(List.of());
-        when(aiService.recommendSolution(any(), any(), any(), anyInt(), anyInt())).thenReturn(null);
+        when(customizationRepository.findByOrderId(anyLong())).thenReturn(null);
+        when(productRepository.findById(anyLong())).thenReturn(null);
+        when(artisanRepository.findById(anyLong())).thenReturn(null);
+        when(aiService.recommendSolution(anyString(), any(), anyString(), anyDouble(), anyInt())).thenReturn(null);
 
         OrderResponse response = orderService.createOrder(1L, request);
 
@@ -111,8 +122,10 @@ class OrderServiceTest {
     @Test
     void getOrderList_WithStatusFilter() {
         when(orderRepository.findByUserIdAndStatus(anyLong(), any(OrderStatus.class))).thenReturn(List.of(testOrder));
-        when(orderRepository.findById(anyLong())).thenReturn(testOrder);
-        when(orderStageRepository.findByOrderId(anyLong())).thenReturn(List.of());
+        when(orderStageRepository.findByOrderIds(anyList())).thenReturn(List.of());
+        when(customizationRepository.findByOrderId(anyLong())).thenReturn(null);
+        when(productRepository.findById(anyLong())).thenReturn(null);
+        when(artisanRepository.findById(anyLong())).thenReturn(null);
 
         List<OrderResponse> responses = orderService.getOrderList(1L, "PENDING_PAYMENT");
 

@@ -1,5 +1,6 @@
 package com.jiangwu.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jiangwu.common.PageResult;
 import com.jiangwu.dto.response.ProductResponse;
 import com.jiangwu.entity.Product;
@@ -73,7 +74,12 @@ class ProductServiceTest {
     @Test
     void searchProducts_Success() {
         List<Product> products = Arrays.asList(testProduct);
-        when(productRepository.search(anyString())).thenReturn(products);
+        when(productRepository.searchPage(any(Page.class), anyString())).thenAnswer(invocation -> {
+            Page<Product> page = invocation.getArgument(0);
+            page.setRecords(products);
+            page.setTotal(1);
+            return page;
+        });
 
         PageResult<ProductResponse> result = productService.searchProducts("陶瓷", 1, 10);
 
@@ -83,7 +89,12 @@ class ProductServiceTest {
 
     @Test
     void searchProducts_EmptyResult() {
-        when(productRepository.search(anyString())).thenReturn(List.of());
+        when(productRepository.searchPage(any(Page.class), anyString())).thenAnswer(invocation -> {
+            Page<Product> page = invocation.getArgument(0);
+            page.setRecords(List.of());
+            page.setTotal(0);
+            return page;
+        });
 
         PageResult<ProductResponse> result = productService.searchProducts("不存在", 1, 10);
 
@@ -94,7 +105,12 @@ class ProductServiceTest {
     @Test
     void getProductList_WithCategory() {
         List<Product> products = Arrays.asList(testProduct);
-        when(productRepository.findByCategory(any(ProductCategory.class))).thenReturn(products);
+        when(productRepository.findByCategoryPage(any(Page.class), any(ProductCategory.class))).thenAnswer(invocation -> {
+            Page<Product> page = invocation.getArgument(0);
+            page.setRecords(products);
+            page.setTotal(1);
+            return page;
+        });
 
         PageResult<ProductResponse> result = productService.getProductList(1, 10, "CERAMIC");
 
@@ -105,7 +121,12 @@ class ProductServiceTest {
     @Test
     void getProductList_AllCategories() {
         List<Product> products = Arrays.asList(testProduct);
-        when(productRepository.findFeatured()).thenReturn(products);
+        when(productRepository.findFeaturedPage(any(Page.class))).thenAnswer(invocation -> {
+            Page<Product> page = invocation.getArgument(0);
+            page.setRecords(products);
+            page.setTotal(1);
+            return page;
+        });
 
         PageResult<ProductResponse> result = productService.getProductList(1, 10, null);
 

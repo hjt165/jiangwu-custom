@@ -3,6 +3,7 @@ package com.jiangwu.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jiangwu.dto.request.LoginRequest;
 import com.jiangwu.dto.request.RegisterRequest;
+import com.jiangwu.dto.request.UpdateUserRequest;
 import com.jiangwu.dto.response.UserResponse;
 import com.jiangwu.exception.GlobalExceptionHandler;
 import com.jiangwu.service.UserService;
@@ -141,12 +142,16 @@ class UserControllerTest {
         updatedResponse.setNickname("新昵称");
         updatedResponse.setRole("普通用户");
 
+        UpdateUserRequest updateRequest = new UpdateUserRequest();
+        updateRequest.setNickname("新昵称");
+
         when(currentUserUtil.extractUserId(any())).thenReturn(1L);
         when(userService.updateUser(anyLong(), anyString(), anyString())).thenReturn(updatedResponse);
 
         mockMvc.perform(put("/user/update")
                         .header("Authorization", "Bearer test_token")
-                        .param("nickname", "新昵称"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200));
     }
