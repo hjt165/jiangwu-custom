@@ -7,7 +7,7 @@ void main() {
 
   group('订单模块测试', () {
     testWidgets('1. 订单列表页面加载', (tester) async {
-      await TestHelper.startApp(tester);
+      await TestHelper.loginApp(tester);
       await TestHelper.waitForPageLoad(tester, seconds: 3);
 
       // 切换到我的页面（最后一个导航项）
@@ -29,7 +29,7 @@ void main() {
     });
 
     testWidgets('2. 订单状态筛选', (tester) async {
-      await TestHelper.startApp(tester);
+      await TestHelper.loginApp(tester);
       await TestHelper.waitForPageLoad(tester, seconds: 3);
 
       // 先进入订单列表
@@ -54,7 +54,7 @@ void main() {
     });
 
     testWidgets('3. 发布定制需求', (tester) async {
-      await TestHelper.startApp(tester);
+      await TestHelper.loginApp(tester);
       await TestHelper.waitForPageLoad(tester, seconds: 3);
 
       // 点击底部中间的发布按钮
@@ -70,7 +70,7 @@ void main() {
     });
 
     testWidgets('4. 订单详情页面', (tester) async {
-      await TestHelper.startApp(tester);
+      await TestHelper.loginApp(tester);
       await TestHelper.waitForPageLoad(tester, seconds: 3);
 
       // 进入订单列表
@@ -95,7 +95,7 @@ void main() {
     });
 
     testWidgets('5. 个人中心页面', (tester) async {
-      await TestHelper.startApp(tester);
+      await TestHelper.loginApp(tester);
       await TestHelper.waitForPageLoad(tester, seconds: 3);
 
       // 切换到我的页面

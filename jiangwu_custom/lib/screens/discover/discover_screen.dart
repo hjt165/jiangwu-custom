@@ -63,7 +63,23 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
           Expanded(
             child: _isLoading
                 ? const Center(child: LoadingWidget())
-                : _buildProductGrid(productState.products),
+                : productState.error != null
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                            const SizedBox(height: AppSizes.spacingMedium),
+                            Text('加载失败: ${productState.error}', style: const TextStyle(color: AppColors.textSecondary)),
+                            const SizedBox(height: AppSizes.spacingMedium),
+                            TextButton(
+                              onPressed: _loadProducts,
+                              child: const Text('重试'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : _buildProductGrid(productState.products),
           ),
         ],
       ),

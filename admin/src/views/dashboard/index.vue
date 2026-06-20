@@ -73,7 +73,7 @@
             <el-table-column prop="time" label="时间" width="180" />
             <el-table-column label="操作" width="100">
               <template #default="{ row }">
-                <el-button type="primary" link size="small">处理</el-button>
+                <el-button type="primary" link size="small" @click="handleTodoAction(row)">处理</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -96,7 +96,10 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { getDashboardData } from '@/api/stats'
+
+const router = useRouter()
 
 const stats = reactive({
   totalUsers: 0,
@@ -127,6 +130,10 @@ const fetchDashboardData = async () => {
   } finally {
     loading.value = false
   }
+}
+
+function handleTodoAction(row) {
+  router.push('/order/list')
 }
 
 onMounted(() => {

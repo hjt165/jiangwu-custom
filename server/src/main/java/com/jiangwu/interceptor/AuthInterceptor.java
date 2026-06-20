@@ -4,12 +4,14 @@ import com.jiangwu.utils.JWTUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
  * JWT 认证拦截器 + 角色校验
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AuthInterceptor implements HandlerInterceptor {
@@ -31,7 +33,8 @@ public class AuthInterceptor implements HandlerInterceptor {
             response.setContentType("application/json;charset=UTF-8");
             try {
                 response.getWriter().write("{\"code\":401,\"message\":\"未登录或登录已过期\"}");
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                log.warn("写入401响应失败: {}", e.getMessage());
             }
             return false;
         }
@@ -48,7 +51,8 @@ public class AuthInterceptor implements HandlerInterceptor {
             response.setContentType("application/json;charset=UTF-8");
             try {
                 response.getWriter().write("{\"code\":403,\"message\":\"无管理员权限\"}");
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                log.warn("写入403响应失败: {}", e.getMessage());
             }
             return false;
         }

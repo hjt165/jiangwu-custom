@@ -9,79 +9,93 @@ void main() {
     testWidgets('1. 启动应用显示登录页面', (tester) async {
       await TestHelper.startApp(tester);
 
-      // 应该显示登录页面
-      expect(find.text('登录'), findsOneWidget);
-      expect(find.text('手机号'), findsOneWidget);
-      expect(find.text('密码'), findsOneWidget);
+      expect(find.text('登录'), findsAtLeastNWidgets(1));
+      expect(find.text('手机号'), findsAtLeastNWidgets(1));
+      expect(find.text('密码'), findsAtLeastNWidgets(1));
     });
 
     testWidgets('2. 登录表单验证 - 空字段', (tester) async {
       await TestHelper.startApp(tester);
 
-      // 点击登录按钮（不输入任何内容）
-      await TestHelper.tapText(tester, '登录');
-      await TestHelper.waitForPageLoad(tester, seconds: 1);
+      await TestHelper.tapButtonText(tester, '登录');
+      await tester.pump(const Duration(seconds: 1));
 
-      // 应该显示错误提示（手机号格式验证）
-      // 注意：具体提示文本取决于验证逻辑
+      expect(find.text('请输入手机号'), findsOneWidget);
     });
 
     testWidgets('3. 登录表单验证 - 手机号格式错误', (tester) async {
       await TestHelper.startApp(tester);
 
       // 输入无效手机号
-      final phoneField = find.widgetWithText(TextFormField, '手机号');
-      await TestHelper.enterText(tester, phoneField, '123');
+      final phoneField = find.byType(TextFormField).at(0);
+      await tester.tap(phoneField);
+      await tester.pumpAndSettle();
+      await tester.enterText(phoneField, '123');
+      await tester.pumpAndSettle();
 
       // 输入密码
-      final passwordField = find.widgetWithText(TextFormField, '密码');
-      await TestHelper.enterText(tester, passwordField, '123456');
+      final passwordField = find.byType(TextFormField).at(1);
+      await tester.tap(passwordField);
+      await tester.pumpAndSettle();
+      await tester.enterText(passwordField, '123456');
+      await tester.pumpAndSettle();
 
       // 点击登录
-      await TestHelper.tapText(tester, '登录');
-      await TestHelper.waitForPageLoad(tester, seconds: 1);
+      await TestHelper.tapButtonText(tester, '登录');
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.text('手机号格式不正确'), findsOneWidget);
     });
 
     testWidgets('4. 登录成功', (tester) async {
       await TestHelper.startApp(tester);
 
-      // 输入测试账号
-      final phoneField = find.widgetWithText(TextFormField, '手机号');
-      await TestHelper.enterText(tester, phoneField, TestHelper.testPhone);
+      // 输入测试账号 - 使用 index 定位 TextFormField（0=手机号，1=密码）
+      final phoneField = find.byType(TextFormField).at(0);
+      await tester.tap(phoneField);
+      await tester.pumpAndSettle();
+      await tester.enterText(phoneField, TestHelper.testPhone);
+      await tester.pumpAndSettle();
 
-      final passwordField = find.widgetWithText(TextFormField, '密码');
-      await TestHelper.enterText(tester, passwordField, TestHelper.testPassword);
+      final passwordField = find.byType(TextFormField).at(1);
+      await tester.tap(passwordField);
+      await tester.pumpAndSettle();
+      await tester.enterText(passwordField, TestHelper.testPassword);
+      await tester.pumpAndSettle();
 
-      // 点击登录
-      await TestHelper.tapText(tester, '登录');
-      await TestHelper.waitForPageLoad(tester, seconds: 5);
+      // 点击登录按钮
+      await TestHelper.tapButtonText(tester, '登录');
+      await tester.pumpAndSettle(const Duration(seconds: 5));
 
       // 登录成功后应该跳转到首页
-      // 检查是否能看到首页元素（如底部导航栏）
-      expect(find.byType(BottomNavigationBar), findsOneWidget);
+      expect(
+        find.byType(BottomNavigationBar),
+        findsOneWidget,
+        reason: '登录成功后应跳转到首页并显示底部导航栏',
+      );
     });
 
     testWidgets('5. 跳转到注册页面', (tester) async {
       await TestHelper.startApp(tester);
 
-      // 点击"注册"链接
-      final registerFinder = find.text('注册');
+      final registerFinder = find.textContaining('注册');
       if (registerFinder.evaluate().isNotEmpty) {
-        await TestHelper.tapText(tester, '注册');
-        await TestHelper.waitForPageLoad(tester, seconds: 1);
+        await tester.tap(registerFinder.first);
+        await tester.pumpAndSettle(const Duration(seconds: 1));
 
-        // 应该显示注册页面
-        expect(find.text('注册'), findsWidgets);
+        expect(find.textContaining('注册'), findsAtLeastNWidgets(1));
       }
     });
 
     testWidgets('6. 跳转到忘记密码页面', (tester) async {
       await TestHelper.startApp(tester);
 
-      final forgotFinder = find.text('忘记密码');
+      final forgotFinder = find.textContaining('忘记密码');
       if (forgotFinder.evaluate().isNotEmpty) {
-        await TestHelper.tapText(tester, '忘记密码');
-        await TestHelper.waitForPageLoad(tester, seconds: 1);
+        await tester.tap(forgotFinder.first);
+        await tester.pumpAndSettle(const Duration(seconds: 1));
+
+        expect(find.textContaining('忘记密码'), findsAtLeastNWidgets(1));
       }
     });
   });

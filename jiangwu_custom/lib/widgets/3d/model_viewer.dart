@@ -135,14 +135,14 @@ class _ModelViewerState extends State<ModelViewer> {
         Icon(
           Icons.view_in_ar,
           size: 64,
-          color: AppColors.textHint.withOpacity(0.5),
+          color: AppColors.textHint.withValues(alpha:0.5),
         ),
         const SizedBox(height: AppSizes.spacingMedium),
         Text(
           '3D预览',
           style: TextStyle(
             fontSize: 16,
-            color: AppColors.textHint.withOpacity(0.7),
+            color: AppColors.textHint.withValues(alpha:0.7),
           ),
         ),
         const SizedBox(height: AppSizes.spacingSmall),
@@ -150,7 +150,7 @@ class _ModelViewerState extends State<ModelViewer> {
           widget.modelPath ?? '未选择模型',
           style: TextStyle(
             fontSize: 12,
-            color: AppColors.textHint.withOpacity(0.5),
+            color: AppColors.textHint.withValues(alpha:0.5),
           ),
         ),
       ],
@@ -163,28 +163,36 @@ class _ModelViewerState extends State<ModelViewer> {
         _buildControlButton(
           icon: Icons.rotate_right,
           onTap: () {
-            // TODO: 旋转模型
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('旋转功能开发中')),
+            );
           },
         ),
         const SizedBox(height: AppSizes.spacingSmall),
         _buildControlButton(
           icon: Icons.zoom_in,
           onTap: () {
-            // TODO: 放大模型
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('放大功能开发中')),
+            );
           },
         ),
         const SizedBox(height: AppSizes.spacingSmall),
         _buildControlButton(
           icon: Icons.zoom_out,
           onTap: () {
-            // TODO: 缩小模型
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('缩小功能开发中')),
+            );
           },
         ),
         const SizedBox(height: AppSizes.spacingSmall),
         _buildControlButton(
           icon: Icons.center_focus_strong,
           onTap: () {
-            // TODO: 重置视角
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('重置视角功能开发中')),
+            );
           },
         ),
       ],
@@ -201,11 +209,11 @@ class _ModelViewerState extends State<ModelViewer> {
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: AppColors.white.withOpacity(0.9),
+          color: AppColors.white.withValues(alpha:0.9),
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha:0.1),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),

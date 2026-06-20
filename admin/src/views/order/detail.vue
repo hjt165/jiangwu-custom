@@ -12,7 +12,7 @@
           <el-descriptions :column="2" border>
             <el-descriptions-item label="订单号">{{ order.orderNo }}</el-descriptions-item>
             <el-descriptions-item label="状态">
-              <el-tag :type="getStatusType(order.status)">{{ order.status }}</el-tag>
+              <el-tag :type="getStatusType(order.status)">{{ getStatusLabel(order.status) }}</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="用户">{{ order.userName }}</el-descriptions-item>
             <el-descriptions-item label="手作人">{{ order.artisanName }}</el-descriptions-item>

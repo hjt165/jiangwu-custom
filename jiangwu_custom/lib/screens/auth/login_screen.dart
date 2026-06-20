@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/constants.dart';
 import '../../providers/user_provider.dart';
+import '../main_screen.dart';
 
 /// 登录页
 /// 用户登录功能
@@ -35,7 +36,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     if (mounted) {
       if (success) {
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const MainScreen()),
+          (route) => false,
+        );
       } else {
         final error = ref.read(userProvider).error;
         ScaffoldMessenger.of(context).showSnackBar(

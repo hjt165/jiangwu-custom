@@ -3,15 +3,19 @@ package com.jiangwu.service;
 import com.jiangwu.dto.response.OrderResponse;
 import com.jiangwu.dto.response.ArtisanResponse;
 import com.jiangwu.entity.Artisan;
+import com.jiangwu.entity.Product;
 import com.jiangwu.enums.ArtisanStatus;
 import com.jiangwu.exception.BusinessException;
 import com.jiangwu.exception.ErrorCode;
 import com.jiangwu.repository.ArtisanRepository;
+import com.jiangwu.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -22,6 +26,7 @@ import java.util.stream.Collectors;
 public class ArtisanService {
 
     private final ArtisanRepository artisanRepository;
+    private final ProductRepository productRepository;
 
     /**
      * 获取手作人列表
@@ -93,5 +98,43 @@ public class ArtisanService {
      */
     public void updateArtisanRating(Long artisanId, double rating) {
         artisanRepository.updateRating(artisanId, new java.math.BigDecimal(rating));
+    }
+
+    /**
+     * 获取所有手作人（包括管理后台使用）
+     */
+    public List<ArtisanResponse> findAllArtisans() {
+        return artisanRepository.selectList(null).stream()
+                .map(ArtisanResponse::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 根据ID获取手作人
+     */
+    public ArtisanResponse findArtisanById(Long id) {
+        Artisan artisan = artisanRepository.findById(id);
+        if (artisan == null) {
+            throw new BusinessException(ErrorCode.ARTISAN_NOT_FOUND);
+        }
+        return ArtisanResponse.fromEntity(artisan);
+    }
+
+    /**
+     * 获取手作人作品列表
+     */
+    public List<Map<String, Object>> findArtisanProducts(Long artisanId) {
+        List<Product> products = productRepository.findByArtisanId(artisanId);
+        return products.stream().map(product -> {
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", product.getId());
+            item.put("title", product.getTitle());
+            item.put("description", product.getDescription());
+            item.put("coverImage", product.getCoverImage());
+            item.put("price", product.getPrice());
+            item.put("isAvailable", product.getIsAvailable());
+            item.put("createdAt", product.getCreatedAt());
+            return item;
+        }).collect(Collectors.toList());
     }
 }

@@ -155,7 +155,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.more_vert, color: AppColors.white),
-            onPressed: () {},
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('更多功能开发中')),
+              );
+            },
           ),
         ],
       ),
@@ -165,7 +169,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           if (!chatState.isConnected)
             Container(
               padding: const EdgeInsets.all(8),
-              color: AppColors.warning.withOpacity(0.1),
+              color: AppColors.warning.withValues(alpha:0.1),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -207,7 +211,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           if (chatState.error != null)
             Container(
               padding: const EdgeInsets.all(8),
-              color: AppColors.error.withOpacity(0.1),
+              color: AppColors.error.withValues(alpha:0.1),
               child: Row(
                 children: [
                   Expanded(
@@ -274,7 +278,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha:0.05),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
@@ -318,7 +322,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           style: TextStyle(
                             fontSize: 10,
                             color: isMe
-                                ? AppColors.white.withOpacity(0.7)
+                                ? AppColors.white.withValues(alpha:0.7)
                                 : AppColors.textHint,
                           ),
                         ),
@@ -356,20 +360,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           height: 10,
           child: CircularProgressIndicator(
             strokeWidth: 1,
-            color: AppColors.white.withOpacity(0.7),
+            color: AppColors.white.withValues(alpha:0.7),
           ),
         );
       case 1:
         return Icon(
           Icons.check,
           size: 12,
-          color: AppColors.white.withOpacity(0.7),
+          color: AppColors.white.withValues(alpha:0.7),
         );
       case 2:
         return Icon(
           Icons.done_all,
           size: 12,
-          color: AppColors.white.withOpacity(0.7),
+          color: AppColors.white.withValues(alpha:0.7),
         );
       default:
         return const SizedBox.shrink();

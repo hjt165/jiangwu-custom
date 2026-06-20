@@ -59,7 +59,7 @@ class AiRecommendWidget extends StatelessWidget {
             vertical: AppSizes.spacingXSmall,
           ),
           decoration: BoxDecoration(
-            color: AppColors.accent.withOpacity(0.1),
+            color: AppColors.accent.withValues(alpha:0.1),
             borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
           ),
           child: Text(
@@ -152,7 +152,7 @@ class AiRecommendWidget extends StatelessWidget {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: AppColors.accent.withOpacity(0.1),
+                  color: AppColors.accent.withValues(alpha:0.1),
                   borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
                 ),
                 child: Icon(Icons.person, color: AppColors.accent),

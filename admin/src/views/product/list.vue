@@ -28,7 +28,7 @@
         <el-table-column prop="createdAt" label="创建时间" width="180" />
         <el-table-column label="操作" fixed="right" width="150">
           <template #default="{ row }">
-            <el-button type="primary" link size="small">详情</el-button>
+            <el-button type="primary" link size="small" @click="$router.push('/product/' + row.id)">详情</el-button>
             <el-button v-if="row.reviewStatus === 0" type="success" link size="small" @click="handleAudit(row, 'pass')">通过</el-button>
             <el-button v-if="row.reviewStatus === 0" type="danger" link size="small" @click="handleAudit(row, 'reject')">拒绝</el-button>
           </template>

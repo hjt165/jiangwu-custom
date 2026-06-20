@@ -7,7 +7,7 @@ void main() {
 
   group('个人中心模块测试', () {
     testWidgets('1. 个人中心页面加载', (tester) async {
-      await TestHelper.startApp(tester);
+      await TestHelper.loginApp(tester);
       await TestHelper.waitForPageLoad(tester, seconds: 3);
 
       // 切换到我的页面
@@ -22,7 +22,7 @@ void main() {
     });
 
     testWidgets('2. 设置页面加载', (tester) async {
-      await TestHelper.startApp(tester);
+      await TestHelper.loginApp(tester);
       await TestHelper.waitForPageLoad(tester, seconds: 3);
 
       // 进入设置页面
@@ -49,7 +49,7 @@ void main() {
     });
 
     testWidgets('3. 用户协议页面', (tester) async {
-      await TestHelper.startApp(tester);
+      await TestHelper.loginApp(tester);
       await TestHelper.waitForPageLoad(tester, seconds: 3);
 
       // 进入设置页面
@@ -74,7 +74,7 @@ void main() {
     });
 
     testWidgets('4. 隐私政策页面', (tester) async {
-      await TestHelper.startApp(tester);
+      await TestHelper.loginApp(tester);
       await TestHelper.waitForPageLoad(tester, seconds: 3);
 
       // 进入设置页面
@@ -99,7 +99,7 @@ void main() {
     });
 
     testWidgets('5. 帮助中心页面', (tester) async {
-      await TestHelper.startApp(tester);
+      await TestHelper.loginApp(tester);
       await TestHelper.waitForPageLoad(tester, seconds: 3);
 
       // 进入设置页面
@@ -124,7 +124,7 @@ void main() {
     });
 
     testWidgets('6. 意见反馈页面', (tester) async {
-      await TestHelper.startApp(tester);
+      await TestHelper.loginApp(tester);
       await TestHelper.waitForPageLoad(tester, seconds: 3);
 
       // 进入设置页面
@@ -150,7 +150,7 @@ void main() {
     });
 
     testWidgets('7. 收藏页面', (tester) async {
-      await TestHelper.startApp(tester);
+      await TestHelper.loginApp(tester);
       await TestHelper.waitForPageLoad(tester, seconds: 3);
 
       // 进入我的收藏
@@ -171,7 +171,7 @@ void main() {
     });
 
     testWidgets('8. 浏览历史页面', (tester) async {
-      await TestHelper.startApp(tester);
+      await TestHelper.loginApp(tester);
       await TestHelper.waitForPageLoad(tester, seconds: 3);
 
       // 进入浏览历史
@@ -189,7 +189,7 @@ void main() {
     });
 
     testWidgets('9. 编辑个人资料', (tester) async {
-      await TestHelper.startApp(tester);
+      await TestHelper.loginApp(tester);
       await TestHelper.waitForPageLoad(tester, seconds: 3);
 
       // 进入个人中心

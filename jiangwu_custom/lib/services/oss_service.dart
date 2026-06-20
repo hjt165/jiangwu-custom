@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:dio/dio.dart';
 import 'api_service.dart';
 
@@ -151,7 +152,7 @@ class OSSService {
       );
       return true;
     } catch (e) {
-      print('删除OSS文件失败: $e');
+      developer.log('删除OSS文件失败: $e');
       return false;
     }
   }

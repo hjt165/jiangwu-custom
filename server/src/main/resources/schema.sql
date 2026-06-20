@@ -78,6 +78,7 @@ CREATE TABLE `t_product` (
     `rating`          DECIMAL(3,2)  DEFAULT 0.00 COMMENT '评分',
     `is_featured`     TINYINT       DEFAULT 0 COMMENT '是否推荐',
     `is_available`    TINYINT       DEFAULT 1 COMMENT '是否可售',
+    `review_status`   TINYINT       DEFAULT 0 COMMENT '审核状态：0待审核 1已通过 2已拒绝',
     `created_at`      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at`      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `deleted`         TINYINT       NOT NULL DEFAULT 0 COMMENT '逻辑删除',
@@ -354,3 +355,21 @@ CREATE TABLE `t_address` (
     PRIMARY KEY (`id`),
     KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='收货地址表';
+
+-- -------------------------------------------
+-- 17. 意见反馈表
+-- -------------------------------------------
+DROP TABLE IF EXISTS `t_feedback`;
+CREATE TABLE `t_feedback` (
+    `id`         BIGINT        NOT NULL COMMENT '反馈ID',
+    `user_id`    BIGINT        DEFAULT NULL COMMENT '用户ID（可为null表示匿名）',
+    `content`    TEXT          NOT NULL COMMENT '反馈内容',
+    `contact`    VARCHAR(100)  DEFAULT NULL COMMENT '联系方式',
+    `status`     TINYINT       NOT NULL DEFAULT 0 COMMENT '状态：0待处理 1已处理 2已忽略',
+    `reply`      TEXT          DEFAULT NULL COMMENT '处理回复',
+    `created_at` DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='意见反馈表';

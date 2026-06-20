@@ -161,7 +161,12 @@ class ApiConstants {
   static const String prodBaseUrl = 'https://api.jiangwu.com/api';
 
   // Web 平台使用 localhost，其他平台使用 10.0.2.2（Android模拟器）
-  static String get baseUrl => kIsWeb ? 'http://localhost:8080/api' : devBaseUrl;
+  // Release 构建使用生产环境
+  static String get baseUrl {
+    if (kReleaseMode) return prodBaseUrl;
+    if (kIsWeb) return 'http://localhost:8080/api';
+    return devBaseUrl;
+  }
 
   // 超时时间（毫秒）
   static const int connectTimeout = 15000;

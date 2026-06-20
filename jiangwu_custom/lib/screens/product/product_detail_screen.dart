@@ -50,7 +50,11 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.share),
-            onPressed: () {},
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('分享功能开发中')),
+              );
+            },
           ),
         ],
       ),

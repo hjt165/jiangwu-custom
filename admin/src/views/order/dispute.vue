@@ -3,7 +3,6 @@
     <div class="page-header">
       <h2>争议仲裁</h2>
     </div>
-
     <div class="page-card">
       <el-table :data="tableData" stripe v-loading="loading">
         <el-table-column prop="orderNo" label="订单号" width="200" />
@@ -19,6 +18,7 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination v-model:current-page="page" :page-size="10" :total="total" layout="total, prev, pager, next" @current-change="loadData" style="margin-top: 16px; justify-content: flex-end" />
     </div>
 
     <el-dialog v-model="dialogVisible" title="仲裁处理" width="500px">
@@ -48,6 +48,8 @@ import { ElMessage } from 'element-plus'
 
 const loading = ref(false)
 const tableData = ref([])
+const page = ref(1)
+const total = ref(0)
 const dialogVisible = ref(false)
 const result = ref('user')
 const remark = ref('')
@@ -56,46 +58,31 @@ const currentOrderId = ref(null)
 async function loadData() {
   loading.value = true
   try {
-    const res = await getDisputeList({ page: 1, size: 10 })
+    const res = await getDisputeList({ page: page.value, size: 10 })
     tableData.value = res.data || []
-  } catch (e) {
-    console.error('加载争议订单失败:', e)
-  } finally {
-    loading.value = false
-  }
+    total.value = res.total || 0
+  } catch (e) { console.error('加载争议订单失败:', e) }
+  finally { loading.value = false }
 }
 
-function handleResolve(row) {
-  currentOrderId.value = row.id
-  dialogVisible.value = true
-}
+function handleResolve(row) { currentOrderId.value = row.id; dialogVisible.value = true }
 
 async function submitResolve() {
   try {
-    await resolveDispute(currentOrderId.value, {
-      resolution: result.value,
-      remark: remark.value
-    })
+    await resolveDispute(currentOrderId.value, { resolution: result.value, remark: remark.value })
     dialogVisible.value = false
     ElMessage.success('仲裁完成')
     loadData()
-  } catch (e) {
-    ElMessage.error('仲裁操作失败')
-  }
+  } catch (e) { ElMessage.error('仲裁操作失败') }
 }
 
 async function handleQuickResolve(row, side) {
   const label = side === 'user' ? '支持用户' : '支持手作人'
   try {
-    await resolveDispute(row.id, {
-      resolution: side,
-      remark: `管理员${label}`
-    })
+    await resolveDispute(row.id, { resolution: side, remark: `管理员${label}` })
     ElMessage.success('仲裁完成')
     loadData()
-  } catch (e) {
-    ElMessage.error('仲裁操作失败')
-  }
+  } catch (e) { ElMessage.error('仲裁操作失败') }
 }
 
 onMounted(loadData)

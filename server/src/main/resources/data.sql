@@ -32,3 +32,9 @@ INSERT INTO `t_material` (`id`, `category`, `name`, `description`, `options`, `s
 (8, 'woodwork', '小叶紫檀', '珍贵红木', NULL, 1),
 (9, 'woodwork', '黑胡桃木', '进口硬木', NULL, 2),
 (10, 'woodwork', '黄杨木', '传统雕刻用材', NULL, 3);
+
+-- 意见反馈测试数据
+INSERT INTO `t_feedback` (`id`, `user_id`, `content`, `contact`, `status`, `reply`) VALUES
+(1, 2, '希望能增加更多手作人入驻', NULL, 0, NULL),
+(2, 2, '下单流程有点复杂，建议简化', '13800000001', 1, '感谢反馈，我们会优化下单流程'),
+(3, 3, '作品展示页面加载较慢，建议优化图片加载', NULL, 2, NULL);

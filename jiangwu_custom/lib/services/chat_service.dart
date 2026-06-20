@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/message.dart';
@@ -50,7 +51,7 @@ class ChatService {
           _startReconnect();
         },
         onError: (error) {
-          print('WebSocket error: $error');
+          developer.log('WebSocket error: $error');
           _isConnected = false;
           _connectionController.add(false);
           _startReconnect();
@@ -61,7 +62,7 @@ class ChatService {
       _connectionController.add(true);
       _startHeartbeat();
     } catch (e) {
-      print('WebSocket connection failed: $e');
+      developer.log('WebSocket connection failed: $e');
       _startReconnect();
     }
   }
@@ -123,7 +124,7 @@ class ChatService {
         // 心跳响应
         break;
       case 'error':
-        print('Server error: ${message['message']}');
+        developer.log('Server error: ${message['message']}');
         break;
     }
   }

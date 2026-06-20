@@ -27,7 +27,7 @@
         </el-table-column>
         <el-table-column label="操作" fixed="right" width="150">
           <template #default="{ row }">
-            <el-button type="primary" link size="small">详情</el-button>
+            <el-button type="primary" link size="small" @click="$router.push('/artisan/' + row.id)">详情</el-button>
             <el-button v-if="row.status !== 1" type="success" link size="small" @click="handleAudit(row, 'pass')">认证</el-button>
             <el-button v-if="row.status !== 1" type="danger" link size="small" @click="handleAudit(row, 'reject')">拒绝</el-button>
           </template>

@@ -55,6 +55,8 @@ public class Product {
 
     private Boolean isAvailable;
 
+    private Integer reviewStatus;
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 

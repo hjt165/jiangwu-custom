@@ -27,6 +27,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen>
     // 加载收藏列表
     Future.microtask(() {
       ref.read(favoritesProvider.notifier).loadFavorites();
+      ref.read(favoritesProvider.notifier).loadFavoriteArtisans();
     });
   }
 
@@ -64,7 +65,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen>
               controller: _tabController,
               children: [
                 _buildProductsTab(favoritesState),
-                _buildArtisansTab(),
+                _buildArtisansTab(favoritesState),
               ],
             ),
           ),
@@ -116,11 +117,54 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen>
     );
   }
 
-  Widget _buildArtisansTab() {
-    // 后端暂无收藏手作人API，显示空状态
-    return const EmptyWidget(
-      icon: Icons.people_outline,
-      message: '暂无收藏手作人',
+  Widget _buildArtisansTab(FavoritesProvider state) {
+    if (state.isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
+    }
+
+    if (state.favoriteArtisans.isEmpty) {
+      return const EmptyWidget(
+        icon: Icons.people_outline,
+        message: '暂无收藏手作人',
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(AppSizes.paddingMedium),
+      itemCount: state.favoriteArtisans.length,
+      itemBuilder: (context, index) {
+        final artisan = state.favoriteArtisans[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: AppSizes.spacingSmall),
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+              child: Text(
+                (artisan['name'] ?? '手')[0],
+                style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+              ),
+            ),
+            title: Text(artisan['name'] ?? '未知手作人'),
+            subtitle: Text(artisan['specialty'] ?? ''),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.star, size: 16, color: AppColors.warning),
+                const SizedBox(width: 4),
+                Text('${artisan['rating'] ?? '-'}'),
+              ],
+            ),
+            onTap: () {
+              Navigator.of(context).pushNamed(
+                '/artisan/${artisan['artisanId']}',
+                arguments: artisan['artisanId'].toString(),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

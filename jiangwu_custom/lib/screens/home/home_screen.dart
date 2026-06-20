@@ -101,29 +101,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             height: 200,
             child: productState.isLoading && productState.featuredProducts.isEmpty
                 ? const Center(child: LoadingWidget())
-                : ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: productState.featuredProducts.isEmpty
-                        ? 5
-                        : productState.featuredProducts.length,
-                    itemBuilder: (context, index) {
-                      if (productState.featuredProducts.isEmpty) {
-                        return HomeProductCard(
-                          onTap: null,
-                        );
-                      }
-                      final product = productState.featuredProducts[index];
-                      return HomeProductCard(
-                        product: product,
-                        onTap: () {
-                          Navigator.of(context).pushNamed(
-                            '/product/',
-                            arguments: product.id,
-                          );
-                        },
-                      );
-                    },
-                  ),
+                : productState.error != null && productState.featuredProducts.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.error_outline, size: 32, color: AppColors.error),
+                            const SizedBox(height: 8),
+                            Text('加载失败: ${productState.error}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                            const SizedBox(height: 8),
+                            TextButton(
+                              onPressed: () => ref.read(productProvider.notifier).fetchFeaturedProducts(),
+                              child: const Text('重试'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : productState.featuredProducts.isEmpty
+                        ? const Center(child: Text('暂无推荐作品', style: TextStyle(color: AppColors.textHint)))
+                        : ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: productState.featuredProducts.length,
+                            itemBuilder: (context, index) {
+                              final product = productState.featuredProducts[index];
+                              return HomeProductCard(
+                                product: product,
+                                onTap: () {
+                                  Navigator.of(context).pushNamed(
+                                    '/product/',
+                                    arguments: product.id,
+                                  );
+                                },
+                              );
+                            },
+                          ),
           ),
         ],
       ),
@@ -160,29 +171,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             height: 120,
             child: artisanState.isLoading && artisanState.artisans.isEmpty
                 ? const Center(child: LoadingWidget())
-                : ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: artisanState.artisans.isEmpty
-                        ? 4
-                        : artisanState.artisans.length,
-                    itemBuilder: (context, index) {
-                      if (artisanState.artisans.isEmpty) {
-                        return const HomeArtisanCard(
-                          onTap: null,
-                        );
-                      }
-                      final artisan = artisanState.artisans[index];
-                      return HomeArtisanCard(
-                        artisan: artisan,
-                        onTap: () {
-                          Navigator.of(context).pushNamed(
-                            AppRoutes.artisanProfile,
-                            arguments: artisan.id,
-                          );
-                        },
-                      );
-                    },
-                  ),
+                : artisanState.error != null && artisanState.artisans.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.error_outline, size: 32, color: AppColors.error),
+                            const SizedBox(height: 8),
+                            Text('加载失败: ${artisanState.error}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                            const SizedBox(height: 8),
+                            TextButton(
+                              onPressed: () => ref.read(artisanProvider.notifier).fetchArtisans(),
+                              child: const Text('重试'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : artisanState.artisans.isEmpty
+                        ? const Center(child: Text('暂无推荐手作人', style: TextStyle(color: AppColors.textHint)))
+                        : ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: artisanState.artisans.length,
+                            itemBuilder: (context, index) {
+                              final artisan = artisanState.artisans[index];
+                              return HomeArtisanCard(
+                                artisan: artisan,
+                                onTap: () {
+                                  Navigator.of(context).pushNamed(
+                                    AppRoutes.artisanProfile,
+                                    arguments: artisan.id,
+                                  );
+                                },
+                              );
+                            },
+                          ),
           ),
         ],
       ),

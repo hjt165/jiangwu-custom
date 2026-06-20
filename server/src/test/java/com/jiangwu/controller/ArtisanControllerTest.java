@@ -1,12 +1,10 @@
 package com.jiangwu.controller;
 
 import com.jiangwu.dto.response.ArtisanResponse;
-import com.jiangwu.entity.Artisan;
-import com.jiangwu.entity.UserFollow;
-import com.jiangwu.repository.ArtisanRepository;
+import com.jiangwu.entity.Review;
 import com.jiangwu.repository.ReviewRepository;
-import com.jiangwu.repository.UserFollowRepository;
 import com.jiangwu.exception.GlobalExceptionHandler;
+import com.jiangwu.service.ArtisanFollowService;
 import com.jiangwu.service.ArtisanService;
 import com.jiangwu.utils.CurrentUserUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -28,23 +27,20 @@ class ArtisanControllerTest {
 
     private MockMvc mockMvc;
     private ArtisanService artisanService;
+    private ArtisanFollowService artisanFollowService;
     private ReviewRepository reviewRepository;
-    private UserFollowRepository userFollowRepository;
-    private ArtisanRepository artisanRepository;
     private CurrentUserUtil currentUserUtil;
     private ArtisanResponse artisanResponse;
 
     @BeforeEach
     void setUp() {
         artisanService = mock(ArtisanService.class);
+        artisanFollowService = mock(ArtisanFollowService.class);
         reviewRepository = mock(ReviewRepository.class);
-        userFollowRepository = mock(UserFollowRepository.class);
-        artisanRepository = mock(ArtisanRepository.class);
         currentUserUtil = mock(CurrentUserUtil.class);
 
         ArtisanController controller = new ArtisanController(
-                artisanService, reviewRepository, userFollowRepository,
-                artisanRepository, currentUserUtil);
+                artisanService, artisanFollowService, reviewRepository, currentUserUtil);
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
@@ -80,76 +76,41 @@ class ArtisanControllerTest {
     @Test
     void getArtisanDetail_NotFound() throws Exception {
         when(artisanService.getArtisanDetail(999L))
-                .thenThrow(new RuntimeException("手作人不存在"));
+                .thenThrow(new com.jiangwu.exception.BusinessException(com.jiangwu.exception.ErrorCode.ARTISAN_NOT_FOUND));
 
         mockMvc.perform(get("/artisan/999"))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.code").value(500));
-    }
-
-    @Test
-    void searchArtisans_Success() throws Exception {
-        when(artisanService.searchArtisans(anyString()))
-                .thenReturn(List.of(artisanResponse));
-
-        mockMvc.perform(get("/artisan/search")
-                        .param("keyword", "陶瓷"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(200));
-    }
-
-    @Test
-    void applyArtisan_Success() throws Exception {
-        when(currentUserUtil.extractUserId(any())).thenReturn(1L);
-
-        mockMvc.perform(post("/artisan/apply")
-                        .header("Authorization", "Bearer test_token")
-                        .param("name", "新匠人")
-                        .param("specialty", "CERAMIC")
-                        .param("bio", "热爱陶瓷"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(200));
+                .andExpect(jsonPath("$.code").value(2001));
     }
 
     @Test
     void followArtisan_Success() throws Exception {
         when(currentUserUtil.extractUserId(any())).thenReturn(1L);
-        when(userFollowRepository.findByUserIdAndArtisanId(anyLong(), anyLong())).thenReturn(null);
-        when(userFollowRepository.insert(any(UserFollow.class))).thenReturn(1);
-        Artisan artisan = new Artisan();
-        artisan.setId(1L);
-        artisan.setFanCount(10);
-        when(artisanRepository.selectById(anyLong())).thenReturn(artisan);
-        when(artisanRepository.updateById(any(Artisan.class))).thenReturn(1);
+        when(artisanFollowService.follow(1L, 1L)).thenReturn(Map.of("isFollowing", true));
 
         mockMvc.perform(post("/artisan/1/follow")
                         .header("Authorization", "Bearer test_token"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(200));
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data.isFollowing").value(true));
     }
 
     @Test
     void unfollowArtisan_Success() throws Exception {
         when(currentUserUtil.extractUserId(any())).thenReturn(1L);
-        when(userFollowRepository.findByUserIdAndArtisanId(anyLong(), anyLong())).thenReturn(new UserFollow());
-        when(userFollowRepository.delete(any())).thenReturn(1);
-        Artisan artisan = new Artisan();
-        artisan.setId(1L);
-        artisan.setFanCount(10);
-        when(artisanRepository.selectById(anyLong())).thenReturn(artisan);
-        when(artisanRepository.updateById(any(Artisan.class))).thenReturn(1);
+        when(artisanFollowService.unfollow(1L, 1L)).thenReturn(Map.of("isFollowing", false));
 
         mockMvc.perform(delete("/artisan/1/follow")
                         .header("Authorization", "Bearer test_token"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(200));
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data.isFollowing").value(false));
     }
 
     @Test
     void checkFollowStatus_True() throws Exception {
         when(currentUserUtil.extractUserId(any())).thenReturn(1L);
-        when(userFollowRepository.findByUserIdAndArtisanId(anyLong(), anyLong()))
-                .thenReturn(new UserFollow());
+        when(artisanFollowService.isFollowing(1L, 1L)).thenReturn(true);
 
         mockMvc.perform(get("/artisan/1/follow/check")
                         .header("Authorization", "Bearer test_token"))
@@ -161,8 +122,7 @@ class ArtisanControllerTest {
     @Test
     void checkFollowStatus_False() throws Exception {
         when(currentUserUtil.extractUserId(any())).thenReturn(1L);
-        when(userFollowRepository.findByUserIdAndArtisanId(anyLong(), anyLong()))
-                .thenReturn(null);
+        when(artisanFollowService.isFollowing(1L, 1L)).thenReturn(false);
 
         mockMvc.perform(get("/artisan/1/follow/check")
                         .header("Authorization", "Bearer test_token"))

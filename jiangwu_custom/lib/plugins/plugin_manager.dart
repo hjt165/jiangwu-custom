@@ -1,5 +1,6 @@
 /// 插件管理器
 /// 提供插件注册、初始化、生命周期管理
+import 'dart:developer' as developer;
 
 /// 插件基类
 /// 所有插件必须继承此类并实现抽象方法
@@ -42,12 +43,12 @@ class PluginManager {
   /// 注册插件
   void register(Plugin plugin) {
     if (_plugins.containsKey(plugin.id)) {
-      print('插件已存在: ${plugin.id}');
+      developer.log('插件已存在: ${plugin.id}');
       return;
     }
     _plugins[plugin.id] = plugin;
     _pluginStates[plugin.id] = plugin.isEnabled;
-    print('插件已注册: ${plugin.name} (${plugin.id})');
+    developer.log('插件已注册: ${plugin.name} (${plugin.id})');
   }
 
   /// 批量注册插件
@@ -63,9 +64,9 @@ class PluginManager {
       if (_pluginStates[plugin.id] == true) {
         try {
           await plugin.onInit();
-          print('插件初始化成功: ${plugin.name}');
+          developer.log('插件初始化成功: ${plugin.name}');
         } catch (e) {
-          print('插件初始化失败: ${plugin.name} - $e');
+          developer.log('插件初始化失败: ${plugin.name} - $e');
         }
       }
     }
@@ -75,21 +76,21 @@ class PluginManager {
   Future<void> enablePlugin(String pluginId) async {
     final plugin = _plugins[pluginId];
     if (plugin == null) {
-      print('插件不存在: $pluginId');
+      developer.log('插件不存在: $pluginId');
       return;
     }
 
     if (_pluginStates[pluginId] == true) {
-      print('插件已启用: $pluginId');
+      developer.log('插件已启用: $pluginId');
       return;
     }
 
     try {
       await plugin.onEnable();
       _pluginStates[pluginId] = true;
-      print('插件已启用: ${plugin.name}');
+      developer.log('插件已启用: ${plugin.name}');
     } catch (e) {
-      print('插件启用失败: ${plugin.name} - $e');
+      developer.log('插件启用失败: ${plugin.name} - $e');
     }
   }
 
@@ -97,21 +98,21 @@ class PluginManager {
   Future<void> disablePlugin(String pluginId) async {
     final plugin = _plugins[pluginId];
     if (plugin == null) {
-      print('插件不存在: $pluginId');
+      developer.log('插件不存在: $pluginId');
       return;
     }
 
     if (_pluginStates[pluginId] == false) {
-      print('插件已禁用: $pluginId');
+      developer.log('插件已禁用: $pluginId');
       return;
     }
 
     try {
       await plugin.onDisable();
       _pluginStates[pluginId] = false;
-      print('插件已禁用: ${plugin.name}');
+      developer.log('插件已禁用: ${plugin.name}');
     } catch (e) {
-      print('插件禁用失败: ${plugin.name} - $e');
+      developer.log('插件禁用失败: ${plugin.name} - $e');
     }
   }
 
@@ -120,9 +121,9 @@ class PluginManager {
     for (final plugin in _plugins.values) {
       try {
         await plugin.onDestroy();
-        print('插件已销毁: ${plugin.name}');
+        developer.log('插件已销毁: ${plugin.name}');
       } catch (e) {
-        print('插件销毁失败: ${plugin.name} - $e');
+        developer.log('插件销毁失败: ${plugin.name} - $e');
       }
     }
     _plugins.clear();

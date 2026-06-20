@@ -92,7 +92,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
         children: [
           CircleAvatar(
             radius: 24,
-            backgroundColor: AppColors.primary.withOpacity(0.1),
+            backgroundColor: AppColors.primary.withValues(alpha:0.1),
             backgroundImage: otherAvatar != null ? NetworkImage(otherAvatar) : null,
             child: otherAvatar == null
                 ? Text(

@@ -8,10 +8,12 @@ class FavoritesProvider extends ChangeNotifier {
   final ApiService _apiService = ApiService();
 
   List<Product> _favoriteProducts = [];
+  List<Map<String, dynamic>> _favoriteArtisans = [];
   bool _isLoading = false;
   String? _error;
 
   List<Product> get favoriteProducts => _favoriteProducts;
+  List<Map<String, dynamic>> get favoriteArtisans => _favoriteArtisans;
   bool get isLoading => _isLoading;
   String? get error => _error;
   int get count => _favoriteProducts.length;
@@ -29,6 +31,18 @@ class FavoritesProvider extends ChangeNotifier {
       _error = e.toString();
     } finally {
       _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// 加载收藏的手作人列表
+  Future<void> loadFavoriteArtisans() async {
+    try {
+      final response = await _apiService.getFollowList();
+      _favoriteArtisans = response.cast<Map<String, dynamic>>();
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
       notifyListeners();
     }
   }

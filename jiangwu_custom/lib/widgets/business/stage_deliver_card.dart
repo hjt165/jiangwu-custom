@@ -59,7 +59,7 @@ class StageDeliverCard extends StatelessWidget {
             ),
             const SizedBox(height: AppSizes.spacingSmall),
             // 只读模式展示图片
-            _buildImagePreview(stage.deliverImages),
+            _buildImagePreview(context, stage.deliverImages),
             const SizedBox(height: AppSizes.paddingMedium),
           ],
 
@@ -112,13 +112,28 @@ class StageDeliverCard extends StatelessWidget {
     );
   }
 
-  Widget _buildImagePreview(List<String> images) {
+  Widget _buildImagePreview(BuildContext context, List<String> images) {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: images.take(9).map((imageUrl) {
         return GestureDetector(
-          onTap: () {},
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (_) => Dialog(
+                child: InteractiveViewer(
+                  child: Image.network(
+                    imageUrl,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => const Center(
+                      child: Icon(Icons.image_not_supported, size: 48),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
           child: Container(
             width: 80,
             height: 80,

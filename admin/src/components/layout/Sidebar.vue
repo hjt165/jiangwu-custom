@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar" :class="{ collapsed: appStore.sidebarCollapsed }">
     <div class="sidebar-logo">
-      <img src="" alt="Logo" class="logo-icon" />
+      <el-icon :size="32" color="#E74C3C"><Brush /></el-icon>
       <span v-show="!appStore.sidebarCollapsed" class="logo-title">管理后台</span>
     </div>
 

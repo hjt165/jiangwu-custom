@@ -65,8 +65,8 @@ class _AiLoadingWidgetState extends State<AiLoadingWidget>
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        AppColors.accent.withOpacity(0.3 + _animation.value * 0.4),
-                        AppColors.accent.withOpacity(0.6 + _animation.value * 0.4),
+                        AppColors.accent.withValues(alpha:0.3 + _animation.value * 0.4),
+                        AppColors.accent.withValues(alpha:0.6 + _animation.value * 0.4),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,

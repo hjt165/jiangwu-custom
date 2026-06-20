@@ -56,10 +56,22 @@ const routes = [
         meta: { title: '作品管理' },
       },
       {
+        path: 'product/:id',
+        name: 'ProductDetail',
+        component: () => import('@/views/product/detail.vue'),
+        meta: { title: '作品详情' },
+      },
+      {
         path: 'artisan/list',
         name: 'ArtisanList',
         component: () => import('@/views/artisan/list.vue'),
         meta: { title: '手作人管理' },
+      },
+      {
+        path: 'artisan/:id',
+        name: 'ArtisanDetail',
+        component: () => import('@/views/artisan/detail.vue'),
+        meta: { title: '手作人详情' },
       },
       {
         path: 'content/image',

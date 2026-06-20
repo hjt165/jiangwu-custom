@@ -160,7 +160,7 @@ class AiAnalysisWidget extends StatelessWidget {
           children: styleTags!.map((tag) {
             return Chip(
               label: Text(tag),
-              backgroundColor: AppColors.accent.withOpacity(0.1),
+              backgroundColor: AppColors.accent.withValues(alpha:0.1),
               labelStyle: TextStyle(color: AppColors.accent),
               padding: EdgeInsets.zero,
             );
@@ -219,7 +219,7 @@ class AiAnalysisWidget extends StatelessWidget {
                     vertical: AppSizes.spacingXSmall,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.green.withOpacity(0.1),
+                    color: AppColors.green.withValues(alpha:0.1),
                     borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
                   ),
                   child: Text(

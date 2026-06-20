@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:developer' as developer;
 import '../../app/constants.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/order_provider.dart';
@@ -37,7 +38,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         _stageDeliveringCount = orders.where((o) => o.status == OrderStatus.stageDelivering).length;
         _completedCount = orders.where((o) => o.status == OrderStatus.completed).length;
       });
-    } catch (_) {}
+    } catch (e, stack) {
+      developer.log('加载订单统计失败', name: 'ProfileScreen', error: e, stackTrace: stack);
+    }
   }
 
   @override

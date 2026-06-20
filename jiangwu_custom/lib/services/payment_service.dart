@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 /// 微信支付服务 (Mock模式 - fluwx暂未兼容Kotlin 2.x)
 /// 保持接口不变
@@ -12,7 +13,7 @@ class PaymentService {
   Stream<PaymentResult>? _paymentStream;
 
   Future<bool> init() async {
-    print('PaymentService: 微信支付服务已禁用(mock模式)');
+    developer.log('PaymentService: 微信支付服务已禁用(mock模式)');
     return true;
   }
 

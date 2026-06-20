@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -44,7 +45,7 @@ class ApiService {
           options.headers['Authorization'] = 'Bearer $token';
         }
 
-        print('''
+        developer.log('''
 [API Request]
 URI: 
 Method: 
@@ -57,7 +58,7 @@ Data:
 
       // 响应拦截器
       onResponse: (response, handler) {
-        print('''
+        developer.log('''
 [API Response]
 URI: 
 Status: 
@@ -88,7 +89,7 @@ Data:
 
       // 错误拦截器
       onError: (error, handler) {
-        print('''
+        developer.log('''
 [API Error]
 URI: 
 Type: 
@@ -340,6 +341,11 @@ Message:
     return await get('/favorite/list');
   }
 
+  /// 获取关注的手作人列表
+  Future<List<dynamic>> getFollowList() async {
+    return await get('/artisan/follow/list');
+  }
+
   // ==================== 浏览历史 API ====================
 
   /// 记录浏览
@@ -355,6 +361,16 @@ Message:
   /// 清空浏览历史
   Future<void> clearHistory() async {
     await delete('/history/clear');
+  }
+
+  // ==================== 意见反馈 API ====================
+
+  /// 提交意见反馈
+  Future<void> submitFeedback(String content, {String? contact}) async {
+    await post('/feedback/submit', data: {
+      'content': content,
+      if (contact != null && contact.isNotEmpty) 'contact': contact,
+    });
   }
 }
 

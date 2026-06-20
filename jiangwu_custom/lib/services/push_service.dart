@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 /// 极光推送服务 (Mock模式 - jpush_flutter暂未兼容)
 /// 保持接口不变，后续恢复推送时替换
@@ -18,24 +19,24 @@ class PushService {
     Function(PushNotification)? onNotification,
   }) async {
     if (_initialized) return;
-    print('PushService: 推送服务已禁用(mock模式)');
+    developer.log('PushService: 推送服务已禁用(mock模式)');
     _initialized = true;
   }
 
   Future<void> setAlias(String userId) async {
-    print('PushService: setAlias($userId) - mock');
+    developer.log('PushService: setAlias($userId) - mock');
   }
 
   Future<void> clearAlias() async {
-    print('PushService: clearAlias - mock');
+    developer.log('PushService: clearAlias - mock');
   }
 
   Future<void> setTags(List<String> tags) async {
-    print('PushService: setTags($tags) - mock');
+    developer.log('PushService: setTags($tags) - mock');
   }
 
   Future<void> clearTags() async {
-    print('PushService: clearTags - mock');
+    developer.log('PushService: clearTags - mock');
   }
 
   Future<bool> requestPermission() async {

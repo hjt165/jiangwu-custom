@@ -2,7 +2,7 @@ package com.jiangwu.controller;
 
 import com.jiangwu.common.Result;
 import com.jiangwu.entity.Material;
-import com.jiangwu.repository.MaterialRepository;
+import com.jiangwu.service.MaterialService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MaterialController {
 
-    private final MaterialRepository materialRepository;
+    private final MaterialService materialService;
 
     /**
      * 获取所有材质
@@ -27,7 +27,7 @@ public class MaterialController {
     @Operation(summary = "获取所有材质")
     @GetMapping("/list")
     public Result<List<Material>> getAllMaterials() {
-        return Result.success(materialRepository.findAll());
+        return Result.success(materialService.getAllMaterials());
     }
 
     /**
@@ -36,6 +36,6 @@ public class MaterialController {
     @Operation(summary = "按分类获取材质")
     @GetMapping("/category/{category}")
     public Result<List<Material>> getMaterialsByCategory(@PathVariable String category) {
-        return Result.success(materialRepository.findByCategory(category));
+        return Result.success(materialService.getMaterialsByCategory(category));
     }
 }

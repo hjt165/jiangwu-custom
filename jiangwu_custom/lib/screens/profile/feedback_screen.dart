@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../app/constants.dart';
+import '../../services/api_service.dart';
 
 class FeedbackScreen extends StatefulWidget {
   const FeedbackScreen({super.key});
@@ -20,15 +21,30 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     super.dispose();
   }
 
-  void _handleSubmit() {
+  void _handleSubmit() async {
     if (_contentController.text.trim().isEmpty) return;
     setState(() => _submitted = true);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('感谢您的反馈！')),
-    );
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) Navigator.of(context).pop();
-    });
+    try {
+      await ApiService().submitFeedback(
+        _contentController.text.trim(),
+        contact: _contactController.text.trim(),
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('感谢您的反馈！')),
+        );
+        Future.delayed(const Duration(seconds: 1), () {
+          if (mounted) Navigator.of(context).pop();
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _submitted = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('提交失败，请重试'), backgroundColor: AppColors.error),
+        );
+      }
+    }
   }
 
   @override

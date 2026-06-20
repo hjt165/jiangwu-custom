@@ -162,7 +162,7 @@ class _HomeBannerState extends State<HomeBanner> {
             decoration: BoxDecoration(
               color: _currentIndex == index
                   ? AppColors.primary
-                  : AppColors.primary.withOpacity(0.3),
+                  : AppColors.primary.withValues(alpha:0.3),
               borderRadius: BorderRadius.circular(3),
             ),
           );
