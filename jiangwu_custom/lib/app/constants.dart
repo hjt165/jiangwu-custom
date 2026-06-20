@@ -176,9 +176,6 @@ class ApiConstants {
   // 分页默认值
   static const int defaultPageSize = 20;
   static const int maxPageSize = 100;
-
-  // 微信开放平台appId
-  static const String wechatAppId = 'your-wechat-app-id';
 }
 
 /// 缓存Key常量

@@ -31,7 +31,6 @@ spring:
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:
       id-type: ASSIGN_ID
@@ -53,14 +52,6 @@ logging:
   level:
     com.jiangwu: debug
     org.springframework: info
-
-# 支付配置（Mock模式）
-payment:
-  mock-enabled: true
-  wechat:
-    app-id: wx_test_app_id
-    partner-id: wx_test_partner_id
-    api-key: wx_test_api_key
 
 # 区块链配置（Mock模式）
 blockchain:

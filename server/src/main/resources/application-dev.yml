@@ -39,6 +39,19 @@ ai:
     timeout: 30000
     connect-timeout: 5000
 
+# MyBatis-Plus SQL日志（仅dev环境开启）
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 支付配置（Mock模式）
+payment:
+  mock-enabled: true
+  wechat:
+    app-id: wx_test_app_id
+    partner-id: wx_test_partner_id
+    api-key: wx_test_api_key
+
 # CORS 允许的域名（逗号分隔）
 cors:
   allowed-origins: http://localhost:3000,http://localhost:5173,http://localhost:8080,http://localhost:8082
