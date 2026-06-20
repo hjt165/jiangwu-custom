@@ -47,10 +47,10 @@ class ApiService {
 
         developer.log('''
 [API Request]
-URI: 
-Method: 
-Headers: 
-Data: 
+URI: ${options.uri}
+Method: ${options.method}
+Headers: ${options.headers}
+Data: ${options.data}
 ''');
 
         handler.next(options);
@@ -60,9 +60,9 @@ Data:
       onResponse: (response, handler) {
         developer.log('''
 [API Response]
-URI: 
-Status: 
-Data: 
+URI: ${response.requestOptions.uri}
+Status: ${response.statusCode}
+Data: ${response.data}
 ''');
 
         // 处理业务响应码
@@ -91,9 +91,9 @@ Data:
       onError: (error, handler) {
         developer.log('''
 [API Error]
-URI: 
-Type: 
-Message: 
+URI: ${error.requestOptions.uri}
+Type: ${error.type}
+Message: ${error.message}
 ''');
 
         // 处理401未授权

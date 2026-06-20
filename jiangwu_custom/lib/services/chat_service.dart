@@ -165,8 +165,8 @@ class ChatService {
   }
 
   /// 获取用户会话列表
-  Future<List<Conversation>> getConversations(int userId) async {
-    final response = await _apiService.get('/chat/conversations/$userId');
+  Future<List<Conversation>> getConversations() async {
+    final response = await _apiService.get('/chat/conversations');
     final list = response.data['data'] as List;
     return list.map((e) => Conversation.fromJson(e)).toList();
   }

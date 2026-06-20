@@ -82,7 +82,7 @@ class AiService {
       if (imagePath != null) {
         // 有图片时使用上传接口
         result = await _apiService.upload<Map<String, dynamic>>(
-          '$_aiBaseUrl/analyze/multimodal',
+          '$_aiBaseUrl/analyze-image',
           filePath: imagePath,
           data: {
             if (text != null) 'text': text,
@@ -91,9 +91,9 @@ class AiService {
           fromJson: (data) => Map<String, dynamic>.from(data),
         );
       } else {
-        // 无图片时使用普通POST
+        // 无图片时使用文字分析接口
         result = await _apiService.post<Map<String, dynamic>>(
-          '$_aiBaseUrl/analyze/multimodal',
+          '$_aiBaseUrl/analyze-text',
           data: {
             if (text != null) 'text': text,
             if (category != null) 'category': category,
@@ -127,7 +127,7 @@ class AiService {
   }) async {
     try {
       final result = await _apiService.post<Map<String, dynamic>>(
-        '$_aiBaseUrl/recommend/artisan',
+        '$_aiBaseUrl/recommend-artisan',
         data: {
           'category': category,
           if (style != null) 'style': style,
@@ -162,7 +162,7 @@ class AiService {
   }) async {
     try {
       final result = await _apiService.post<Map<String, dynamic>>(
-        '$_aiBaseUrl/recommend/solution',
+        '$_aiBaseUrl/recommend-solution',
         data: {
           'description': description,
           if (imageUrl != null) 'image_url': imageUrl,
@@ -190,7 +190,7 @@ class AiService {
   }) async {
     try {
       final result = await _apiService.get<Map<String, dynamic>>(
-        '$_aiBaseUrl/rag/similar/$caseId',
+        '$_aiBaseUrl/similar/$caseId',
         queryParameters: {'top_k': topK},
         fromJson: (data) => Map<String, dynamic>.from(data),
       );

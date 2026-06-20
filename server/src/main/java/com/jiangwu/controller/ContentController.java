@@ -2,7 +2,7 @@ package com.jiangwu.controller;
 
 import com.jiangwu.common.Result;
 import com.jiangwu.service.ContentService;
-import com.jiangwu.utils.JWTUtil;
+import com.jiangwu.utils.CurrentUserUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +19,7 @@ import java.util.Map;
 public class ContentController {
 
     private final ContentService contentService;
-    private final JWTUtil jwtUtil;
+    private final CurrentUserUtil currentUserUtil;
 
     // ==================== 图片审核 ====================
 
@@ -43,7 +43,7 @@ public class ContentController {
             @PathVariable Long id,
             @RequestBody Map<String, Object> body,
             HttpServletRequest request) {
-        Long reviewerId = extractUserId(request);
+        Long reviewerId = currentUserUtil.extractUserId(request);
         String action = (String) body.get("action");
         String remark = (String) body.get("remark");
         contentService.reviewImage(id, action, remark, reviewerId);
@@ -57,7 +57,7 @@ public class ContentController {
     public Result<Void> batchReviewImages(
             @RequestBody Map<String, Object> body,
             HttpServletRequest request) {
-        Long reviewerId = extractUserId(request);
+        Long reviewerId = currentUserUtil.extractUserId(request);
         List<Long> ids = ((List<?>) body.get("ids")).stream()
                 .map(id -> Long.valueOf(id.toString()))
                 .toList();
@@ -91,7 +91,7 @@ public class ContentController {
             @PathVariable Long id,
             @RequestBody Map<String, Object> body,
             HttpServletRequest request) {
-        Long reviewerId = extractUserId(request);
+        Long reviewerId = currentUserUtil.extractUserId(request);
         String action = (String) body.get("action");
         String remark = (String) body.get("remark");
         contentService.reviewComment(id, action, remark, reviewerId);
@@ -105,7 +105,7 @@ public class ContentController {
     public Result<Void> batchReviewComments(
             @RequestBody Map<String, Object> body,
             HttpServletRequest request) {
-        Long reviewerId = extractUserId(request);
+        Long reviewerId = currentUserUtil.extractUserId(request);
         List<Long> ids = ((List<?>) body.get("ids")).stream()
                 .map(id -> Long.valueOf(id.toString()))
                 .toList();
@@ -115,11 +115,4 @@ public class ContentController {
         return Result.success();
     }
 
-    /**
-     * 从请求中提取用户ID
-     */
-    private Long extractUserId(HttpServletRequest request) {
-        String token = jwtUtil.extractToken(request.getHeader("Authorization"));
-        return jwtUtil.parseUserId(token);
-    }
 }

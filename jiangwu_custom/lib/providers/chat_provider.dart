@@ -86,7 +86,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
     try {
       final user = _authService.currentUser;
       if (user != null) {
-        final conversations = await _chatService.getConversations(int.parse(user.id));
+        final conversations = await _chatService.getConversations();
         state = state.copyWith(
           conversations: conversations,
           isLoadingConversations: false,

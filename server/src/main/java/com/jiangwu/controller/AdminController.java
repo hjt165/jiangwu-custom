@@ -135,6 +135,17 @@ public class AdminController {
         return Result.success();
     }
 
+    @PutMapping("/order/{id}/cancel")
+    public Result<Void> cancelOrder(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        String reason = (String) body.getOrDefault("reason", "管理员取消");
+        Order order = orderRepository.findById(id);
+        if (order == null) {
+            return Result.error(404, "订单不存在");
+        }
+        orderRepository.updateCancelled(id, com.jiangwu.enums.OrderStatus.CANCELLED, java.time.LocalDateTime.now(), reason);
+        return Result.success();
+    }
+
     // ==================== 作品管理 ====================
 
     @GetMapping("/product/list")
