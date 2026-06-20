@@ -44,12 +44,12 @@ public class AdminService {
         String token = jwtUtil.generateToken(user.getId());
         Map<String, Object> data = new HashMap<>();
         data.put("token", token);
-        data.put("user", Map.of(
-                "id", user.getId(),
-                "nickname", user.getNickname(),
-                "avatar", user.getAvatar(),
-                "role", user.getRole()
-        ));
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("id", user.getId());
+        userInfo.put("nickname", user.getNickname());
+        userInfo.put("avatar", user.getAvatar());
+        userInfo.put("role", user.getRole());
+        data.put("user", userInfo);
         return data;
     }
 
