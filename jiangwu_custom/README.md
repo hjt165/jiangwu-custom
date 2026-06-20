@@ -28,7 +28,7 @@ flutter build web --no-tree-shake-icons
 ## 运行测试
 
 ```bash
-# 单元测试（46 个）
+# 测试（85 个）
 flutter test
 
 # 集成测试（需要后端运行中）

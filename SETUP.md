@@ -100,8 +100,11 @@ flutter build web --no-tree-shake-icons
 # 后端测试（93 个）
 cd server && mvn test
 
-# Flutter 单元测试（46 个）
+# Flutter 测试（85 个）
 cd jiangwu_custom && flutter test
+
+# AI 服务测试（19 个）
+cd ai-service && python -m pytest
 
 # Flutter 集成测试（需要后端运行中）
 cd jiangwu_custom && flutter test integration_test
