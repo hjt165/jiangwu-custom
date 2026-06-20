@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:integration_test/integration_test.dart';
@@ -11,7 +12,7 @@ export 'package:integration_test/integration_test.dart';
 class TestHelper {
   static const String testPhone = '13800000003';
   static const String testPassword = '123456';
-  static const String baseUrl = 'http://10.0.2.2:8080/api';
+  static String get baseUrl => kIsWeb ? 'http://localhost:8080/api' : 'http://10.0.2.2:8080/api';
 
   /// 等待页面加载完成
   static Future<void> waitForPageLoad(WidgetTester tester, {int seconds = 3}) async {
