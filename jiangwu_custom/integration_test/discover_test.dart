@@ -86,7 +86,7 @@ void main() {
       await TestHelper.waitForPageLoad(tester, seconds: 3);
 
       // 在首页尝试下拉刷新
-      await tester.fling(find.byType(ListView).first, const Offset(0, 300), 800);
+      await tester.fling(find.byType(ListView).first, const Offset(0, 300), 800, warnIfMissed: false);
       await TestHelper.waitForPageLoad(tester, seconds: 3);
     });
   });
