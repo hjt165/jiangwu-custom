@@ -79,4 +79,5 @@ class HybridRecommender:
             for item in candidates:
                 item["hybrid_score"] = item.get("match_score", 0)
 
-        return sorted(candidates, key=lambda x: x.get("hybrid_score", 0), reverse=True)
+        ranked = content_scored if user_preference else candidates
+        return sorted(ranked, key=lambda x: x.get("hybrid_score", 0), reverse=True)
