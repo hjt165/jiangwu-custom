@@ -11,8 +11,8 @@ test.describe('登录页面', () => {
   });
 
   test('管理员登录成功', async ({ page }) => {
-    await page.fill('input[placeholder="手机号"]', '13800000000');
-    await page.fill('input[placeholder="密码"]', 'admin123');
+    await page.fill('input[placeholder="请输入手机号"]', '13800000000');
+    await page.fill('input[placeholder="请输入密码"]', 'admin123');
     await page.click('button:has-text("登 录")');
     
     // 等待跳转或检查 token
@@ -23,8 +23,8 @@ test.describe('登录页面', () => {
   });
 
   test('错误密码提示', async ({ page }) => {
-    await page.fill('input[placeholder="手机号"]', '13800000000');
-    await page.fill('input[placeholder="密码"]', 'wrong123');
+    await page.fill('input[placeholder="请输入手机号"]', '13800000000');
+    await page.fill('input[placeholder="请输入密码"]', 'wrong123');
     await page.click('button:has-text("登 录")');
     
     await expect(page.locator('.el-message--error').first()).toBeVisible({ timeout: 10000 });

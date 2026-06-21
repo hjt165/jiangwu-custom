@@ -9,20 +9,26 @@
 html, body, #app {
   width: 100%;
   height: 100%;
-  font-family: '思源黑体', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: 'PingFang SC', 'Microsoft YaHei', '思源黑体', -apple-system, sans-serif;
   color: $text-primary;
   background-color: #f0f2f5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 // 滚动条美化
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c0c4cc;
+  background: #d0d3d9;
   border-radius: 3px;
+
+  &:hover {
+    background: #b0b3b9;
+  }
 }
 
 ::-webkit-scrollbar-track {
@@ -34,7 +40,7 @@ html, body, #app {
   background: #fff;
   border-radius: $border-radius;
   box-shadow: $shadow-card;
-  padding: 20px;
+  padding: 24px;
   margin-bottom: 20px;
 }
 
@@ -83,4 +89,15 @@ html, body, #app {
   justify-content: center;
   padding: 60px 0;
   color: $text-secondary;
+}
+
+// 页面过渡动画
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }

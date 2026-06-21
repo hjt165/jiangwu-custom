@@ -4,8 +4,8 @@ test.describe('作品管理', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
-    await page.fill('input[placeholder="手机号"]', '13800000000');
-    await page.fill('input[placeholder="密码"]', 'admin123');
+    await page.fill('input[placeholder="请输入手机号"]', '13800000000');
+    await page.fill('input[placeholder="请输入密码"]', 'admin123');
     await page.click('button:has-text("登 录")');
     await expect(page).toHaveURL(/.*dashboard/, { timeout: 10000 });
     await page.goto('/product/list');
@@ -39,8 +39,8 @@ test.describe('作品详情', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
-    await page.fill('input[placeholder="手机号"]', '13800000000');
-    await page.fill('input[placeholder="密码"]', 'admin123');
+    await page.fill('input[placeholder="请输入手机号"]', '13800000000');
+    await page.fill('input[placeholder="请输入密码"]', 'admin123');
     await page.click('button:has-text("登 录")');
     await expect(page).toHaveURL(/.*dashboard/, { timeout: 10000 });
   });
