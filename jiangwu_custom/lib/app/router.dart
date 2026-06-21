@@ -36,6 +36,7 @@ import '../screens/artisan/income_screen.dart';
 import '../screens/chat/chat_list_screen.dart';
 import '../screens/chat/chat_screen.dart';
 import '../screens/product/product_detail_screen.dart';
+import '../screens/common/not_found_screen.dart';
 
 /// 路由配置
 /// 定义所有页面路由映射
@@ -183,7 +184,7 @@ class AppRouter {
         );
 
       default:
-        return _buildRoute(const MainScreen(), settings);
+        return _buildRoute(NotFoundScreen(routeName: name), settings);
     }
   }
 
