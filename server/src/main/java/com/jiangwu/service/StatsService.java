@@ -141,4 +141,29 @@ public class StatsService {
 
         return data;
     }
+
+    /**
+     * 获取7天趋势数据（用于图表展示）
+     */
+    public Map<String, Object> getTrend() {
+        Map<String, Object> data = new HashMap<>();
+
+        // 按状态统计订单数
+        var statusWrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.jiangwu.entity.Order>()
+                .eq("deleted", 0)
+                .select("status", "COUNT(*) as count")
+                .groupBy("status");
+        data.put("statusDistribution", orderRepository.selectMaps(statusWrapper));
+
+        // 近7天每日订单量
+        var dailyWrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.jiangwu.entity.Order>()
+                .eq("deleted", 0)
+                .ge("created_at", LocalDateTime.of(LocalDate.now().minusDays(6), LocalTime.MIN))
+                .select("DATE(created_at) as date", "COUNT(*) as count", "COALESCE(SUM(total_amount), 0) as amount")
+                .groupBy("DATE(created_at)")
+                .orderByAsc("date");
+        data.put("dailyTrend", orderRepository.selectMaps(dailyWrapper));
+
+        return data;
+    }
 }

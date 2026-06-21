@@ -44,4 +44,12 @@ public class StatsController {
             @RequestParam(required = false) String endDate) {
         return Result.success(statsService.getUserStats(startDate, endDate));
     }
+
+    /**
+     * 获取7天趋势数据（图表展示）
+     */
+    @GetMapping("/trend")
+    public Result<Map<String, Object>> getTrend() {
+        return Result.success(statsService.getTrend());
+    }
 }

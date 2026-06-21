@@ -74,4 +74,15 @@ class StatsServiceTest {
         assertNotNull(result.get("retentionRate"));
         assertNotNull(result.get("avgOrderAmount"));
     }
+
+    @Test
+    void getTrend_ReturnsTrendData() {
+        when(orderRepository.selectMaps(any())).thenReturn(java.util.List.of());
+
+        Map<String, Object> result = statsService.getTrend();
+
+        assertNotNull(result);
+        assertNotNull(result.get("dailyTrend"));
+        assertNotNull(result.get("statusDistribution"));
+    }
 }

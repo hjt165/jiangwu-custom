@@ -45,3 +45,29 @@ class LoadingWidget extends StatelessWidget {
     return Center(child: content);
   }
 }
+
+/// 骨架屏加载
+class SkeletonWidget extends StatelessWidget {
+  final double width;
+  final double height;
+  final double borderRadius;
+
+  const SkeletonWidget({
+    super.key,
+    this.width = double.infinity,
+    this.height = 16,
+    this.borderRadius = 4,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(borderRadius),
+      ),
+    );
+  }
+}
