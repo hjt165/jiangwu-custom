@@ -127,3 +127,9 @@ local.properties
 # JDK
 jdk-17.0.2/
 jdk17.zip
+
+# ==================== Playwright ====================
+admin/test-results/
+admin/playwright-report/
+admin/blob-report/
+admin/.cache/
