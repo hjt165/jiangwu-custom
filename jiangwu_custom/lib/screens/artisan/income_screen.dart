@@ -284,6 +284,7 @@ class _IncomeScreenState extends ConsumerState<IncomeScreen>
 
   void _showWithdrawDialog() {
     final amountController = TextEditingController();
+    final accountController = TextEditingController();
     String selectedAccount = 'alipay';
 
     showDialog(
@@ -325,6 +326,18 @@ class _IncomeScreenState extends ConsumerState<IncomeScreen>
                     ),
                   ],
                 ),
+                const SizedBox(height: AppSizes.paddingMedium),
+                TextField(
+                  controller: accountController,
+                  decoration: InputDecoration(
+                    labelText: selectedAccount == 'alipay' ? '支付宝账号'
+                        : selectedAccount == 'wechat' ? '微信号'
+                        : '银行卡号',
+                    hintText: selectedAccount == 'alipay' ? '请输入支付宝账号'
+                        : selectedAccount == 'wechat' ? '请输入微信号'
+                        : '请输入银行卡号',
+                  ),
+                ),
               ],
             ),
             actions: [
@@ -350,7 +363,7 @@ class _IncomeScreenState extends ConsumerState<IncomeScreen>
                       .requestWithdraw(
                         amount: amount,
                         accountType: selectedAccount,
-                        accountInfo: 'user@example.com',
+                        accountInfo: accountController.text,
                       );
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(

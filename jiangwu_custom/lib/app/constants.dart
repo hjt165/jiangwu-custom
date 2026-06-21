@@ -168,6 +168,9 @@ class ApiConstants {
     return devBaseUrl;
   }
 
+  // 分享链接域名
+  static const String webBaseUrl = 'https://jiangwu.com';
+
   // 超时时间（毫秒）
   static const int connectTimeout = 15000;
   static const int receiveTimeout = 15000;

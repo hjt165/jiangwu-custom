@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../app/constants.dart';
+
 /// 分享工具类
 /// 封装系统分享功能
 class ShareUtils {
@@ -13,7 +15,7 @@ class ShareUtils {
   }) async {
     final text = '匠物定制 | $productName\n'
         '发现这件精美的手作艺术品，快来定制属于你的专属作品！\n'
-        '链接: https://jiangwu.com/product/$productId';
+        '链接: ${ApiConstants.webBaseUrl}/product/$productId';
 
     await Share.share(text, subject: productName);
   }
@@ -36,7 +38,7 @@ class ShareUtils {
   }) async {
     final text = '匠物定制 | 手作人 $artisanName\n'
         '来看看这位手作人的精美作品吧！\n'
-        '链接: https://jiangwu.com/artisan/$artisanId';
+        '链接: ${ApiConstants.webBaseUrl}/artisan/$artisanId';
 
     await Share.share(text, subject: artisanName);
   }
