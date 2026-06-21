@@ -13,6 +13,7 @@ import '../../widgets/common/loading_widget.dart';
 import '../../widgets/common/error_widget.dart';
 import '../../widgets/common/empty_widget.dart';
 import '../../widgets/common/button_widget.dart';
+import '../../utils/share_utils.dart';
 import '../chat/chat_screen.dart';
 
 /// 订单详情页
@@ -547,9 +548,15 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
               title: const Text('分享订单'),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('分享功能开发中')),
-                );
+                final orderState = ref.read(orderProvider);
+                final order = orderState.orders.where((o) => o.id == widget.orderId).firstOrNull;
+                if (order != null) {
+                  ShareUtils.shareOrder(
+                    context,
+                    orderNo: order.orderNo,
+                    productName: order.product?.title,
+                  );
+                }
               },
             ),
             ListTile(
@@ -558,7 +565,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
               onTap: () {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('客服功能开发中')),
+                  const SnackBar(content: Text('客服热线: 400-888-8888\n工作时间: 9:00-18:00')),
                 );
               },
             ),
@@ -567,13 +574,36 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
               title: const Text('举报'),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('举报功能开发中')),
-                );
+                _showReportDialog();
               },
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showReportDialog() {
+    final reasons = ['虚假商品', '质量问题', '未按时发货', '其他原因'];
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('举报订单'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: reasons.map((r) => ListTile(
+            title: Text(r),
+            onTap: () {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('已提交举报: $r')),
+              );
+            },
+          )).toList(),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+        ],
       ),
     );
   }

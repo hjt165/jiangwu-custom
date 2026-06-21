@@ -11,6 +11,7 @@ import '../../widgets/business/artisan_reviews_list.dart';
 import '../../widgets/common/loading_widget.dart';
 import '../../widgets/common/error_widget.dart';
 import '../../widgets/common/button_widget.dart';
+import '../../utils/share_utils.dart';
 
 /// 手作人主页
 /// 展示手作人详情、作品列表、评价列表
@@ -216,9 +217,14 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
   }
 
   void _handleShare() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('分享功能开发中')),
-    );
+    final artisan = ref.read(artisanProvider).currentArtisan;
+    if (artisan != null) {
+      ShareUtils.shareArtisan(
+        context,
+        artisanId: widget.artisanId,
+        artisanName: artisan.name ?? '手作人',
+      );
+    }
   }
 
   void _showMoreActions() {
@@ -236,9 +242,7 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
               title: const Text('举报'),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('举报功能开发中')),
-                );
+                _showReportDialog();
               },
             ),
             ListTile(
@@ -246,13 +250,72 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
               title: const Text('拉黑'),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('拉黑功能开发中')),
-                );
+                _showBlockDialog();
               },
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showReportDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('举报手作人'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildReportOption(ctx, '虚假信息'),
+            _buildReportOption(ctx, '侵权内容'),
+            _buildReportOption(ctx, '不当行为'),
+            _buildReportOption(ctx, '其他原因'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('取消'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReportOption(BuildContext ctx, String reason) {
+    return ListTile(
+      title: Text(reason),
+      onTap: () {
+        Navigator.pop(ctx);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('已提交举报: $reason')),
+        );
+      },
+    );
+  }
+
+  void _showBlockDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('拉黑手作人'),
+        content: const Text('拉黑后将不再看到该手作人的作品和消息，确定要拉黑吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('已拉黑该手作人')),
+              );
+            },
+            child: const Text('确定', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }

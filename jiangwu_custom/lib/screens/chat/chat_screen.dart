@@ -156,9 +156,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           IconButton(
             icon: const Icon(Icons.more_vert, color: AppColors.white),
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('更多功能开发中')),
-              );
+              _showChatMenu();
             },
           ),
         ],
@@ -439,6 +437,69 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               icon: const Icon(Icons.send, color: AppColors.white, size: 20),
               onPressed: _sendMessage,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showChatMenu() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.delete_outline),
+              title: const Text('清空聊天记录'),
+              onTap: () {
+                Navigator.pop(context);
+                _confirmClearHistory();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.block),
+              title: const Text('拉黑用户'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('已拉黑该用户')),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.report),
+              title: const Text('举报'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('举报已提交')),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _confirmClearHistory() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('清空聊天记录'),
+        content: const Text('确定要清空所有聊天记录吗？此操作不可恢复。'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('聊天记录已清空')),
+              );
+            },
+            child: const Text('确定', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

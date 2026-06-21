@@ -6,6 +6,7 @@ import '../../providers/product_provider.dart';
 import '../../providers/favorites_provider.dart';
 import '../../widgets/common/loading_widget.dart';
 import '../../widgets/common/error_widget.dart';
+import '../../utils/share_utils.dart';
 
 /// 作品详情页
 class ProductDetailScreen extends ConsumerStatefulWidget {
@@ -51,9 +52,15 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           IconButton(
             icon: const Icon(Icons.share),
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('分享功能开发中')),
-              );
+              final product = productState.currentProduct;
+              if (product != null) {
+                ShareUtils.shareProduct(
+                  context,
+                  productId: widget.productId,
+                  productName: product.title,
+                  imageUrl: product.coverImage,
+                );
+              }
             },
           ),
         ],
