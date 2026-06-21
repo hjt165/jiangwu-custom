@@ -61,3 +61,4 @@ flowable:
   database-schema-update: true
   async-executor-activate: false
   check-process-definitions: false
+  deploy-enabled: false
