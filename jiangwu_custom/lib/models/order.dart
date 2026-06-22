@@ -57,8 +57,8 @@ class OrderStage {
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       status: OrderStatus.fromString(json['status'] ?? ''),
-      dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']) : null,
-      completedAt: json['completedAt'] != null ? DateTime.parse(json['completedAt']) : null,
+      dueDate: json['dueDate'] != null ? DateTime.tryParse(json['dueDate'].toString()) : null,
+      completedAt: json['completedAt'] != null ? DateTime.tryParse(json['completedAt'].toString()) : null,
       deliverImages: List<String>.from(json['deliverImages'] ?? []),
       deliverNote: json['deliverNote'],
     );
@@ -161,10 +161,10 @@ class Order {
           [],
       currentStage: json['currentStage'] ?? 0,
       review: json['review'] != null ? Review.fromJson(json['review']) : null,
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
-      paidAt: json['paidAt'] != null ? DateTime.parse(json['paidAt']) : null,
-      completedAt: json['completedAt'] != null ? DateTime.parse(json['completedAt']) : null,
+      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updatedAt']?.toString() ?? '') ?? DateTime.now(),
+      paidAt: json['paidAt'] != null ? DateTime.tryParse(json['paidAt'].toString()) : null,
+      completedAt: json['completedAt'] != null ? DateTime.tryParse(json['completedAt'].toString()) : null,
     );
   }
 

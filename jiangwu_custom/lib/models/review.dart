@@ -52,8 +52,8 @@ class Review {
       tags: List<String>.from(json['tags'] ?? []),
       reply: json['reply'],
       replyAt: json['replyAt'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updatedAt']?.toString() ?? '') ?? DateTime.now(),
     );
   }
 

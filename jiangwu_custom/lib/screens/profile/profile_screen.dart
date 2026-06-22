@@ -31,6 +31,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _loadOrderStats() async {
     try {
       await ref.read(orderProvider.notifier).fetchOrders();
+      if (!mounted) return;
       final orders = ref.read(orderProvider).orders;
       setState(() {
         _pendingPaymentCount = orders.where((o) => o.status == OrderStatus.pendingPayment).length;

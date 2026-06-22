@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -141,19 +142,27 @@ public class OrderService {
                 .stream()
                 .collect(Collectors.toMap(Customization::getOrderId, c -> c));
 
+        // 批量加载作品（避免 N+1）
+        List<Long> productIds = orders.stream().map(Order::getProductId).filter(Objects::nonNull).distinct().toList();
+        if (!productIds.isEmpty()) {
+            productMap = productRepository.findByIds(productIds)
+                    .stream()
+                    .collect(Collectors.toMap(Product::getId, p -> p));
+        }
+
+        // 批量加载手作人（避免 N+1）
+        List<Long> artisanIds = orders.stream().map(Order::getArtisanId).filter(Objects::nonNull).distinct().toList();
+        if (!artisanIds.isEmpty()) {
+            artisanMap = artisanRepository.findByIds(artisanIds)
+                    .stream()
+                    .collect(Collectors.toMap(Artisan::getId, a -> a));
+        }
+
         for (Order order : orders) {
-            // 使用批量查询结果，避免重复查询
+            // 使用批量查询结果
             Customization c = customizationBatchMap.get(order.getId());
             if (c != null) {
                 customizationMap.put(order.getId(), c);
-            }
-            if (order.getProductId() != null && !productMap.containsKey(order.getProductId())) {
-                Product p = productRepository.findById(order.getProductId());
-                if (p != null) productMap.put(order.getProductId(), p);
-            }
-            if (order.getArtisanId() != null && !artisanMap.containsKey(order.getArtisanId())) {
-                Artisan a = artisanRepository.findById(order.getArtisanId());
-                if (a != null) artisanMap.put(order.getArtisanId(), a);
             }
         }
 

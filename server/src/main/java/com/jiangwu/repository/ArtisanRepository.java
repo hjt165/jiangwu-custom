@@ -20,6 +20,11 @@ public interface ArtisanRepository extends BaseMapper<Artisan> {
     @Select("SELECT * FROM t_artisan WHERE id = #{id} AND deleted = 0")
     Artisan findById(Long id);
 
+    @Select("<script>SELECT * FROM t_artisan WHERE id IN " +
+            "<foreach collection='ids' item='id' open='(' separator=',' close=')'>#{id}</foreach>" +
+            " AND deleted = 0</script>")
+    List<Artisan> findByIds(@org.apache.ibatis.annotations.Param("ids") List<Long> ids);
+
     @Select("SELECT * FROM t_artisan WHERE status = #{status} AND deleted = 0 ORDER BY rating DESC")
     List<Artisan> findByStatus(ArtisanStatus status);
 

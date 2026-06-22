@@ -56,20 +56,12 @@ public class ArtisanSelfController {
     public Result<Map<String, Object>> getWorkspaceStats(HttpServletRequest request) {
         Artisan artisan = resolveArtisan(request);
 
-        long pendingOrders = orderRepository.findByArtisanId(artisan.getId()).stream()
-                .filter(o -> o.getStatus() == OrderStatus.PAID || o.getStatus() == OrderStatus.PENDING_PAYMENT)
-                .count();
-
-        long todayOrders = orderRepository.findByArtisanId(artisan.getId()).stream()
-                .filter(o -> o.getCreatedAt() != null && o.getCreatedAt().toLocalDate().equals(LocalDateTime.now().toLocalDate()))
-                .count();
+        long pendingOrders = orderRepository.countPendingOrdersByArtisanId(artisan.getId());
+        long todayOrders = orderRepository.countTodayOrdersByArtisanId(artisan.getId());
 
         // 本月收入：completed状态的订单金额
         LocalDateTime monthStart = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
-        BigDecimal monthIncome = orderRepository.findByArtisanId(artisan.getId()).stream()
-                .filter(o -> o.getStatus() == OrderStatus.COMPLETED && o.getCompletedAt() != null && o.getCompletedAt().isAfter(monthStart))
-                .map(Order::getTotalAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal monthIncome = orderRepository.sumCompletedIncomeByArtisanId(artisan.getId(), monthStart);
 
         int totalWorks = productRepository.findByArtisanId(artisan.getId()).size();
 
@@ -300,27 +292,15 @@ public class ArtisanSelfController {
             HttpServletRequest request,
             @RequestParam(defaultValue = "month") String period) {
         Artisan artisan = resolveArtisan(request);
-        List<Order> allOrders = orderRepository.findByArtisanId(artisan.getId());
 
-        BigDecimal totalIncome = allOrders.stream()
-                .filter(o -> o.getStatus() == OrderStatus.COMPLETED)
-                .map(Order::getTotalAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalIncome = orderRepository.sumTotalIncomeByArtisanId(artisan.getId());
 
         LocalDateTime periodStart = "month".equals(period)
                 ? LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0)
                 : LocalDateTime.now().withDayOfYear(1).withHour(0).withMinute(0).withSecond(0);
 
-        BigDecimal periodIncome = allOrders.stream()
-                .filter(o -> o.getStatus() == OrderStatus.COMPLETED && o.getCompletedAt() != null && o.getCompletedAt().isAfter(periodStart))
-                .map(Order::getTotalAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal pendingIncome = allOrders.stream()
-                .filter(o -> o.getStatus() == OrderStatus.PRODUCING || o.getStatus() == OrderStatus.STAGE_DELIVERING)
-                .map(Order::getPaidAmount)
-                .filter(java.util.Objects::nonNull)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal periodIncome = orderRepository.sumCompletedIncomeByArtisanId(artisan.getId(), periodStart);
+        BigDecimal pendingIncome = orderRepository.sumPendingIncomeByArtisanId(artisan.getId());
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalIncome", totalIncome.doubleValue());

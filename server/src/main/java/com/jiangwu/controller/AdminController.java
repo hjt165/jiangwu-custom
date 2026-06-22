@@ -21,6 +21,8 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 管理后台控制器
@@ -165,13 +167,11 @@ public class AdminController {
         List<Product> list = productRepository.selectPage(pageParam, wrapper).getRecords();
 
         // 批量填充手作人名称（避免 N+1）
-        List<Long> artisanIds = list.stream().map(Product::getArtisanId).distinct().toList();
+        List<Long> artisanIds = list.stream().map(Product::getArtisanId).filter(Objects::nonNull).distinct().toList();
         if (!artisanIds.isEmpty()) {
-            Map<Long, Artisan> artisanMap = new java.util.HashMap<>();
-            for (Long aid : artisanIds) {
-                Artisan a = artisanRepository.findById(aid);
-                if (a != null) artisanMap.put(aid, a);
-            }
+            Map<Long, Artisan> artisanMap = artisanRepository.findByIds(artisanIds)
+                    .stream()
+                    .collect(Collectors.toMap(Artisan::getId, a -> a));
             for (Product p : list) {
                 Artisan artisan = artisanMap.get(p.getArtisanId());
                 if (artisan != null) {

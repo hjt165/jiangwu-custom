@@ -51,6 +51,11 @@ public class ArtisanFollowService {
      */
     @Transactional
     public Map<String, Boolean> unfollow(Long userId, Long artisanId) {
+        UserFollow existing = userFollowRepository.findByUserIdAndArtisanId(userId, artisanId);
+        if (existing == null) {
+            return Map.of("isFollowing", false);
+        }
+
         QueryWrapper<UserFollow> wrapper = new QueryWrapper<>();
         wrapper.eq("user_id", userId).eq("artisan_id", artisanId);
         userFollowRepository.delete(wrapper);
@@ -76,13 +81,11 @@ public class ArtisanFollowService {
         List<UserFollow> follows = userFollowRepository.findByUserId(userId);
         if (follows.isEmpty()) return List.of();
 
-        // 批量加载手作人信息
+        // 批量加载手作人信息（避免 N+1）
         List<Long> artisanIds = follows.stream().map(UserFollow::getArtisanId).distinct().toList();
-        Map<Long, Artisan> artisanMap = new java.util.HashMap<>();
-        for (Long aid : artisanIds) {
-            Artisan a = artisanRepository.findById(aid);
-            if (a != null) artisanMap.put(aid, a);
-        }
+        Map<Long, Artisan> artisanMap = artisanRepository.findByIds(artisanIds)
+                .stream()
+                .collect(Collectors.toMap(Artisan::getId, a -> a));
 
         return follows.stream().map(follow -> {
             Map<String, Object> item = new HashMap<>();

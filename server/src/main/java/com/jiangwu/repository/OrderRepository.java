@@ -51,4 +51,21 @@ public interface OrderRepository extends BaseMapper<Order> {
 
     @Update("UPDATE t_order SET current_stage = #{stage}, updated_at = NOW() WHERE id = #{id}")
     int updateCurrentStage(Long id, int stage);
+
+    // ========== 手作人端 SQL 聚合查询（避免全表加载到内存） ==========
+
+    @Select("SELECT COUNT(*) FROM t_order WHERE artisan_id = #{artisanId} AND status IN ('PAID', 'PENDING_PAYMENT') AND deleted = 0")
+    long countPendingOrdersByArtisanId(Long artisanId);
+
+    @Select("SELECT COUNT(*) FROM t_order WHERE artisan_id = #{artisanId} AND deleted = 0 AND DATE(created_at) = CURDATE()")
+    long countTodayOrdersByArtisanId(Long artisanId);
+
+    @Select("SELECT COALESCE(SUM(total_amount), 0) FROM t_order WHERE artisan_id = #{artisanId} AND status = 'COMPLETED' AND deleted = 0 AND completed_at >= #{startDate}")
+    BigDecimal sumCompletedIncomeByArtisanId(Long artisanId, LocalDateTime startDate);
+
+    @Select("SELECT COALESCE(SUM(paid_amount), 0) FROM t_order WHERE artisan_id = #{artisanId} AND status IN ('PRODUCING', 'STAGE_DELIVERING') AND deleted = 0")
+    BigDecimal sumPendingIncomeByArtisanId(Long artisanId);
+
+    @Select("SELECT COALESCE(SUM(total_amount), 0) FROM t_order WHERE artisan_id = #{artisanId} AND status = 'COMPLETED' AND deleted = 0")
+    BigDecimal sumTotalIncomeByArtisanId(Long artisanId);
 }

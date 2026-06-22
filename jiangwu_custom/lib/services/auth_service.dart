@@ -27,23 +27,27 @@ class AuthService {
     required String phone,
     required String password,
   }) async {
-    final response = await _apiService.post<Map<String, dynamic>>(
-      '/user/login',
-      data: {
-        'phone': phone,
-        'password': password,
-      },
-    );
+    try {
+      final response = await _apiService.post<Map<String, dynamic>>(
+        '/user/login',
+        data: {
+          'phone': phone,
+          'password': password,
+        },
+      );
 
-    final user = User.fromJson(response);
+      final user = User.fromJson(response);
 
-    // 持久化 Token
-    if (user.token != null) {
-      await _apiService.saveToken(user.token!);
+      // 持久化 Token
+      if (user.token != null) {
+        await _apiService.saveToken(user.token!);
+      }
+
+      _currentUser = user;
+      return user;
+    } catch (e) {
+      rethrow;
     }
-
-    _currentUser = user;
-    return user;
   }
 
   /// 注册
@@ -52,24 +56,28 @@ class AuthService {
     required String code,
     required String password,
   }) async {
-    final response = await _apiService.post<Map<String, dynamic>>(
-      '/user/register',
-      data: {
-        'phone': phone,
-        'code': code,
-        'password': password,
-      },
-    );
+    try {
+      final response = await _apiService.post<Map<String, dynamic>>(
+        '/user/register',
+        data: {
+          'phone': phone,
+          'code': code,
+          'password': password,
+        },
+      );
 
-    final user = User.fromJson(response);
+      final user = User.fromJson(response);
 
-    // 持久化 Token
-    if (user.token != null) {
-      await _apiService.saveToken(user.token!);
+      // 持久化 Token
+      if (user.token != null) {
+        await _apiService.saveToken(user.token!);
+      }
+
+      _currentUser = user;
+      return user;
+    } catch (e) {
+      rethrow;
     }
-
-    _currentUser = user;
-    return user;
   }
 
   /// 发送验证码

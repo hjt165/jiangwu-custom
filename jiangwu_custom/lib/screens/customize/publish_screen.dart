@@ -1,9 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:image_picker/image_picker.dart';
 import '../../app/constants.dart';
 import '../../services/api_service.dart';
+import '../../widgets/common/platform_image.dart';
 
 /// 需求发布页
 /// 多模态输入（图片/文字/语音）
@@ -230,12 +230,9 @@ class _PublishScreenState extends State<PublishScreen> {
                       child: Icon(Icons.image, size: 24, color: AppColors.textHint),
                     ),
                   )
-                : Image.file(
-                    File(imagePath),
+                : buildLocalImage(
+                    imagePath,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const Center(
-                      child: Icon(Icons.image, size: 24, color: AppColors.textHint),
-                    ),
                   ),
           ),
         ),

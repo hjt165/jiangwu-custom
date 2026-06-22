@@ -153,32 +153,46 @@ class ChatService {
 
   /// 获取或创建会话
   Future<Conversation> getOrCreateConversation(int userId, int artisanId, {int? orderId}) async {
-    final response = await _apiService.get(
-      '/chat/conversation',
-      queryParameters: {
-        'userId': userId,
-        'artisanId': artisanId,
-        if (orderId != null) 'orderId': orderId,
-      },
-    );
-    return Conversation.fromJson(response.data['data']);
+    try {
+      final response = await _apiService.get(
+        '/chat/conversation',
+        queryParameters: {
+          'userId': userId,
+          'artisanId': artisanId,
+          if (orderId != null) 'orderId': orderId,
+        },
+      );
+      final data = response.data['data'];
+      if (data == null) throw Exception('会话数据为空');
+      return Conversation.fromJson(data);
+    } catch (e) {
+      rethrow;
+    }
   }
 
   /// 获取用户会话列表
   Future<List<Conversation>> getConversations() async {
-    final response = await _apiService.get('/chat/conversations');
-    final list = response.data['data'] as List;
-    return list.map((e) => Conversation.fromJson(e)).toList();
+    try {
+      final response = await _apiService.get('/chat/conversations');
+      final list = response.data['data'] as List? ?? [];
+      return list.map((e) => Conversation.fromJson(e)).toList();
+    } catch (e) {
+      rethrow;
+    }
   }
 
   /// 获取会话消息列表
   Future<List<ChatMessage>> getMessages(int conversationId, {int limit = 50}) async {
-    final response = await _apiService.get(
-      '/chat/messages/$conversationId',
-      queryParameters: {'limit': limit},
-    );
-    final list = response.data['data'] as List;
-    return list.map((e) => ChatMessage.fromJson(e)).toList();
+    try {
+      final response = await _apiService.get(
+        '/chat/messages/$conversationId',
+        queryParameters: {'limit': limit},
+      );
+      final list = response.data['data'] as List? ?? [];
+      return list.map((e) => ChatMessage.fromJson(e)).toList();
+    } catch (e) {
+      rethrow;
+    }
   }
 
   /// 获取历史消息（分页）
@@ -187,12 +201,16 @@ class ChatService {
     String before, {
     int limit = 50,
   }) async {
-    final response = await _apiService.get(
-      '/chat/messages/$conversationId/history',
-      queryParameters: {'before': before, 'limit': limit},
-    );
-    final list = response.data['data'] as List;
-    return list.map((e) => ChatMessage.fromJson(e)).toList();
+    try {
+      final response = await _apiService.get(
+        '/chat/messages/$conversationId/history',
+        queryParameters: {'before': before, 'limit': limit},
+      );
+      final list = response.data['data'] as List? ?? [];
+      return list.map((e) => ChatMessage.fromJson(e)).toList();
+    } catch (e) {
+      rethrow;
+    }
   }
 
   /// REST方式发送消息（备选方案）
@@ -202,22 +220,32 @@ class ChatService {
     String content, {
     String messageType = 'text',
   }) async {
-    final response = await _apiService.post('/chat/send', data: {
-      'conversationId': conversationId,
-      'senderId': senderId,
-      'content': content,
-      'messageType': messageType,
-    });
-    return ChatMessage.fromJson(response.data['data']);
+    try {
+      final response = await _apiService.post('/chat/send', data: {
+        'conversationId': conversationId,
+        'senderId': senderId,
+        'content': content,
+        'messageType': messageType,
+      });
+      final data = response.data['data'];
+      if (data == null) throw Exception('发送消息失败');
+      return ChatMessage.fromJson(data);
+    } catch (e) {
+      rethrow;
+    }
   }
 
   /// 获取未读消息数
   Future<int> getUnreadCount(int userId, {String role = 'user'}) async {
-    final response = await _apiService.get(
-      '/chat/unread/$userId',
-      queryParameters: {'role': role},
-    );
-    return response.data['data']['unreadCount'] ?? 0;
+    try {
+      final response = await _apiService.get(
+        '/chat/unread/$userId',
+        queryParameters: {'role': role},
+      );
+      return response.data['data']['unreadCount'] ?? 0;
+    } catch (e) {
+      return 0;
+    }
   }
 
   /// 标记已读（REST方式）
