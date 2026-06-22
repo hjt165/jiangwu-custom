@@ -5,6 +5,12 @@ spring:
     url: jdbc:mysql://localhost:3306/jiangwu_custom?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root
     password: 123456
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      max-lifetime: 600000
+      connection-timeout: 30000
 
   # Redis
   data:
@@ -15,9 +21,9 @@ spring:
       database: 0
       lettuce:
         pool:
-          max-active: 8
+          max-active: 16
           max-idle: 8
-          min-idle: 0
+          min-idle: 2
 
   # RabbitMQ
   rabbitmq:

@@ -37,35 +37,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final productState = ref.watch(productProvider);
     final artisanState = ref.watch(artisanProvider);
 
-    return RefreshIndicator(
-      onRefresh: () async {
-        await ref.read(productProvider.notifier).fetchFeaturedProducts();
-        await ref.read(artisanProvider.notifier).fetchArtisans();
-      },
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Banner轮播
-            const HomeBanner(),
+    return RepaintBoundary(
+      child: RefreshIndicator(
+        onRefresh: () async {
+          await ref.read(productProvider.notifier).fetchFeaturedProducts();
+          await ref.read(artisanProvider.notifier).fetchArtisans();
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Banner轮播
+              const HomeBanner(),
 
-            // 分类入口
-            CategoryGrid(
-              onCategoryTap: (code, name) {
-                Navigator.of(context).pushNamed(
-                  AppRoutes.category,
-                  arguments: name,
-                );
-              },
-            ),
+              // 分类入口
+              CategoryGrid(
+                onCategoryTap: (code, name) {
+                  Navigator.of(context).pushNamed(
+                    AppRoutes.category,
+                    arguments: name,
+                  );
+                },
+              ),
 
-            // 热门推荐
-            _buildHotSection(context, productState),
+              // 热门推荐
+              _buildHotSection(context, productState),
 
-            // 手作人推荐
-            _buildArtisanSection(context, artisanState),
-          ],
+              // 手作人推荐
+              _buildArtisanSection(context, artisanState),
+            ],
+          ),
         ),
       ),
     );

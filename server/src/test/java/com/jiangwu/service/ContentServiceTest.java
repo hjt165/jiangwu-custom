@@ -1,5 +1,7 @@
 package com.jiangwu.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jiangwu.entity.ProductImage;
 import com.jiangwu.entity.Review;
 import com.jiangwu.entity.User;
@@ -36,7 +38,11 @@ class ContentServiceTest {
         image.setDescription("测试图片");
         image.setReviewStatus(0);
         when(imageRepository.selectCount(any())).thenReturn(1L);
-        when(imageRepository.selectList(any())).thenReturn(List.of(image));
+
+        Page<ProductImage> page = new Page<>(1, 10);
+        page.setRecords(List.of(image));
+        page.setTotal(1);
+        when(imageRepository.selectPage(any(Page.class), any(QueryWrapper.class))).thenReturn(page);
 
         Map<String, Object> result = contentService.getImageReviewList(null, null, 1, 10);
         assertNotNull(result);
@@ -47,7 +53,11 @@ class ContentServiceTest {
     @Test
     void getImageReviewList_WithKeyword() {
         when(imageRepository.selectCount(any())).thenReturn(0L);
-        when(imageRepository.selectList(any())).thenReturn(List.of());
+
+        Page<ProductImage> page = new Page<>(1, 10);
+        page.setRecords(List.of());
+        page.setTotal(0);
+        when(imageRepository.selectPage(any(Page.class), any(QueryWrapper.class))).thenReturn(page);
 
         Map<String, Object> result = contentService.getImageReviewList("测试", null, 1, 10);
         assertNotNull(result);
@@ -104,8 +114,16 @@ class ContentServiceTest {
         review.setContent("很好");
         review.setUserId(1L);
         when(reviewRepository.selectCount(any())).thenReturn(1L);
-        when(reviewRepository.selectList(any())).thenReturn(List.of(review));
-        when(userRepository.selectById(1L)).thenReturn(new User());
+
+        Page<Review> reviewPage = new Page<>(1, 10);
+        reviewPage.setRecords(List.of(review));
+        reviewPage.setTotal(1);
+        when(reviewRepository.selectPage(any(Page.class), any(QueryWrapper.class))).thenReturn(reviewPage);
+
+        User user = new User();
+        user.setId(1L);
+        user.setNickname("测试用户");
+        when(userRepository.findByIds(anyList())).thenReturn(List.of(user));
 
         Map<String, Object> result = contentService.getCommentReviewList(null, null, null, null, 1, 10);
         assertNotNull(result);

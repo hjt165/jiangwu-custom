@@ -1,6 +1,8 @@
 package com.jiangwu.service;
 
 import com.jiangwu.entity.BrowseHistory;
+import com.jiangwu.entity.Product;
+import com.jiangwu.enums.ProductCategory;
 import com.jiangwu.repository.BrowseHistoryRepository;
 import com.jiangwu.repository.ProductImageRepository;
 import com.jiangwu.repository.ProductRepository;
@@ -10,7 +12,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -39,6 +44,29 @@ class HistoryServiceTest {
         when(historyRepository.findProductIdsByUserId(1L)).thenReturn(List.of());
         var result = historyService.getHistoryList(1L);
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getHistoryList_WithProducts_BatchImageQuery() {
+        Product product = new Product();
+        product.setId(1L);
+        product.setTitle("陶瓷杯");
+        product.setPrice(new BigDecimal("299"));
+        product.setCategory(ProductCategory.CERAMIC);
+
+        when(historyRepository.findProductIdsByUserId(1L)).thenReturn(List.of(1L));
+        when(productRepository.findByIds(anyList())).thenReturn(List.of(product));
+
+        Map<String, Object> imgRow = new HashMap<>();
+        imgRow.put("product_id", 1L);
+        imgRow.put("image_url", "http://img.jpg");
+        when(productImageRepository.findImageUrlsByProductIds(anyList())).thenReturn(List.of(imgRow));
+
+        var result = historyService.getHistoryList(1L);
+
+        assertEquals(1, result.size());
+        assertEquals("陶瓷杯", result.get(0).getTitle());
+        verify(productImageRepository).findImageUrlsByProductIds(anyList());
     }
 
     @Test

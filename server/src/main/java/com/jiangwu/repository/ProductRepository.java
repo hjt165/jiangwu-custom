@@ -17,7 +17,9 @@ public interface ProductRepository extends BaseMapper<Product> {
     @Select("SELECT * FROM t_product WHERE id = #{id} AND deleted = 0")
     Product findById(Long id);
 
-    @Select("SELECT * FROM t_product WHERE id IN (#{ids}) AND deleted = 0")
+    @Select("<script>SELECT * FROM t_product WHERE id IN " +
+            "<foreach collection='ids' item='id' open='(' separator=',' close=')'>#{id}</foreach>" +
+            " AND deleted = 0</script>")
     List<Product> findByIds(@org.apache.ibatis.annotations.Param("ids") List<Long> ids);
 
     @Select("SELECT * FROM t_product WHERE artisan_id = #{artisanId} AND deleted = 0 ORDER BY created_at DESC")

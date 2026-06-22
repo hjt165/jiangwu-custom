@@ -1,6 +1,7 @@
 package com.jiangwu.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jiangwu.entity.Order;
 import com.jiangwu.entity.User;
 import com.jiangwu.enums.OrderStatus;
@@ -54,7 +55,7 @@ public class AdminService {
     }
 
     /**
-     * 获取用户列表
+     * 获取用户列表（MyBatis-Plus 分页，避免 SQL 注入）
      */
     public List<User> getUserList(String keyword, Integer status, int page, int size) {
         QueryWrapper<User> wrapper = new QueryWrapper<>();
@@ -69,8 +70,8 @@ public class AdminService {
             wrapper.eq("status", status);
         }
         wrapper.orderByDesc("created_at");
-        wrapper.last("LIMIT " + size + " OFFSET " + (page - 1) * size);
-        return userRepository.selectList(wrapper);
+        Page<User> pageParam = new Page<>(page, size);
+        return userRepository.selectPage(pageParam, wrapper).getRecords();
     }
 
     /**
@@ -103,7 +104,7 @@ public class AdminService {
     }
 
     /**
-     * 获取订单列表
+     * 获取订单列表（MyBatis-Plus 分页，避免 SQL 注入）
      */
     public List<Order> getOrderList(String status, String keyword, int page, int size) {
         QueryWrapper<Order> wrapper = new QueryWrapper<>();
@@ -115,8 +116,8 @@ public class AdminService {
             wrapper.like("order_no", keyword);
         }
         wrapper.orderByDesc("created_at");
-        wrapper.last("LIMIT " + size + " OFFSET " + (page - 1) * size);
-        return orderRepository.selectList(wrapper);
+        Page<Order> pageParam = new Page<>(page, size);
+        return orderRepository.selectPage(pageParam, wrapper).getRecords();
     }
 
     /**
@@ -131,15 +132,15 @@ public class AdminService {
     }
 
     /**
-     * 获取争议订单列表
+     * 获取争议订单列表（MyBatis-Plus 分页，避免 SQL 注入）
      */
     public List<Order> getDisputeList(int page, int size) {
         QueryWrapper<Order> wrapper = new QueryWrapper<>();
         wrapper.eq("deleted", 0)
                 .in("status", List.of("dispute", "cancelled"));
         wrapper.orderByDesc("created_at");
-        wrapper.last("LIMIT " + size + " OFFSET " + (page - 1) * size);
-        return orderRepository.selectList(wrapper);
+        Page<Order> pageParam = new Page<>(page, size);
+        return orderRepository.selectPage(pageParam, wrapper).getRecords();
     }
 
     /**

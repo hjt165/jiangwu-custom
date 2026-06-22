@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../app/constants.dart';
 
@@ -137,11 +138,12 @@ class _HomeBannerState extends State<HomeBanner> {
         child: item.imageUrl != null
             ? ClipRRect(
                 borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-                child: Image.network(
-                  item.imageUrl!,
+                child: CachedNetworkImage(
+                  imageUrl: item.imageUrl!,
                   fit: BoxFit.cover,
                   width: double.infinity,
-                  errorBuilder: (_, __, ___) => _buildDefaultBanner(),
+                  placeholder: (context, url) => _buildDefaultBanner(),
+                  errorWidget: (context, url, error) => _buildDefaultBanner(),
                 ),
               )
             : _buildDefaultBanner(),

@@ -10,6 +10,8 @@ import com.jiangwu.exception.ErrorCode;
 import com.jiangwu.repository.ArtisanRepository;
 import com.jiangwu.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -29,8 +31,9 @@ public class ArtisanService {
     private final ProductRepository productRepository;
 
     /**
-     * 获取手作人列表
+     * 获取手作人列表（缓存 5 分钟）
      */
+    @Cacheable(value = "artisans", key = "'list:verified'")
     public List<ArtisanResponse> getArtisanList() {
         return artisanRepository.findByStatus(ArtisanStatus.VERIFIED).stream()
                 .map(ArtisanResponse::fromEntity)
@@ -38,8 +41,9 @@ public class ArtisanService {
     }
 
     /**
-     * 获取手作人详情
+     * 获取手作人详情（缓存 5 分钟）
      */
+    @Cacheable(value = "artisans", key = "'detail:' + #artisanId")
     public ArtisanResponse getArtisanDetail(Long artisanId) {
         Artisan artisan = artisanRepository.findById(artisanId);
         if (artisan == null) {
@@ -96,6 +100,7 @@ public class ArtisanService {
     /**
      * 更新手作人评分
      */
+    @CacheEvict(value = "artisans", key = "'detail:' + #artisanId")
     public void updateArtisanRating(Long artisanId, double rating) {
         artisanRepository.updateRating(artisanId, new java.math.BigDecimal(rating));
     }

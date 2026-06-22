@@ -135,9 +135,17 @@ public class OrderService {
         // 批量查询手作人
         Map<Long, Artisan> artisanMap = new java.util.HashMap<>();
 
+        // 批量加载定制参数（避免 N+1）
+        List<Long> customizationOrderIds = orders.stream().map(Order::getId).toList();
+        Map<Long, Customization> customizationBatchMap = customizationRepository.findByOrderIds(customizationOrderIds)
+                .stream()
+                .collect(Collectors.toMap(Customization::getOrderId, c -> c));
+
         for (Order order : orders) {
-            if (customizationRepository.findByOrderId(order.getId()) != null) {
-                customizationMap.put(order.getId(), customizationRepository.findByOrderId(order.getId()));
+            // 使用批量查询结果，避免重复查询
+            Customization c = customizationBatchMap.get(order.getId());
+            if (c != null) {
+                customizationMap.put(order.getId(), c);
             }
             if (order.getProductId() != null && !productMap.containsKey(order.getProductId())) {
                 Product p = productRepository.findById(order.getProductId());

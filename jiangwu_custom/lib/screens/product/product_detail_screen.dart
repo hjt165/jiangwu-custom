@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/constants.dart';
@@ -112,10 +113,11 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               itemCount: product.images.length,
               onPageChanged: (index) => setState(() => _currentImageIndex = index),
               itemBuilder: (context, index) {
-                return Image.network(
-                  product.images[index],
+                return CachedNetworkImage(
+                  imageUrl: product.images[index],
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                  errorWidget: (context, url, error) => Container(
                     color: AppColors.divider,
                     child: const Icon(Icons.image, size: 80, color: AppColors.textHint),
                   ),

@@ -155,47 +155,49 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildOrderStats(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(AppSizes.paddingMedium),
-      padding: const EdgeInsets.all(AppSizes.paddingMedium),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-        boxShadow: AppSizes.cardShadow,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                '我的订单',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+    return RepaintBoundary(
+      child: Container(
+        margin: const EdgeInsets.all(AppSizes.paddingMedium),
+        padding: const EdgeInsets.all(AppSizes.paddingMedium),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+          boxShadow: AppSizes.cardShadow,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  '我的订单',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, AppRoutes.orderList);
-                },
-                child: const Text('查看全部'),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSizes.spacingMedium),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildStatItem(Icons.payment, '待付款', _pendingPaymentCount, context),
-              _buildStatItem(Icons.local_shipping, '待发货', _producingCount, context),
-              _buildStatItem(Icons.inventory, '待收货', _stageDeliveringCount, context),
-              _buildStatItem(Icons.rate_review, '待评价', _completedCount, context),
-            ],
-          ),
-        ],
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, AppRoutes.orderList);
+                  },
+                  child: const Text('查看全部'),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSizes.spacingMedium),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildStatItem(Icons.payment, '待付款', _pendingPaymentCount, context),
+                _buildStatItem(Icons.local_shipping, '待发货', _producingCount, context),
+                _buildStatItem(Icons.inventory, '待收货', _stageDeliveringCount, context),
+                _buildStatItem(Icons.rate_review, '待评价', _completedCount, context),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

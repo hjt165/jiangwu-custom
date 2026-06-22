@@ -112,12 +112,14 @@ public class FavoriteService {
         Map<Long, Product> productMap = products.stream()
                 .collect(Collectors.toMap(Product::getId, p -> p));
 
-        // 批量查询图片
-        Map<Long, List<String>> imagesMap = new java.util.HashMap<>();
-        for (Long pid : productIds) {
-            List<String> images = productImageRepository.findImageUrlsByProductId(pid);
-            if (!images.isEmpty()) {
-                imagesMap.put(pid, images);
+        // 批量查询图片（单次 SQL）
+        Map<Long, List<String>> imagesMap = new java.util.LinkedHashMap<>();
+        if (!productIds.isEmpty()) {
+            List<Map<String, Object>> rows = productImageRepository.findImageUrlsByProductIds(productIds);
+            for (Map<String, Object> row : rows) {
+                Long pid = ((Number) row.get("product_id")).longValue();
+                String url = (String) row.get("image_url");
+                imagesMap.computeIfAbsent(pid, k -> new java.util.ArrayList<>()).add(url);
             }
         }
 

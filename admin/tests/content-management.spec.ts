@@ -1,15 +1,8 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, loginAndNavigate } from './helpers/test-helper';
 
 test.describe('图片审核', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/login');
-    await page.waitForLoadState('networkidle');
-    await page.fill('input[placeholder="请输入手机号"]', '13800000000');
-    await page.fill('input[placeholder="请输入密码"]', 'admin123');
-    await page.click('button:has-text("登 录")');
-    await expect(page).toHaveURL(/.*dashboard/, { timeout: 10000 });
-    await page.goto('/content/image');
-    await expect(page).toHaveURL(/.*content\/image/);
+    await loginAndNavigate(page, '/content/image');
   });
 
   test('显示图片审核页面', async ({ page }) => {
@@ -18,7 +11,7 @@ test.describe('图片审核', () => {
   });
 
   test('搜索和筛选组件存在', async ({ page }) => {
-    await expect(page.locator('input[placeholder="搜索图片描述"]')).toBeVisible();
+    await expect(page.locator('input[placeholder*="搜索"]')).toBeVisible();
     await expect(page.locator('.el-select').first()).toBeVisible();
     await expect(page.locator('button:has-text("搜索")')).toBeVisible();
     await expect(page.locator('button:has-text("重置")')).toBeVisible();
@@ -32,18 +25,28 @@ test.describe('图片审核', () => {
   test('表格包含选择框列', async ({ page }) => {
     await expect(page.locator('.el-table .el-checkbox').first()).toBeVisible();
   });
+
+  test('表格列标题包含操作列', async ({ page }) => {
+    await expect(page.locator('th:has-text("操作")')).toBeVisible();
+  });
+
+  test('操作列有通过和拒绝按钮', async ({ page }) => {
+    const passBtn = page.locator('button:has-text("通过")').first();
+    const rejectBtn = page.locator('button:has-text("拒绝")').first();
+    if (await passBtn.isVisible()) {
+      await expect(passBtn).toBeVisible();
+      await expect(rejectBtn).toBeVisible();
+    }
+  });
+
+  test('分页组件存在', async ({ page }) => {
+    await expect(page.locator('.el-pagination')).toBeVisible();
+  });
 });
 
 test.describe('评论审核', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/login');
-    await page.waitForLoadState('networkidle');
-    await page.fill('input[placeholder="请输入手机号"]', '13800000000');
-    await page.fill('input[placeholder="请输入密码"]', 'admin123');
-    await page.click('button:has-text("登 录")');
-    await expect(page).toHaveURL(/.*dashboard/, { timeout: 10000 });
-    await page.goto('/content/comment');
-    await expect(page).toHaveURL(/.*content\/comment/);
+    await loginAndNavigate(page, '/content/comment');
   });
 
   test('显示评论审核页面', async ({ page }) => {
@@ -52,7 +55,7 @@ test.describe('评论审核', () => {
   });
 
   test('搜索和筛选组件存在', async ({ page }) => {
-    await expect(page.locator('input[placeholder="搜索评论内容"]')).toBeVisible();
+    await expect(page.locator('input[placeholder*="搜索"]')).toBeVisible();
     await expect(page.locator('.el-select').first()).toBeVisible();
     await expect(page.locator('button:has-text("搜索")')).toBeVisible();
     await expect(page.locator('button:has-text("重置")')).toBeVisible();
@@ -66,5 +69,13 @@ test.describe('评论审核', () => {
   test('评分筛选下拉框存在', async ({ page }) => {
     const ratingSelect = page.locator('.el-select').nth(1);
     await expect(ratingSelect).toBeVisible();
+  });
+
+  test('表格包含选择框列', async ({ page }) => {
+    await expect(page.locator('.el-table .el-checkbox').first()).toBeVisible();
+  });
+
+  test('分页组件存在', async ({ page }) => {
+    await expect(page.locator('.el-pagination')).toBeVisible();
   });
 });

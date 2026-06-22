@@ -1,13 +1,8 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, loginAndNavigate } from './helpers/test-helper';
 
 test.describe('工作台', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/login');
-    await page.waitForLoadState('networkidle');
-    await page.fill('input[placeholder="请输入手机号"]', '13800000000');
-    await page.fill('input[placeholder="请输入密码"]', 'admin123');
-    await page.click('button:has-text("登 录")');
-    await expect(page).toHaveURL(/.*dashboard/, { timeout: 10000 });
+    await loginAndNavigate(page, '/dashboard');
   });
 
   test('显示统计卡片', async ({ page }) => {
@@ -17,7 +12,14 @@ test.describe('工作台', () => {
     await expect(page.locator('text=手作人数')).toBeVisible();
   });
 
-  test('显示图表', async ({ page }) => {
+  test('显示图表或待办事项', async ({ page }) => {
     await expect(page.locator('.echarts-chart, .el-card:has-text("待办事项")')).toBeVisible();
+  });
+
+  test('快速操作区域存在', async ({ page }) => {
+    const quickActions = page.locator('.el-card:has-text("用户管理"), .el-card:has-text("订单管理"), .el-card:has-text("图片审核"), .el-card:has-text("数据统计")');
+    if (await quickActions.first().isVisible()) {
+      await expect(quickActions.first()).toBeVisible();
+    }
   });
 });

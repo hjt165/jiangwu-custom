@@ -15,6 +15,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -29,7 +30,7 @@ public class ProductService {
     private final HistoryService historyService;
 
     /**
-     * 获取作品列表（数据库分页 + 分类筛选）
+     * 获取作品列表（数据库分页 + 分类筛选 + 批量图片查询）
      */
     @Cacheable(value = "products", key = "'list:' + #page + ':' + #size + ':' + (#category ?: 'all')")
     public PageResult<ProductResponse> getProductList(int page, int size, String category) {
@@ -42,10 +43,7 @@ public class ProductService {
             productRepository.findFeaturedPage(pageParam);
         }
 
-        List<ProductResponse> responses = pageParam.getRecords().stream()
-                .map(this::toResponseWithImages)
-                .collect(Collectors.toList());
-
+        List<ProductResponse> responses = toResponseListWithImages(pageParam.getRecords());
         return new PageResult<>(pageParam.getTotal(), responses, page, size, pageParam.getPages());
     }
 
@@ -79,40 +77,32 @@ public class ProductService {
     }
 
     /**
-     * 搜索作品（数据库分页）
+     * 搜索作品（数据库分页 + 批量图片查询）
      */
     public PageResult<ProductResponse> searchProducts(String keyword, int page, int size) {
         Page<Product> pageParam = new Page<>(page, size);
         productRepository.searchPage(pageParam, keyword);
 
-        List<ProductResponse> responses = pageParam.getRecords().stream()
-                .map(this::toResponseWithImages)
-                .collect(Collectors.toList());
-
+        List<ProductResponse> responses = toResponseListWithImages(pageParam.getRecords());
         return new PageResult<>(pageParam.getTotal(), responses, page, size, pageParam.getPages());
     }
 
     /**
-     * 获取推荐作品
+     * 获取推荐作品（批量图片查询）
      */
     @Cacheable(value = "products", key = "'featured'")
     public List<ProductResponse> getFeaturedProducts() {
-        return productRepository.findFeatured().stream()
-                .map(this::toResponseWithImages)
-                .collect(Collectors.toList());
+        return toResponseListWithImages(productRepository.findFeatured());
     }
 
     /**
-     * 获取手作人的作品列表（数据库分页）
+     * 获取手作人的作品列表（数据库分页 + 批量图片查询）
      */
     public PageResult<ProductResponse> getArtisanProducts(Long artisanId, int page, int size) {
         Page<Product> pageParam = new Page<>(page, size);
         productRepository.findByArtisanIdPage(pageParam, artisanId);
 
-        List<ProductResponse> responses = pageParam.getRecords().stream()
-                .map(this::toResponseWithImages)
-                .collect(Collectors.toList());
-
+        List<ProductResponse> responses = toResponseListWithImages(pageParam.getRecords());
         return new PageResult<>(pageParam.getTotal(), responses, page, size, pageParam.getPages());
     }
 
@@ -125,7 +115,39 @@ public class ProductService {
     }
 
     /**
-     * 转换为 Response（含图片列表）
+     * 批量转换为 Response（含图片列表），避免 N+1 查询
+     */
+    private List<ProductResponse> toResponseListWithImages(List<Product> products) {
+        if (products.isEmpty()) return List.of();
+
+        List<Long> productIds = products.stream().map(Product::getId).toList();
+        Map<Long, List<String>> imagesMap = batchLoadImages(productIds);
+
+        return products.stream().map(product -> {
+            ProductResponse response = ProductResponse.fromEntity(product);
+            if (response != null && imagesMap.containsKey(product.getId())) {
+                response.setImagesFromUrls(imagesMap.get(product.getId()));
+            }
+            return response;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * 批量查询产品图片（单次 SQL）
+     */
+    private Map<Long, List<String>> batchLoadImages(List<Long> productIds) {
+        List<Map<String, Object>> rows = productImageRepository.findImageUrlsByProductIds(productIds);
+        Map<Long, List<String>> imagesMap = new java.util.LinkedHashMap<>();
+        for (Map<String, Object> row : rows) {
+            Long pid = ((Number) row.get("product_id")).longValue();
+            String url = (String) row.get("image_url");
+            imagesMap.computeIfAbsent(pid, k -> new java.util.ArrayList<>()).add(url);
+        }
+        return imagesMap;
+    }
+
+    /**
+     * 转换为 Response（含图片列表）- 单个产品
      */
     private ProductResponse toResponseWithImages(Product product) {
         ProductResponse response = ProductResponse.fromEntity(product);

@@ -1,6 +1,7 @@
 package com.jiangwu.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jiangwu.entity.Feedback;
 import com.jiangwu.repository.FeedbackRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,13 +32,13 @@ public class FeedbackService {
     }
 
     /**
-     * 获取反馈列表（管理后台用）
+     * 获取反馈列表（管理后台用，MyBatis-Plus 分页）
      */
     public List<Feedback> getList(int page, int size) {
         QueryWrapper<Feedback> wrapper = new QueryWrapper<>();
         wrapper.orderByDesc("created_at");
-        wrapper.last("LIMIT " + size + " OFFSET " + (page - 1) * size);
-        return feedbackRepository.selectList(wrapper);
+        Page<Feedback> pageParam = new Page<>(page, size);
+        return feedbackRepository.selectPage(pageParam, wrapper).getRecords();
     }
 
     /**

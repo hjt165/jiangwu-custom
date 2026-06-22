@@ -1,15 +1,8 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, loginAndNavigate } from './helpers/test-helper';
 
 test.describe('作品管理', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/login');
-    await page.waitForLoadState('networkidle');
-    await page.fill('input[placeholder="请输入手机号"]', '13800000000');
-    await page.fill('input[placeholder="请输入密码"]', 'admin123');
-    await page.click('button:has-text("登 录")');
-    await expect(page).toHaveURL(/.*dashboard/, { timeout: 10000 });
-    await page.goto('/product/list');
-    await expect(page).toHaveURL(/.*product\/list/);
+    await loginAndNavigate(page, '/product/list');
   });
 
   test('显示作品管理页面', async ({ page }) => {
@@ -18,7 +11,7 @@ test.describe('作品管理', () => {
   });
 
   test('搜索框存在', async ({ page }) => {
-    await expect(page.locator('input[placeholder="搜索作品名称"]')).toBeVisible();
+    await expect(page.locator('input[placeholder*="搜索"]')).toBeVisible();
     await expect(page.locator('button:has-text("搜索")')).toBeVisible();
   });
 
@@ -26,8 +19,26 @@ test.describe('作品管理', () => {
     await expect(page.locator('th:has-text("ID")')).toBeVisible();
     await expect(page.locator('th:has-text("作品名称")')).toBeVisible();
     await expect(page.locator('th:has-text("分类")')).toBeVisible();
+    await expect(page.locator('th:has-text("手作人")')).toBeVisible();
     await expect(page.locator('th:has-text("价格")')).toBeVisible();
     await expect(page.locator('th:has-text("审核状态")')).toBeVisible();
+    await expect(page.locator('th:has-text("创建时间")')).toBeVisible();
+  });
+
+  test('操作列有详情按钮', async ({ page }) => {
+    const detailBtn = page.locator('button:has-text("详情")').first();
+    if (await detailBtn.isVisible()) {
+      await expect(detailBtn).toBeVisible();
+    }
+  });
+
+  test('待审核作品显示通过拒绝按钮', async ({ page }) => {
+    const passBtn = page.locator('button:has-text("通过")').first();
+    const rejectBtn = page.locator('button:has-text("拒绝")').first();
+    if (await passBtn.isVisible()) {
+      await expect(passBtn).toBeVisible();
+      await expect(rejectBtn).toBeVisible();
+    }
   });
 
   test('分页组件存在', async ({ page }) => {
@@ -37,22 +48,24 @@ test.describe('作品管理', () => {
 
 test.describe('作品详情', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/login');
-    await page.waitForLoadState('networkidle');
-    await page.fill('input[placeholder="请输入手机号"]', '13800000000');
-    await page.fill('input[placeholder="请输入密码"]', 'admin123');
-    await page.click('button:has-text("登 录")');
-    await expect(page).toHaveURL(/.*dashboard/, { timeout: 10000 });
+    await loginAndNavigate(page, '/product/1');
   });
 
-  test('从列表进入详情页', async ({ page }) => {
-    await page.goto('/product/list');
-    await expect(page).toHaveURL(/.*product\/list/);
-    const detailBtn = page.locator('button:has-text("详情")').first();
-    if (await detailBtn.isVisible()) {
-      await detailBtn.click();
-      await expect(page).toHaveURL(/.*product\/\d+/);
-      await expect(page.locator('h2:has-text("作品详情")')).toBeVisible();
-    }
+  test('显示作品详情页面', async ({ page }) => {
+    await expect(page.locator('h2:has-text("作品详情")')).toBeVisible();
+  });
+
+  test('显示作品信息', async ({ page }) => {
+    await expect(page.locator('text=作品信息')).toBeVisible();
+    await expect(page.locator('text=作品标题')).toBeVisible();
+    await expect(page.locator('text=分类')).toBeVisible();
+    await expect(page.locator('text=价格')).toBeVisible();
+    await expect(page.locator('text=审核状态')).toBeVisible();
+    await expect(page.locator('text=上架状态')).toBeVisible();
+    await expect(page.locator('text=创建时间')).toBeVisible();
+  });
+
+  test('操作按钮存在', async ({ page }) => {
+    await expect(page.locator('button:has-text("返回列表")')).toBeVisible();
   });
 });

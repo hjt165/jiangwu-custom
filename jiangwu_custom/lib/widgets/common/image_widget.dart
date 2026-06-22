@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../app/constants.dart';
 
@@ -27,18 +28,13 @@ class ImageWidget extends StatelessWidget {
     Widget image;
 
     if (imageUrl != null && imageUrl!.isNotEmpty) {
-      image = Image.network(
-        imageUrl!,
+      image = CachedNetworkImage(
+        imageUrl: imageUrl!,
         width: width,
         height: height,
         fit: fit,
-        errorBuilder: (context, error, stackTrace) {
-          return _buildPlaceholder();
-        },
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return _buildLoading();
-        },
+        placeholder: (context, url) => _buildLoading(),
+        errorWidget: (context, url, error) => _buildPlaceholder(),
       );
     } else if (assetPath != null) {
       image = Image.asset(

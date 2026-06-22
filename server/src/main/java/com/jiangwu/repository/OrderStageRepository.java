@@ -15,7 +15,9 @@ public interface OrderStageRepository extends BaseMapper<OrderStage> {
     @Select("SELECT * FROM t_order_stage WHERE order_id = #{orderId} ORDER BY sort_order ASC")
     List<OrderStage> findByOrderId(Long orderId);
 
-    @Select("SELECT * FROM t_order_stage WHERE order_id IN (#{orderIds}) ORDER BY order_id, sort_order ASC")
+    @Select("<script>SELECT * FROM t_order_stage WHERE order_id IN " +
+            "<foreach collection='orderIds' item='id' open='(' separator=',' close=')'>#{id}</foreach>" +
+            " ORDER BY order_id, sort_order ASC</script>")
     List<OrderStage> findByOrderIds(@org.apache.ibatis.annotations.Param("orderIds") List<Long> orderIds);
 
     @Select("SELECT * FROM t_order_stage WHERE id = #{id}")

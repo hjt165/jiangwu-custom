@@ -1,15 +1,8 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, loginAndNavigate } from './helpers/test-helper';
 
 test.describe('系统设置', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/login');
-    await page.waitForLoadState('networkidle');
-    await page.fill('input[placeholder="请输入手机号"]', '13800000000');
-    await page.fill('input[placeholder="请输入密码"]', 'admin123');
-    await page.click('button:has-text("登 录")');
-    await expect(page).toHaveURL(/.*dashboard/, { timeout: 10000 });
-    await page.goto('/settings');
-    await expect(page).toHaveURL(/.*settings/);
+    await loginAndNavigate(page, '/settings');
   });
 
   test('显示系统设置页面', async ({ page }) => {
@@ -34,5 +27,10 @@ test.describe('系统设置', () => {
 
   test('保存按钮存在', async ({ page }) => {
     await expect(page.locator('button:has-text("保存设置")')).toBeVisible();
+  });
+
+  test('平台名称输入框可编辑', async ({ page }) => {
+    const nameInput = page.locator('input').first();
+    await expect(nameInput).toBeVisible();
   });
 });

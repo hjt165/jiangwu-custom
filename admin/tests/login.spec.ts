@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './helpers/test-helper';
 
 test.describe('登录页面', () => {
   test.beforeEach(async ({ page }) => {
@@ -14,10 +14,7 @@ test.describe('登录页面', () => {
     await page.fill('input[placeholder="请输入手机号"]', '13800000000');
     await page.fill('input[placeholder="请输入密码"]', 'admin123');
     await page.click('button:has-text("登 录")');
-    
-    // 等待跳转或检查 token
     await page.waitForURL(/.*dashboard/, { timeout: 15000 }).catch(() => {});
-    // 验证 localStorage 有 token
     const token = await page.evaluate(() => localStorage.getItem('jiangwu_admin_token'));
     expect(token).toBeTruthy();
   });
@@ -26,7 +23,6 @@ test.describe('登录页面', () => {
     await page.fill('input[placeholder="请输入手机号"]', '13800000000');
     await page.fill('input[placeholder="请输入密码"]', 'wrong123');
     await page.click('button:has-text("登 录")');
-    
     await expect(page.locator('.el-message--error').first()).toBeVisible({ timeout: 10000 });
   });
 });

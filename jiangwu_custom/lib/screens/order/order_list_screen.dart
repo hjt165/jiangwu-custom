@@ -25,9 +25,6 @@ class _OrderListScreenState extends ConsumerState<OrderListScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: _tabs.length, vsync: this);
-    _tabController.addListener(() {
-      setState(() {});
-    });
 
     Future.microtask(() {
       ref.read(orderProvider.notifier).fetchOrders();

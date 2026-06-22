@@ -1,6 +1,7 @@
 package com.jiangwu.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jiangwu.entity.Feedback;
 import com.jiangwu.repository.FeedbackRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +51,10 @@ class FeedbackServiceTest {
 
     @Test
     void getList_ReturnsPaginatedResults() {
-        when(feedbackRepository.selectList(any(QueryWrapper.class))).thenReturn(List.of(testFeedback));
+        Page<Feedback> page = new Page<>(1, 10);
+        page.setRecords(List.of(testFeedback));
+        page.setTotal(1);
+        when(feedbackRepository.selectPage(any(Page.class), any(QueryWrapper.class))).thenReturn(page);
 
         List<Feedback> result = feedbackService.getList(1, 10);
 
@@ -60,7 +64,10 @@ class FeedbackServiceTest {
 
     @Test
     void getList_EmptyPage() {
-        when(feedbackRepository.selectList(any(QueryWrapper.class))).thenReturn(List.of());
+        Page<Feedback> page = new Page<>(1, 10);
+        page.setRecords(List.of());
+        page.setTotal(0);
+        when(feedbackRepository.selectPage(any(Page.class), any(QueryWrapper.class))).thenReturn(page);
 
         List<Feedback> result = feedbackService.getList(1, 10);
 

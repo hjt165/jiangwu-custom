@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../app/constants.dart';
 import '../../models/product.dart';
@@ -44,11 +45,12 @@ class HomeProductCard extends StatelessWidget {
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(AppSizes.radiusMedium),
                       ),
-                      child: Image.network(
-                        product!.coverImage!,
+                      child: CachedNetworkImage(
+                        imageUrl: product!.coverImage!,
                         fit: BoxFit.cover,
                         width: double.infinity,
-                        errorBuilder: (_, __, ___) => const Center(
+                        placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                        errorWidget: (context, url, error) => const Center(
                           child: Icon(
                             Icons.image_outlined,
                             size: 40,

@@ -5,6 +5,7 @@ import com.jiangwu.repository.OrderRepository;
 import com.jiangwu.repository.ProductRepository;
 import com.jiangwu.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -28,8 +29,9 @@ public class StatsService {
     private final ProductRepository productRepository;
 
     /**
-     * 获取仪表盘概览数据
+     * 获取仪表盘概览数据（缓存 30 秒）
      */
+    @Cacheable(value = "stats", key = "'dashboard'")
     public Map<String, Object> getDashboard() {
         Map<String, Object> data = new HashMap<>();
 

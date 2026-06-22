@@ -1,6 +1,7 @@
 package com.jiangwu.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jiangwu.entity.ProductImage;
 import com.jiangwu.entity.Review;
 import com.jiangwu.entity.User;
@@ -47,8 +48,8 @@ public class ContentService {
         wrapper.orderByDesc("created_at");
 
         long total = imageRepository.selectCount(wrapper);
-        wrapper.last("LIMIT " + size + " OFFSET " + (page - 1) * size);
-        List<ProductImage> images = imageRepository.selectList(wrapper);
+        Page<ProductImage> pageParam = new Page<>(page, size);
+        List<ProductImage> images = imageRepository.selectPage(pageParam, wrapper).getRecords();
 
         List<Map<String, Object>> result = images.stream().map(image -> {
             Map<String, Object> item = new HashMap<>();
@@ -126,9 +127,17 @@ public class ContentService {
         wrapper.orderByDesc("created_at");
 
         long total = reviewRepository.selectCount(wrapper);
-        wrapper.last("LIMIT " + size + " OFFSET " + (page - 1) * size);
-        List<Review> reviews = reviewRepository.selectList(wrapper);
+        Page<Review> pageParam = new Page<>(page, size);
+        List<Review> reviews = reviewRepository.selectPage(pageParam, wrapper).getRecords();
 
+        // 批量加载用户信息，避免 N+1
+        List<Long> userIds = reviews.stream().map(Review::getUserId).distinct().toList();
+        Map<Long, User> userMap = new java.util.HashMap<>();
+        if (!userIds.isEmpty()) {
+            userRepository.findByIds(userIds).forEach(u -> userMap.put(u.getId(), u));
+        }
+
+        final Map<Long, User> finalUserMap = userMap;
         List<Map<String, Object>> result = reviews.stream().map(review -> {
             Map<String, Object> item = new HashMap<>();
             item.put("id", review.getId());
@@ -143,7 +152,7 @@ public class ContentService {
             item.put("reviewStatus", review.getReviewStatus());
             item.put("createdAt", review.getCreatedAt());
 
-            User user = userRepository.selectById(review.getUserId());
+            User user = finalUserMap.get(review.getUserId());
             if (user != null) {
                 item.put("userName", user.getNickname());
                 item.put("userAvatar", user.getAvatar());

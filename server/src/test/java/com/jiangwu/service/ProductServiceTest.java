@@ -16,8 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -80,6 +79,7 @@ class ProductServiceTest {
             page.setTotal(1);
             return page;
         });
+        when(productImageRepository.findImageUrlsByProductIds(anyList())).thenReturn(List.of());
 
         PageResult<ProductResponse> result = productService.searchProducts("陶瓷", 1, 10);
 
@@ -111,6 +111,7 @@ class ProductServiceTest {
             page.setTotal(1);
             return page;
         });
+        when(productImageRepository.findImageUrlsByProductIds(anyList())).thenReturn(List.of());
 
         PageResult<ProductResponse> result = productService.getProductList(1, 10, "CERAMIC");
 
@@ -127,8 +128,41 @@ class ProductServiceTest {
             page.setTotal(1);
             return page;
         });
+        when(productImageRepository.findImageUrlsByProductIds(anyList())).thenReturn(List.of());
 
         PageResult<ProductResponse> result = productService.getProductList(1, 10, null);
+
+        assertNotNull(result);
+        assertEquals(1, result.getTotal());
+    }
+
+    @Test
+    void getFeaturedProducts_ReturnsWithBatchImages() {
+        when(productRepository.findFeatured()).thenReturn(List.of(testProduct));
+        Map<String, Object> imgRow = new HashMap<>();
+        imgRow.put("product_id", 1L);
+        imgRow.put("image_url", "http://img.jpg");
+        when(productImageRepository.findImageUrlsByProductIds(anyList())).thenReturn(List.of(imgRow));
+
+        List<ProductResponse> result = productService.getFeaturedProducts();
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("手工陶瓷杯", result.get(0).getTitle());
+        verify(productImageRepository).findImageUrlsByProductIds(anyList());
+    }
+
+    @Test
+    void getArtisanProducts_ReturnsWithBatchImages() {
+        when(productRepository.findByArtisanIdPage(any(Page.class), eq(1L))).thenAnswer(invocation -> {
+            Page<Product> page = invocation.getArgument(0);
+            page.setRecords(List.of(testProduct));
+            page.setTotal(1);
+            return page;
+        });
+        when(productImageRepository.findImageUrlsByProductIds(anyList())).thenReturn(List.of());
+
+        PageResult<ProductResponse> result = productService.getArtisanProducts(1L, 1, 10);
 
         assertNotNull(result);
         assertEquals(1, result.getTotal());

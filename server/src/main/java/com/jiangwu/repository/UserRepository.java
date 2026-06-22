@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Mapper
 public interface UserRepository extends BaseMapper<User> {
@@ -17,6 +18,11 @@ public interface UserRepository extends BaseMapper<User> {
 
     @Select("SELECT * FROM t_user WHERE id = #{id} AND deleted = 0")
     User findById(Long id);
+
+    @Select("<script>SELECT * FROM t_user WHERE id IN " +
+            "<foreach collection='ids' item='id' open='(' separator=',' close=')'>#{id}</foreach>" +
+            " AND deleted = 0</script>")
+    List<User> findByIds(@org.apache.ibatis.annotations.Param("ids") java.util.List<Long> ids);
 
     @Update("UPDATE t_user SET last_login_at = #{loginTime}, updated_at = #{loginTime} WHERE id = #{id}")
     int updateLoginTime(Long id, LocalDateTime loginTime);

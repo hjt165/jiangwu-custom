@@ -96,7 +96,7 @@ class OrderServiceTest {
         when(orderStageRepository.insert(any(OrderStage.class))).thenReturn(1);
         when(orderRepository.findById(anyLong())).thenReturn(testOrder);
         when(orderStageRepository.findByOrderId(anyLong())).thenReturn(List.of());
-        when(customizationRepository.findByOrderId(anyLong())).thenReturn(null);
+        when(customizationRepository.findByOrderIds(anyList())).thenReturn(List.of());
         when(productRepository.findById(anyLong())).thenReturn(null);
         when(artisanRepository.findById(anyLong())).thenReturn(null);
         when(aiService.recommendSolution(anyString(), any(), anyString(), anyDouble(), anyInt())).thenReturn(null);
@@ -123,7 +123,7 @@ class OrderServiceTest {
     void getOrderList_WithStatusFilter() {
         when(orderRepository.findByUserIdAndStatus(anyLong(), any(OrderStatus.class))).thenReturn(List.of(testOrder));
         when(orderStageRepository.findByOrderIds(anyList())).thenReturn(List.of());
-        when(customizationRepository.findByOrderId(anyLong())).thenReturn(null);
+        when(customizationRepository.findByOrderIds(anyList())).thenReturn(List.of());
         when(productRepository.findById(anyLong())).thenReturn(null);
         when(artisanRepository.findById(anyLong())).thenReturn(null);
 

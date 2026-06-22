@@ -13,7 +13,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -115,6 +118,28 @@ class FavoriteServiceTest {
         when(favoriteRepository.findProductIdsByUserId(1L)).thenReturn(List.of());
         var result = favoriteService.getFavoriteList(1L);
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getFavoriteList_WithProducts_BatchImageQuery() {
+        Product product = new Product();
+        product.setId(1L);
+        product.setTitle("银饰手镯");
+        product.setPrice(new BigDecimal("599"));
+
+        when(favoriteRepository.findProductIdsByUserId(1L)).thenReturn(List.of(1L));
+        when(productRepository.findByIds(anyList())).thenReturn(List.of(product));
+
+        Map<String, Object> imgRow = new HashMap<>();
+        imgRow.put("product_id", 1L);
+        imgRow.put("image_url", "http://img.jpg");
+        when(productImageRepository.findImageUrlsByProductIds(anyList())).thenReturn(List.of(imgRow));
+
+        var result = favoriteService.getFavoriteList(1L);
+
+        assertEquals(1, result.size());
+        assertEquals("银饰手镯", result.get(0).getTitle());
+        verify(productImageRepository).findImageUrlsByProductIds(anyList());
     }
 
     @Test
