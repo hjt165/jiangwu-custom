@@ -2,6 +2,9 @@ package com.jiangwu.service;
 
 import com.jiangwu.exception.BusinessException;
 import com.jiangwu.exception.ErrorCode;
+import com.jiangwu.repository.OrderRepository;
+import com.jiangwu.repository.ProductRepository;
+import com.jiangwu.utils.CurrentUserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
 /**
  * 文件上传服务
  */
@@ -30,6 +37,16 @@ public class FileService {
 
     @Value("${file.max-size:10485760}")
     private long maxSize;
+
+    private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
+    private final CurrentUserUtil currentUserUtil;
+
+    public FileService(ProductRepository productRepository, OrderRepository orderRepository, CurrentUserUtil currentUserUtil) {
+        this.productRepository = productRepository;
+        this.orderRepository = orderRepository;
+        this.currentUserUtil = currentUserUtil;
+    }
 
     private static final List<String> ALLOWED_IMAGE_TYPES = Arrays.asList(
             "image/jpeg", "image/png", "image/gif", "image/webp"
@@ -133,12 +150,40 @@ public class FileService {
             if (fileUrl == null || !fileUrl.startsWith("/uploads/")) {
                 return false;
             }
+
+            Long currentUserId = getCurrentUserId();
+            if (currentUserId == null) {
+                log.warn("删除文件失败: 未获取到当前用户ID");
+                return false;
+            }
+
+            boolean isOwner = productRepository.existsByCoverImageAndArtisanUserId(fileUrl, currentUserId) > 0
+                    || orderRepository.existsByReferenceImageAndUserId(fileUrl, currentUserId) > 0;
+            if (!isOwner) {
+                log.warn("删除文件失败: 用户{}无权删除文件{}", currentUserId, fileUrl);
+                throw new BusinessException(ErrorCode.FORBIDDEN);
+            }
+
             String fileName = fileUrl.substring("/uploads/".length());
             Path filePath = Paths.get(uploadDir, fileName);
             return Files.deleteIfExists(filePath);
+        } catch (BusinessException e) {
+            throw e;
         } catch (IOException e) {
             log.error("删除文件失败: {}", fileUrl, e);
             return false;
         }
+    }
+
+    private Long getCurrentUserId() {
+        try {
+            ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attrs == null) return null;
+            HttpServletRequest request = attrs.getRequest();
+            return currentUserUtil.extractUserIdOrNull(request);
+        } catch (Exception e) {
+            log.warn("获取当前用户ID失败", e);
+        }
+        return null;
     }
 }

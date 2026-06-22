@@ -75,27 +75,29 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
+      if (!mounted) return;
       setState(() {
         _keyword = keyword;
         _hasSearched = true;
         _isSearching = true;
       });
 
-      // 保存搜索历史
       await _saveSearchHistory(keyword);
 
-      // 调用真实搜索 API
       try {
         await ref.read(productProvider.notifier).searchProducts(keyword);
+        if (!mounted) return;
         final productState = ref.read(productProvider);
         _searchResults = productState.products;
         _applyFilter();
       } catch (e) {
         _searchResults = [];
       } finally {
-        setState(() {
-          _isSearching = false;
-        });
+        if (mounted) {
+          setState(() {
+            _isSearching = false;
+          });
+        }
       }
     });
   }

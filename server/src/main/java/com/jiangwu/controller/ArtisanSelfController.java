@@ -1,6 +1,7 @@
 package com.jiangwu.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jiangwu.common.Result;
 import com.jiangwu.entity.Artisan;
 import com.jiangwu.entity.Order;
@@ -63,7 +64,7 @@ public class ArtisanSelfController {
         LocalDateTime monthStart = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
         BigDecimal monthIncome = orderRepository.sumCompletedIncomeByArtisanId(artisan.getId(), monthStart);
 
-        int totalWorks = productRepository.findByArtisanId(artisan.getId()).size();
+        int totalWorks = productRepository.countByArtisanId(artisan.getId());
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("pendingOrders", pendingOrders);
@@ -79,10 +80,8 @@ public class ArtisanSelfController {
     @GetMapping("/orders/pending")
     public Result<List<Order>> getPendingOrders(HttpServletRequest request) {
         Artisan artisan = resolveArtisan(request);
-        List<Order> orders = orderRepository.findByArtisanId(artisan.getId()).stream()
-                .filter(o -> o.getStatus() == OrderStatus.PAID || o.getStatus() == OrderStatus.PENDING_PAYMENT)
-                .collect(Collectors.toList());
-        return Result.success(orders);
+        Page<Order> page = orderRepository.findPendingOrdersByArtisanIdPage(new Page<>(1, 100), artisan.getId());
+        return Result.success(page.getRecords());
     }
 
     // ==================== 订单管理 ====================
@@ -91,31 +90,21 @@ public class ArtisanSelfController {
      * 获取手作人订单列表
      */
     @GetMapping("/orders")
-    public Result<List<Order>> getOrders(
+    public Result<Map<String, Object>> getOrders(
             HttpServletRequest request,
             @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
         Artisan artisan = resolveArtisan(request);
-        List<Order> orders = orderRepository.findByArtisanId(artisan.getId());
-
+        Page<Order> pageParam = new Page<>(page, pageSize);
+        Page<Order> result;
         if (status != null && !status.isEmpty()) {
             OrderStatus orderStatus = OrderStatus.valueOf(status);
-            orders = orders.stream()
-                    .filter(o -> o.getStatus() == orderStatus)
-                    .collect(Collectors.toList());
-        }
-
-        // 简单分页
-        int start = (page - 1) * pageSize;
-        int end = Math.min(start + pageSize, orders.size());
-        if (start < orders.size()) {
-            orders = orders.subList(start, end);
+            result = orderRepository.findByArtisanIdAndStatusPage(pageParam, artisan.getId(), orderStatus);
         } else {
-            orders = List.of();
+            result = orderRepository.findByArtisanIdPage(pageParam, artisan.getId());
         }
-
-        return Result.success(orders);
+        return Result.success(Map.of("data", result.getRecords(), "total", result.getTotal(), "pages", result.getPages()));
     }
 
     /**
@@ -180,22 +169,14 @@ public class ArtisanSelfController {
      * 获取手作人作品列表
      */
     @GetMapping("/products")
-    public Result<List<Product>> getProducts(
+    public Result<Map<String, Object>> getProducts(
             HttpServletRequest request,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
         Artisan artisan = resolveArtisan(request);
-        List<Product> products = productRepository.findByArtisanId(artisan.getId());
-
-        int start = (page - 1) * pageSize;
-        int end = Math.min(start + pageSize, products.size());
-        if (start < products.size()) {
-            products = products.subList(start, end);
-        } else {
-            products = List.of();
-        }
-
-        return Result.success(products);
+        Page<Product> pageParam = new Page<>(page, pageSize);
+        Page<Product> result = productRepository.findByArtisanIdPage(pageParam, artisan.getId());
+        return Result.success(Map.of("data", result.getRecords(), "total", result.getTotal(), "pages", result.getPages()));
     }
 
     /**
@@ -314,20 +295,15 @@ public class ArtisanSelfController {
      * 获取收入明细列表
      */
     @GetMapping("/income/records")
-    public Result<List<Map<String, Object>>> getIncomeRecords(
+    public Result<Map<String, Object>> getIncomeRecords(
             HttpServletRequest request,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
         Artisan artisan = resolveArtisan(request);
-        List<Order> completedOrders = orderRepository.findByArtisanId(artisan.getId()).stream()
-                .filter(o -> o.getStatus() == OrderStatus.COMPLETED)
-                .collect(Collectors.toList());
+        Page<Order> pageParam = new Page<>(page, pageSize);
+        Page<Order> result = orderRepository.findCompletedOrdersByArtisanIdPage(pageParam, artisan.getId());
 
-        int start = (page - 1) * pageSize;
-        int end = Math.min(start + pageSize, completedOrders.size());
-        List<Order> paged = start < completedOrders.size() ? completedOrders.subList(start, end) : List.of();
-
-        List<Map<String, Object>> records = paged.stream().map(order -> {
+        List<Map<String, Object>> records = result.getRecords().stream().map(order -> {
             Map<String, Object> record = new HashMap<>();
             record.put("id", order.getId());
             record.put("orderNo", order.getOrderNo());
@@ -336,7 +312,7 @@ public class ArtisanSelfController {
             return record;
         }).collect(Collectors.toList());
 
-        return Result.success(records);
+        return Result.success(Map.of("data", records, "total", result.getTotal(), "pages", result.getPages()));
     }
 
     /**

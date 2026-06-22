@@ -40,9 +40,9 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
         category: widget.category.name,
         refresh: true,
       );
-      _applyFilter();
+      if (mounted) _applyFilter();
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 

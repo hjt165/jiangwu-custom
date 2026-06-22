@@ -68,7 +68,7 @@ class _PublishScreenState extends State<PublishScreen> {
       limit: remaining,
     );
 
-    if (pickedFiles.isNotEmpty) {
+    if (pickedFiles.isNotEmpty && mounted) {
       setState(() {
         _images = [..._images, ...pickedFiles.map((f) => f.path).toList()];
       });

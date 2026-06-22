@@ -97,8 +97,8 @@ class OrderServiceTest {
         when(orderRepository.findById(anyLong())).thenReturn(testOrder);
         when(orderStageRepository.findByOrderId(anyLong())).thenReturn(List.of());
         when(customizationRepository.findByOrderIds(anyList())).thenReturn(List.of());
-        when(productRepository.findById(anyLong())).thenReturn(null);
-        when(artisanRepository.findById(anyLong())).thenReturn(null);
+        when(productRepository.findByIds(anyList())).thenReturn(List.of());
+        when(artisanRepository.findByIds(anyList())).thenReturn(List.of());
         when(aiService.recommendSolution(anyString(), any(), anyString(), anyDouble(), anyInt())).thenReturn(null);
 
         OrderResponse response = orderService.createOrder(1L, request);
@@ -124,8 +124,8 @@ class OrderServiceTest {
         when(orderRepository.findByUserIdAndStatus(anyLong(), any(OrderStatus.class))).thenReturn(List.of(testOrder));
         when(orderStageRepository.findByOrderIds(anyList())).thenReturn(List.of());
         when(customizationRepository.findByOrderIds(anyList())).thenReturn(List.of());
-        when(productRepository.findById(anyLong())).thenReturn(null);
-        when(artisanRepository.findById(anyLong())).thenReturn(null);
+        when(productRepository.findByIds(anyList())).thenReturn(List.of());
+        when(artisanRepository.findByIds(anyList())).thenReturn(List.of());
 
         List<OrderResponse> responses = orderService.getOrderList(1L, "PENDING_PAYMENT");
 

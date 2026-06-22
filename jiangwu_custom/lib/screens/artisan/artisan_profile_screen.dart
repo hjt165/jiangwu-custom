@@ -50,12 +50,14 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
       final response = await ApiService().get<List<dynamic>>(
         '/artisan/${widget.artisanId}/reviews',
       );
-      setState(() {
-        _reviews = response.map((e) => Review.fromJson(e)).toList();
-        _isLoadingReviews = false;
-      });
+      if (mounted) {
+        setState(() {
+          _reviews = response.map((e) => Review.fromJson(e)).toList();
+          _isLoadingReviews = false;
+        });
+      }
     } catch (e) {
-      setState(() => _isLoadingReviews = false);
+      if (mounted) setState(() => _isLoadingReviews = false);
     }
   }
 

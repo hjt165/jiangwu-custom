@@ -1,6 +1,7 @@
 package com.jiangwu.repository;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jiangwu.entity.Order;
 import com.jiangwu.enums.OrderStatus;
 import org.apache.ibatis.annotations.Mapper;
@@ -68,4 +69,21 @@ public interface OrderRepository extends BaseMapper<Order> {
 
     @Select("SELECT COALESCE(SUM(total_amount), 0) FROM t_order WHERE artisan_id = #{artisanId} AND status = 'COMPLETED' AND deleted = 0")
     BigDecimal sumTotalIncomeByArtisanId(Long artisanId);
+
+    // ========== 手作人端分页查询（避免全表加载到内存） ==========
+
+    @Select("SELECT * FROM t_order WHERE artisan_id = #{artisanId} AND status IN ('PAID', 'PENDING_PAYMENT') AND deleted = 0 ORDER BY created_at DESC")
+    Page<Order> findPendingOrdersByArtisanIdPage(Page<Order> page, Long artisanId);
+
+    @Select("SELECT * FROM t_order WHERE artisan_id = #{artisanId} AND status = #{status} AND deleted = 0 ORDER BY created_at DESC")
+    Page<Order> findByArtisanIdAndStatusPage(Page<Order> page, Long artisanId, OrderStatus status);
+
+    @Select("SELECT * FROM t_order WHERE artisan_id = #{artisanId} AND deleted = 0 ORDER BY created_at DESC")
+    Page<Order> findByArtisanIdPage(Page<Order> page, Long artisanId);
+
+    @Select("SELECT * FROM t_order WHERE artisan_id = #{artisanId} AND status = 'COMPLETED' AND deleted = 0 ORDER BY completed_at DESC")
+    Page<Order> findCompletedOrdersByArtisanIdPage(Page<Order> page, Long artisanId);
+
+    @Select("SELECT COUNT(*) FROM t_order WHERE reference_images LIKE CONCAT('%', #{imageUrl}, '%') AND user_id = #{userId} AND deleted = 0")
+    int existsByReferenceImageAndUserId(@org.apache.ibatis.annotations.Param("imageUrl") String imageUrl, @org.apache.ibatis.annotations.Param("userId") Long userId);
 }

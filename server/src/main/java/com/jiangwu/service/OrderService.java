@@ -131,9 +131,7 @@ public class OrderService {
 
         // 批量查询定制参数
         Map<Long, Customization> customizationMap = new java.util.HashMap<>();
-        // 批量查询作品
         Map<Long, Product> productMap = new java.util.HashMap<>();
-        // 批量查询手作人
         Map<Long, Artisan> artisanMap = new java.util.HashMap<>();
 
         // 批量加载定制参数（避免 N+1）
@@ -145,17 +143,19 @@ public class OrderService {
         // 批量加载作品（避免 N+1）
         List<Long> productIds = orders.stream().map(Order::getProductId).filter(Objects::nonNull).distinct().toList();
         if (!productIds.isEmpty()) {
-            productMap = productRepository.findByIds(productIds)
+            Map<Long, Product> loadedProducts = productRepository.findByIds(productIds)
                     .stream()
                     .collect(Collectors.toMap(Product::getId, p -> p));
+            productMap.putAll(loadedProducts);
         }
 
         // 批量加载手作人（避免 N+1）
         List<Long> artisanIds = orders.stream().map(Order::getArtisanId).filter(Objects::nonNull).distinct().toList();
         if (!artisanIds.isEmpty()) {
-            artisanMap = artisanRepository.findByIds(artisanIds)
+            Map<Long, Artisan> loadedArtisans = artisanRepository.findByIds(artisanIds)
                     .stream()
                     .collect(Collectors.toMap(Artisan::getId, a -> a));
+            artisanMap.putAll(loadedArtisans);
         }
 
         for (Order order : orders) {

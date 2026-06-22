@@ -61,6 +61,8 @@ class ArtisanFollowServiceTest {
 
     @Test
     void unfollow_DecrementsFanCount() {
+        UserFollow existing = new UserFollow();
+        when(userFollowRepository.findByUserIdAndArtisanId(1L, 1L)).thenReturn(existing);
         doReturn(1).when(userFollowRepository).delete(any());
         doReturn(1).when(artisanRepository).updateFanCount(1L, -1);
 
@@ -88,7 +90,7 @@ class ArtisanFollowServiceTest {
         follow.setId(1L);
         follow.setArtisanId(1L);
         when(userFollowRepository.findByUserId(1L)).thenReturn(List.of(follow));
-        when(artisanRepository.findById(1L)).thenReturn(testArtisan);
+        when(artisanRepository.findByIds(List.of(1L))).thenReturn(List.of(testArtisan));
 
         List<Map<String, Object>> result = artisanFollowService.getFollowList(1L);
         assertEquals(1, result.size());

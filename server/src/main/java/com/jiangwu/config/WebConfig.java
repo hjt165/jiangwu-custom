@@ -48,11 +48,12 @@ public class WebConfig implements WebMvcConfigurer {
                         "/product/list",
                         "/product/search",
                         "/product/featured",
-                        "/product/detail/**",
+                        "/product/{id}",
+                        "/product/artisan/{artisanId}",
                         // 手作人浏览（无需认证）
                         "/artisan/list",
                         "/artisan/search",
-                        "/artisan/detail/**",
+                        "/artisan/{id}",
                         // 材质浏览（无需认证）
                         "/material/list",
                         "/material/category/**",

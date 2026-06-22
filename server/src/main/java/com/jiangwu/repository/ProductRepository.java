@@ -59,4 +59,10 @@ public interface ProductRepository extends BaseMapper<Product> {
 
     @Update("UPDATE t_product SET rating = #{rating}, updated_at = NOW() WHERE id = #{id}")
     int updateRating(Long id, BigDecimal rating);
+
+    @Select("SELECT COUNT(*) FROM t_product WHERE artisan_id = #{artisanId} AND deleted = 0")
+    int countByArtisanId(Long artisanId);
+
+    @Select("SELECT COUNT(*) FROM t_product WHERE cover_image = #{imageUrl} AND artisan_id = #{userId} AND deleted = 0")
+    int existsByCoverImageAndArtisanUserId(@org.apache.ibatis.annotations.Param("imageUrl") String imageUrl, @org.apache.ibatis.annotations.Param("userId") Long userId);
 }

@@ -37,7 +37,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
         refresh: true,
       );
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
