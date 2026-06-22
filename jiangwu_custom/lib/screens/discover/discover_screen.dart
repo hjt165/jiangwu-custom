@@ -41,6 +41,14 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     }
   }
 
+  Future<void> _loadMore() async {
+    final productState = ref.read(productProvider);
+    if (productState.isLoading || !productState.hasMore) return;
+    await ref.read(productProvider.notifier).fetchProducts(
+      category: _selectedCategory?.name,
+    );
+  }
+
   void _onCategorySelected(ProductCategory? category) {
     setState(() => _selectedCategory = category);
     _loadProducts();
@@ -179,18 +187,28 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
           refresh: true,
         );
       },
-      child: GridView.builder(
-        padding: const EdgeInsets.all(AppSizes.paddingMedium),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: AppSizes.spacingMedium,
-          crossAxisSpacing: AppSizes.spacingMedium,
-          childAspectRatio: 0.8,
-        ),
-        itemCount: products.length,
-        itemBuilder: (context, index) {
-          return _buildProductCard(products[index]);
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          if (notification is ScrollEndNotification &&
+              notification.metrics.pixels >=
+                  notification.metrics.maxScrollExtent - 200) {
+            _loadMore();
+          }
+          return false;
         },
+        child: GridView.builder(
+          padding: const EdgeInsets.all(AppSizes.paddingMedium),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: AppSizes.spacingMedium,
+            crossAxisSpacing: AppSizes.spacingMedium,
+            childAspectRatio: 0.8,
+          ),
+          itemCount: products.length,
+          itemBuilder: (context, index) {
+            return _buildProductCard(products[index]);
+          },
+        ),
       ),
     );
   }

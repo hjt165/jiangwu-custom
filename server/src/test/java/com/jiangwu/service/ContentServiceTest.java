@@ -94,16 +94,10 @@ class ContentServiceTest {
 
     @Test
     void batchReviewImages_ProcessesAll() {
-        ProductImage img1 = new ProductImage();
-        img1.setId(1L);
-        ProductImage img2 = new ProductImage();
-        img2.setId(2L);
-        when(imageRepository.selectById(1L)).thenReturn(img1);
-        when(imageRepository.selectById(2L)).thenReturn(img2);
-        doReturn(1).when(imageRepository).updateById(any(ProductImage.class));
+        doReturn(1).when(imageRepository).update(any(ProductImage.class), any());
 
         contentService.batchReviewImages(List.of(1L, 2L), "pass", "批量通过", 1L);
-        verify(imageRepository, times(2)).updateById(any(ProductImage.class));
+        verify(imageRepository, times(2)).update(any(ProductImage.class), any());
     }
 
     @Test
@@ -149,15 +143,9 @@ class ContentServiceTest {
 
     @Test
     void batchReviewComments_ProcessesAll() {
-        Review r1 = new Review();
-        r1.setId(1L);
-        Review r2 = new Review();
-        r2.setId(2L);
-        when(reviewRepository.selectById(1L)).thenReturn(r1);
-        when(reviewRepository.selectById(2L)).thenReturn(r2);
-        doReturn(1).when(reviewRepository).updateById(any(Review.class));
+        doReturn(1).when(reviewRepository).update(any(Review.class), any());
 
         contentService.batchReviewComments(List.of(1L, 2L), "reject", "违规", 1L);
-        verify(reviewRepository, times(2)).updateById(any(Review.class));
+        verify(reviewRepository, times(2)).update(any(Review.class), any());
     }
 }

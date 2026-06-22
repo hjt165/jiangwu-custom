@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/constants.dart';
@@ -31,6 +33,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   String _keyword = '';
   FilterSortOptions _filterOptions = const FilterSortOptions();
   bool _hasSearched = false;
+  Timer? _debounceTimer;
 
   // 热门搜索数据
   final List<String> _hotSearches = [
@@ -61,6 +64,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _searchController.dispose();
     _focusNode.dispose();
     super.dispose();
@@ -69,28 +73,31 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Future<void> _performSearch(String keyword) async {
     if (keyword.trim().isEmpty) return;
 
-    setState(() {
-      _keyword = keyword;
-      _hasSearched = true;
-      _isSearching = true;
-    });
-
-    // 保存搜索历史
-    await _saveSearchHistory(keyword);
-
-    // 调用真实搜索 API
-    try {
-      await ref.read(productProvider.notifier).searchProducts(keyword);
-      final productState = ref.read(productProvider);
-      _searchResults = productState.products;
-      _applyFilter();
-    } catch (e) {
-      _searchResults = [];
-    } finally {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
       setState(() {
-        _isSearching = false;
+        _keyword = keyword;
+        _hasSearched = true;
+        _isSearching = true;
       });
-    }
+
+      // 保存搜索历史
+      await _saveSearchHistory(keyword);
+
+      // 调用真实搜索 API
+      try {
+        await ref.read(productProvider.notifier).searchProducts(keyword);
+        final productState = ref.read(productProvider);
+        _searchResults = productState.products;
+        _applyFilter();
+      } catch (e) {
+        _searchResults = [];
+      } finally {
+        setState(() {
+          _isSearching = false;
+        });
+      }
+    });
   }
 
   void _applyFilter() {

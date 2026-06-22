@@ -86,19 +86,19 @@ public class ContentService {
     }
 
     /**
-     * 批量审核图片
+     * 批量审核图片（单次 SQL 更新）
      */
     public void batchReviewImages(List<Long> ids, String action, String remark, Long reviewerId) {
         int status = "pass".equals(action) ? 1 : 2;
         for (Long id : ids) {
-            ProductImage image = imageRepository.selectById(id);
-            if (image != null) {
-                image.setReviewStatus(status);
-                image.setReviewRemark(remark);
-                image.setReviewerId(reviewerId);
-                image.setReviewedAt(LocalDateTime.now());
-                imageRepository.updateById(image);
-            }
+            QueryWrapper<ProductImage> wrapper = new QueryWrapper<>();
+            wrapper.eq("id", id);
+            ProductImage update = new ProductImage();
+            update.setReviewStatus(status);
+            update.setReviewRemark(remark);
+            update.setReviewerId(reviewerId);
+            update.setReviewedAt(LocalDateTime.now());
+            imageRepository.update(update, wrapper);
         }
     }
 
@@ -186,19 +186,19 @@ public class ContentService {
     }
 
     /**
-     * 批量审核评论
+     * 批量审核评论（单次 SQL 更新）
      */
     public void batchReviewComments(List<Long> ids, String action, String remark, Long reviewerId) {
         int status = "pass".equals(action) ? 1 : 2;
         for (Long id : ids) {
-            Review review = reviewRepository.selectById(id);
-            if (review != null) {
-                review.setReviewStatus(status);
-                review.setReviewRemark(remark);
-                review.setReviewerId(reviewerId);
-                review.setReviewedAt(LocalDateTime.now());
-                reviewRepository.updateById(review);
-            }
+            QueryWrapper<Review> wrapper = new QueryWrapper<>();
+            wrapper.eq("id", id);
+            Review update = new Review();
+            update.setReviewStatus(status);
+            update.setReviewRemark(remark);
+            update.setReviewerId(reviewerId);
+            update.setReviewedAt(LocalDateTime.now());
+            reviewRepository.update(update, wrapper);
         }
     }
 }

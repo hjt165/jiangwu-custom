@@ -26,7 +26,7 @@
         </el-table-column>
         <el-table-column prop="status" label="状态" width="120">
           <template #default="{ row }">
-            <el-tag :type="getStatusType(row.status)">{{ getStatusLabel(row.status) }}</el-tag>
+            <OrderStatus :status="row.status" />
           </template>
         </el-table-column>
         <el-table-column prop="createdAt" label="创建时间" width="180" />
@@ -52,6 +52,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getOrderList } from '@/api/order'
+import OrderStatus from '@/components/business/OrderStatus.vue'
 
 const router = useRouter()
 const loading = ref(false)
@@ -60,17 +61,6 @@ const searchKeyword = ref('')
 const filterStatus = ref('')
 const page = ref(1)
 const total = ref(0)
-
-const statusMap = {
-  pending_payment: { label: '待支付', type: 'warning' },
-  paid: { label: '已支付', type: 'primary' },
-  producing: { label: '制作中', type: '' },
-  completed: { label: '已完成', type: 'success' },
-  cancelled: { label: '已取消', type: 'info' },
-}
-
-function getStatusLabel(status) { return statusMap[status]?.label || status }
-function getStatusType(status) { return statusMap[status]?.type || 'info' }
 
 async function loadData() {
   loading.value = true

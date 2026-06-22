@@ -12,6 +12,7 @@ import com.jiangwu.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -63,8 +64,8 @@ public class ProductService {
         if (product == null) {
             throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND);
         }
-        // 增加浏览量
-        productRepository.incrementViewCount(productId);
+        // 异步增加浏览量（不阻塞请求）
+        asyncIncrementViewCount(productId);
         // 记录浏览历史（如果提供了 userId）
         if (userId != null) {
             try {
@@ -74,6 +75,18 @@ public class ProductService {
             }
         }
         return toResponseWithImages(product);
+    }
+
+    /**
+     * 异步增加浏览量
+     */
+    @Async
+    public void asyncIncrementViewCount(Long productId) {
+        try {
+            productRepository.incrementViewCount(productId);
+        } catch (Exception e) {
+            // 浏览量统计失败不影响主流程
+        }
     }
 
     /**

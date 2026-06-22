@@ -12,7 +12,7 @@
           <el-descriptions :column="2" border>
             <el-descriptions-item label="订单号">{{ order.orderNo }}</el-descriptions-item>
             <el-descriptions-item label="状态">
-              <el-tag :type="getStatusType(order.status)">{{ getStatusLabel(order.status) }}</el-tag>
+              <OrderStatus :status="order.status" />
             </el-descriptions-item>
             <el-descriptions-item label="用户">{{ order.userName }}</el-descriptions-item>
             <el-descriptions-item label="手作人">{{ order.artisanName }}</el-descriptions-item>
@@ -48,25 +48,10 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getOrderDetail, cancelOrder } from '@/api/order'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import OrderStatus from '@/components/business/OrderStatus.vue'
 
 const route = useRoute()
 const order = ref({})
-
-const statusMap = {
-  pending_payment: { label: '待支付', type: 'warning' },
-  paid: { label: '已支付', type: 'primary' },
-  producing: { label: '制作中', type: '' },
-  completed: { label: '已完成', type: 'success' },
-  cancelled: { label: '已取消', type: 'info' },
-}
-
-function getStatusType(status) {
-  return statusMap[status]?.type || 'info'
-}
-
-function getStatusLabel(status) {
-  return statusMap[status]?.label || status
-}
 
 async function loadOrder() {
   try {
