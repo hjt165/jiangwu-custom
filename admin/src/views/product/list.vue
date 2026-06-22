@@ -29,8 +29,8 @@
         <el-table-column label="操作" fixed="right" width="150">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="$router.push('/product/' + row.id)">详情</el-button>
-            <el-button v-if="row.reviewStatus === 0" type="success" link size="small" @click="handleAudit(row, 'pass')">通过</el-button>
-            <el-button v-if="row.reviewStatus === 0" type="danger" link size="small" @click="handleAudit(row, 'reject')">拒绝</el-button>
+            <el-button v-if="row.reviewStatus === 0" type="success" link size="small" :loading="auditLoading[row.id]" :disabled="auditLoading[row.id]" @click="handleAudit(row, 'pass')">通过</el-button>
+            <el-button v-if="row.reviewStatus === 0" type="danger" link size="small" :loading="auditLoading[row.id]" :disabled="auditLoading[row.id]" @click="handleAudit(row, 'reject')">拒绝</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -47,7 +47,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { getProductList, auditProduct } from '@/api/product'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
@@ -56,6 +56,7 @@ const tableData = ref([])
 const searchKeyword = ref('')
 const page = ref(1)
 const total = ref(0)
+const auditLoading = reactive({})
 
 async function loadData() {
   loading.value = true
@@ -87,6 +88,7 @@ async function handleAudit(row, action) {
       cancelButtonText: '取消',
       type: action === 'pass' ? 'success' : 'warning'
     })
+    auditLoading[row.id] = true
     await auditProduct(row.id, { action })
     ElMessage.success(`作品已${label}`)
     loadData()
@@ -94,6 +96,8 @@ async function handleAudit(row, action) {
     if (e !== 'cancel') {
       ElMessage.error('审核操作失败')
     }
+  } finally {
+    auditLoading[row.id] = false
   }
 }
 

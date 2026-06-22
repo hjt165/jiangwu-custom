@@ -16,6 +16,8 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,13 +41,12 @@ class ArtisanFollowServiceTest {
     void follow_NewFollow_CreatesAndIncrementsFanCount() {
         when(userFollowRepository.findByUserIdAndArtisanId(1L, 1L)).thenReturn(null);
         doReturn(1).when(userFollowRepository).insert(any(UserFollow.class));
-        when(artisanRepository.selectById(1L)).thenReturn(testArtisan);
-        doReturn(1).when(artisanRepository).updateById(any(Artisan.class));
+        doReturn(1).when(artisanRepository).updateFanCount(1L, 1);
 
         Map<String, Boolean> result = artisanFollowService.follow(1L, 1L);
 
         assertTrue(result.get("isFollowing"));
-        assertEquals(11, testArtisan.getFanCount());
+        verify(artisanRepository).updateFanCount(1L, 1);
     }
 
     @Test
@@ -61,23 +62,12 @@ class ArtisanFollowServiceTest {
     @Test
     void unfollow_DecrementsFanCount() {
         doReturn(1).when(userFollowRepository).delete(any());
-        when(artisanRepository.selectById(1L)).thenReturn(testArtisan);
-        doReturn(1).when(artisanRepository).updateById(any(Artisan.class));
+        doReturn(1).when(artisanRepository).updateFanCount(1L, -1);
 
         Map<String, Boolean> result = artisanFollowService.unfollow(1L, 1L);
 
         assertFalse(result.get("isFollowing"));
-        assertEquals(9, testArtisan.getFanCount());
-    }
-
-    @Test
-    void unfollow_ZeroFanCount_DoesNotGoNegative() {
-        testArtisan.setFanCount(0);
-        doReturn(1).when(userFollowRepository).delete(any());
-        when(artisanRepository.selectById(1L)).thenReturn(testArtisan);
-
-        artisanFollowService.unfollow(1L, 1L);
-        assertEquals(0, testArtisan.getFanCount());
+        verify(artisanRepository).updateFanCount(1L, -1);
     }
 
     @Test
@@ -98,7 +88,7 @@ class ArtisanFollowServiceTest {
         follow.setId(1L);
         follow.setArtisanId(1L);
         when(userFollowRepository.findByUserId(1L)).thenReturn(List.of(follow));
-        when(artisanRepository.selectById(1L)).thenReturn(testArtisan);
+        when(artisanRepository.findById(1L)).thenReturn(testArtisan);
 
         List<Map<String, Object>> result = artisanFollowService.getFollowList(1L);
         assertEquals(1, result.size());

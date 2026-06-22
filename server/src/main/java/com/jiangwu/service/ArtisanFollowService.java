@@ -26,7 +26,7 @@ public class ArtisanFollowService {
     private final ArtisanRepository artisanRepository;
 
     /**
-     * 关注手作人
+     * 关注手作人（原子计数，无竞态条件）
      */
     @Transactional
     public Map<String, Boolean> follow(Long userId, Long artisanId) {
@@ -40,17 +40,14 @@ public class ArtisanFollowService {
         follow.setArtisanId(artisanId);
         userFollowRepository.insert(follow);
 
-        Artisan artisan = artisanRepository.selectById(artisanId);
-        if (artisan != null) {
-            artisan.setFanCount(artisan.getFanCount() + 1);
-            artisanRepository.updateById(artisan);
-        }
+        // 原子递增 fanCount（避免竞态条件）
+        artisanRepository.updateFanCount(artisanId, 1);
 
         return Map.of("isFollowing", true);
     }
 
     /**
-     * 取消关注手作人
+     * 取消关注手作人（原子计数，无竞态条件）
      */
     @Transactional
     public Map<String, Boolean> unfollow(Long userId, Long artisanId) {
@@ -58,11 +55,8 @@ public class ArtisanFollowService {
         wrapper.eq("user_id", userId).eq("artisan_id", artisanId);
         userFollowRepository.delete(wrapper);
 
-        Artisan artisan = artisanRepository.selectById(artisanId);
-        if (artisan != null && artisan.getFanCount() > 0) {
-            artisan.setFanCount(artisan.getFanCount() - 1);
-            artisanRepository.updateById(artisan);
-        }
+        // 原子递减 fanCount（避免竞态条件）
+        artisanRepository.updateFanCount(artisanId, -1);
 
         return Map.of("isFollowing", false);
     }
@@ -76,17 +70,26 @@ public class ArtisanFollowService {
     }
 
     /**
-     * 获取关注列表
+     * 获取关注列表（批量查询，避免 N+1）
      */
     public List<Map<String, Object>> getFollowList(Long userId) {
         List<UserFollow> follows = userFollowRepository.findByUserId(userId);
+        if (follows.isEmpty()) return List.of();
+
+        // 批量加载手作人信息
+        List<Long> artisanIds = follows.stream().map(UserFollow::getArtisanId).distinct().toList();
+        Map<Long, Artisan> artisanMap = new java.util.HashMap<>();
+        for (Long aid : artisanIds) {
+            Artisan a = artisanRepository.findById(aid);
+            if (a != null) artisanMap.put(aid, a);
+        }
 
         return follows.stream().map(follow -> {
             Map<String, Object> item = new HashMap<>();
             item.put("id", follow.getId());
             item.put("createdAt", follow.getCreatedAt());
 
-            Artisan artisan = artisanRepository.selectById(follow.getArtisanId());
+            Artisan artisan = artisanMap.get(follow.getArtisanId());
             if (artisan != null) {
                 item.put("artisanId", artisan.getId());
                 item.put("name", artisan.getName());

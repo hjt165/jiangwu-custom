@@ -34,10 +34,10 @@
           <el-form label-width="100px">
             <el-form-item label="信用分调整">
               <el-input-number v-model="creditScore" :min="0" :max="100" />
-              <el-button type="primary" style="margin-left: 12px" @click="updateCredit">调整</el-button>
+              <el-button type="primary" style="margin-left: 12px" :loading="creditLoading" :disabled="creditLoading" @click="updateCredit">调整</el-button>
             </el-form-item>
             <el-form-item label="账号状态">
-              <el-switch v-model="user.status" :active-value="1" :inactive-value="0" active-text="正常" inactive-text="禁用" @change="handleStatusChange" />
+              <el-switch v-model="user.status" :active-value="1" :inactive-value="0" active-text="正常" inactive-text="禁用" :disabled="statusLoading" @change="handleStatusChange" />
             </el-form-item>
           </el-form>
         </el-card>
@@ -55,6 +55,8 @@ import { ElMessage } from 'element-plus'
 const route = useRoute()
 const user = ref({})
 const creditScore = ref(0)
+const creditLoading = ref(false)
+const statusLoading = ref(false)
 
 async function loadUser() {
   try {
@@ -67,22 +69,28 @@ async function loadUser() {
 }
 
 async function updateCredit() {
+  creditLoading.value = true
   try {
     await updateUserCredit(user.value.id, creditScore.value)
     user.value.creditScore = creditScore.value
     ElMessage.success('信用分调整成功')
   } catch (e) {
     ElMessage.error('信用分调整失败')
+  } finally {
+    creditLoading.value = false
   }
 }
 
 async function handleStatusChange(val) {
+  statusLoading.value = true
   try {
     await updateUserStatus(user.value.id, val)
     ElMessage.success(val === 1 ? '账号已启用' : '账号已禁用')
   } catch (e) {
     user.value.status = val === 1 ? 0 : 1
     ElMessage.error('状态更新失败')
+  } finally {
+    statusLoading.value = false
   }
 }
 

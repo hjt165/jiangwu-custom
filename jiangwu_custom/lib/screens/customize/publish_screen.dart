@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../app/constants.dart';
@@ -220,13 +222,21 @@ class _PublishScreenState extends State<PublishScreen> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
-            child: Image.network(
-              imagePath,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const Center(
-                child: Icon(Icons.image, size: 24, color: AppColors.textHint),
-              ),
-            ),
+            child: imagePath.startsWith('http')
+                ? Image.network(
+                    imagePath,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const Center(
+                      child: Icon(Icons.image, size: 24, color: AppColors.textHint),
+                    ),
+                  )
+                : Image.file(
+                    File(imagePath),
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const Center(
+                      child: Icon(Icons.image, size: 24, color: AppColors.textHint),
+                    ),
+                  ),
           ),
         ),
         Positioned(

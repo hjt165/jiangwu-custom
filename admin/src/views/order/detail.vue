@@ -35,7 +35,7 @@
           <template #header>操作</template>
           <el-space direction="vertical" fill>
             <el-button type="warning" block @click="$router.back()">返回列表</el-button>
-            <el-button type="danger" block :disabled="order.status === 'cancelled'" @click="handleCancel">取消订单</el-button>
+            <el-button type="danger" block :loading="cancelLoading" :disabled="cancelLoading || order.status === 'cancelled'" @click="handleCancel">取消订单</el-button>
           </el-space>
         </el-card>
       </el-col>
@@ -52,6 +52,7 @@ import OrderStatus from '@/components/business/OrderStatus.vue'
 
 const route = useRoute()
 const order = ref({})
+const cancelLoading = ref(false)
 
 async function loadOrder() {
   try {
@@ -69,6 +70,7 @@ async function handleCancel() {
       cancelButtonText: '返回',
       type: 'warning'
     })
+    cancelLoading.value = true
     await cancelOrder(order.value.id || order.value.orderNo, '管理员取消')
     ElMessage.success('订单已取消')
     loadOrder()
@@ -76,6 +78,8 @@ async function handleCancel() {
     if (e !== 'cancel') {
       ElMessage.error('取消订单失败')
     }
+  } finally {
+    cancelLoading.value = false
   }
 }
 
