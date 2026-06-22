@@ -37,15 +37,16 @@ public class ProductService {
     public PageResult<ProductResponse> getProductList(int page, int size, String category) {
         Page<Product> pageParam = new Page<>(page, size);
 
+        Page<Product> result;
         if (category != null && !category.isEmpty()) {
             ProductCategory cat = ProductCategory.valueOf(category.toUpperCase());
-            productRepository.findByCategoryPage(pageParam, cat);
+            result = productRepository.findByCategoryPage(pageParam, cat);
         } else {
-            productRepository.findFeaturedPage(pageParam);
+            result = productRepository.findFeaturedPage(pageParam);
         }
 
-        List<ProductResponse> responses = toResponseListWithImages(pageParam.getRecords());
-        return new PageResult<>(pageParam.getTotal(), responses, page, size, pageParam.getPages());
+        List<ProductResponse> responses = toResponseListWithImages(result.getRecords());
+        return new PageResult<>(result.getTotal(), responses, page, size, result.getPages());
     }
 
     /**
