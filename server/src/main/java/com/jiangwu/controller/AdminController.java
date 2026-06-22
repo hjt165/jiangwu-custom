@@ -1,13 +1,13 @@
 package com.jiangwu.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jiangwu.common.Result;
 import com.jiangwu.entity.Artisan;
 import com.jiangwu.entity.Order;
 import com.jiangwu.entity.Product;
 import com.jiangwu.entity.User;
 import com.jiangwu.enums.ArtisanStatus;
-import com.jiangwu.enums.OrderStatus;
 import com.jiangwu.repository.ArtisanRepository;
 import com.jiangwu.repository.OrderRepository;
 import com.jiangwu.repository.ProductRepository;
@@ -17,6 +17,7 @@ import com.jiangwu.service.StatsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,10 +62,10 @@ public class AdminController {
         if (status != null) {
             wrapper.eq("status", status);
         }
-        long total = userRepository.selectCount(wrapper);
         wrapper.orderByDesc("created_at");
-        wrapper.last("LIMIT " + size + " OFFSET " + (page - 1) * size);
-        List<User> list = userRepository.selectList(wrapper);
+        long total = userRepository.selectCount(wrapper);
+        Page<User> pageParam = new Page<>(page, size);
+        List<User> list = userRepository.selectPage(pageParam, wrapper).getRecords();
         return Result.success(Map.of("data", list, "total", total));
     }
 
@@ -103,10 +104,10 @@ public class AdminController {
         if (keyword != null && !keyword.isEmpty()) {
             wrapper.like("order_no", keyword);
         }
-        long total = orderRepository.selectCount(wrapper);
         wrapper.orderByDesc("created_at");
-        wrapper.last("LIMIT " + size + " OFFSET " + (page - 1) * size);
-        List<Order> list = orderRepository.selectList(wrapper);
+        long total = orderRepository.selectCount(wrapper);
+        Page<Order> pageParam = new Page<>(page, size);
+        List<Order> list = orderRepository.selectPage(pageParam, wrapper).getRecords();
         return Result.success(Map.of("data", list, "total", total));
     }
 
@@ -121,10 +122,10 @@ public class AdminController {
             @RequestParam(defaultValue = "10") int size) {
         QueryWrapper<Order> wrapper = new QueryWrapper<>();
         wrapper.eq("deleted", 0).in("status", List.of("dispute", "cancelled"));
-        long total = orderRepository.selectCount(wrapper);
         wrapper.orderByDesc("created_at");
-        wrapper.last("LIMIT " + size + " OFFSET " + (page - 1) * size);
-        List<Order> list = orderRepository.selectList(wrapper);
+        long total = orderRepository.selectCount(wrapper);
+        Page<Order> pageParam = new Page<>(page, size);
+        List<Order> list = orderRepository.selectPage(pageParam, wrapper).getRecords();
         return Result.success(Map.of("data", list, "total", total));
     }
 
@@ -142,7 +143,7 @@ public class AdminController {
         if (order == null) {
             return Result.error(404, "订单不存在");
         }
-        orderRepository.updateCancelled(id, com.jiangwu.enums.OrderStatus.CANCELLED, java.time.LocalDateTime.now(), reason);
+        orderRepository.updateCancelled(id, com.jiangwu.enums.OrderStatus.CANCELLED, LocalDateTime.now(), reason);
         return Result.success();
     }
 
@@ -158,16 +159,24 @@ public class AdminController {
         if (keyword != null && !keyword.isEmpty()) {
             wrapper.like("title", keyword);
         }
-        long total = productRepository.selectCount(wrapper);
         wrapper.orderByDesc("created_at");
-        wrapper.last("LIMIT " + size + " OFFSET " + (page - 1) * size);
-        List<Product> list = productRepository.selectList(wrapper);
+        long total = productRepository.selectCount(wrapper);
+        Page<Product> pageParam = new Page<>(page, size);
+        List<Product> list = productRepository.selectPage(pageParam, wrapper).getRecords();
 
-        // 填充手作人名称
-        for (Product p : list) {
-            Artisan artisan = artisanRepository.findById(p.getArtisanId());
-            if (artisan != null) {
-                p.setCraftParams(Map.of("artisanName", artisan.getName()));
+        // 批量填充手作人名称（避免 N+1）
+        List<Long> artisanIds = list.stream().map(Product::getArtisanId).distinct().toList();
+        if (!artisanIds.isEmpty()) {
+            Map<Long, Artisan> artisanMap = new java.util.HashMap<>();
+            for (Long aid : artisanIds) {
+                Artisan a = artisanRepository.findById(aid);
+                if (a != null) artisanMap.put(aid, a);
+            }
+            for (Product p : list) {
+                Artisan artisan = artisanMap.get(p.getArtisanId());
+                if (artisan != null) {
+                    p.setCraftParams(Map.of("artisanName", artisan.getName()));
+                }
             }
         }
         return Result.success(Map.of("data", list, "total", total));
@@ -210,10 +219,10 @@ public class AdminController {
         if (keyword != null && !keyword.isEmpty()) {
             wrapper.like("name", keyword).or().like("specialty", keyword);
         }
-        long total = artisanRepository.selectCount(wrapper);
         wrapper.orderByDesc("created_at");
-        wrapper.last("LIMIT " + size + " OFFSET " + (page - 1) * size);
-        List<Artisan> list = artisanRepository.selectList(wrapper);
+        long total = artisanRepository.selectCount(wrapper);
+        Page<Artisan> pageParam = new Page<>(page, size);
+        List<Artisan> list = artisanRepository.selectPage(pageParam, wrapper).getRecords();
         return Result.success(Map.of("data", list, "total", total));
     }
 
@@ -234,7 +243,7 @@ public class AdminController {
         }
         String action = body.get("action");
         if ("pass".equals(action)) {
-            artisanRepository.updateStatus(id, ArtisanStatus.VERIFIED, java.time.LocalDateTime.now());
+            artisanRepository.updateStatus(id, ArtisanStatus.VERIFIED, LocalDateTime.now());
         } else if ("reject".equals(action)) {
             artisanRepository.updateStatus(id, ArtisanStatus.REJECTED, null);
         }
