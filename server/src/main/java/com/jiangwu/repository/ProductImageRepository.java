@@ -17,8 +17,8 @@ public interface ProductImageRepository extends BaseMapper<ProductImage> {
     @Select("SELECT image_url FROM t_product_image WHERE product_id = #{productId} ORDER BY sort_order ASC")
     List<String> findImageUrlsByProductId(Long productId);
 
-    @Select("SELECT product_id, image_url FROM t_product_image WHERE product_id IN " +
+    @Select("<script>SELECT product_id, image_url FROM t_product_image WHERE product_id IN " +
             "<foreach collection='productIds' item='id' open='(' separator=',' close=')'>#{id}</foreach> " +
-            "ORDER BY product_id, sort_order ASC")
+            "ORDER BY product_id, sort_order ASC</script>")
     List<Map<String, Object>> findImageUrlsByProductIds(@org.apache.ibatis.annotations.Param("productIds") List<Long> productIds);
 }
