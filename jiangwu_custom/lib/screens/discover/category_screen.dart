@@ -127,7 +127,7 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
                     works: _products,
                     onWorkTap: (product) {
                       Navigator.of(context).pushNamed(
-                        '/product/${product.id}',
+                        AppRoutes.productDetail,
                         arguments: product.id,
                       );
                     },

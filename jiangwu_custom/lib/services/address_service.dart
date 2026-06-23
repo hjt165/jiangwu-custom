@@ -6,13 +6,21 @@ class AddressService {
   final _api = ApiService();
 
   Future<List<Address>> getAddresses() async {
-    final data = await _api.get<List<dynamic>>('/address/list');
-    return data.map((e) => Address.fromJson(Map<String, dynamic>.from(e))).toList();
+    try {
+      final data = await _api.get<List<dynamic>>('/address/list');
+      return data.map((e) => Address.fromJson(Map<String, dynamic>.from(e))).toList();
+    } catch (e) {
+      return [];
+    }
   }
 
-  Future<Address> getAddress(int id) async {
-    final data = await _api.get<Map<String, dynamic>>('/address/$id');
-    return Address.fromJson(data);
+  Future<Address?> getAddress(int id) async {
+    try {
+      final data = await _api.get<Map<String, dynamic>>('/address/$id');
+      return Address.fromJson(data);
+    } catch (e) {
+      return null;
+    }
   }
 
   Future<Address> createAddress({

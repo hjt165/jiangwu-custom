@@ -277,7 +277,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             works: _searchResults,
             onWorkTap: (product) {
               Navigator.of(context).pushNamed(
-                '/product/${product.id}',
+                AppRoutes.productDetail,
                 arguments: product.id,
               );
             },

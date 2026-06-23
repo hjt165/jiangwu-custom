@@ -130,7 +130,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 product: product,
                                 onTap: () {
                                   Navigator.of(context).pushNamed(
-                                    '/product/',
+                                    AppRoutes.productDetail,
                                     arguments: product.id,
                                   );
                                 },

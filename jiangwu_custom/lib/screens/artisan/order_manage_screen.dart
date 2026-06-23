@@ -123,7 +123,7 @@ class _OrderManageScreenState extends ConsumerState<OrderManageScreen>
       onTap: () {
         Navigator.pushNamed(
           context,
-          '/order/${order.id}',
+          AppRoutes.orderDetail,
           arguments: order.id,
         );
       },

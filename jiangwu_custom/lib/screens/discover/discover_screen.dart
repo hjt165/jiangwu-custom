@@ -217,7 +217,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     return GestureDetector(
       onTap: () {
         Navigator.of(context).pushNamed(
-          '/product/${product.id}',
+          AppRoutes.productDetail,
           arguments: product.id,
         );
       },

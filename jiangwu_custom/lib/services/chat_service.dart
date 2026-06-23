@@ -162,7 +162,7 @@ class ChatService {
           if (orderId != null) 'orderId': orderId,
         },
       );
-      final data = response.data['data'];
+      final data = response.data;
       if (data == null) throw Exception('会话数据为空');
       return Conversation.fromJson(data);
     } catch (e) {
@@ -174,7 +174,7 @@ class ChatService {
   Future<List<Conversation>> getConversations() async {
     try {
       final response = await _apiService.get('/chat/conversations');
-      final list = response.data['data'] as List? ?? [];
+      final list = response.data as List? ?? [];
       return list.map((e) => Conversation.fromJson(e)).toList();
     } catch (e) {
       rethrow;
@@ -188,7 +188,7 @@ class ChatService {
         '/chat/messages/$conversationId',
         queryParameters: {'limit': limit},
       );
-      final list = response.data['data'] as List? ?? [];
+      final list = response.data as List? ?? [];
       return list.map((e) => ChatMessage.fromJson(e)).toList();
     } catch (e) {
       rethrow;
@@ -206,7 +206,7 @@ class ChatService {
         '/chat/messages/$conversationId/history',
         queryParameters: {'before': before, 'limit': limit},
       );
-      final list = response.data['data'] as List? ?? [];
+      final list = response.data as List? ?? [];
       return list.map((e) => ChatMessage.fromJson(e)).toList();
     } catch (e) {
       rethrow;
@@ -227,7 +227,7 @@ class ChatService {
         'content': content,
         'messageType': messageType,
       });
-      final data = response.data['data'];
+      final data = response.data;
       if (data == null) throw Exception('发送消息失败');
       return ChatMessage.fromJson(data);
     } catch (e) {
@@ -242,7 +242,7 @@ class ChatService {
         '/chat/unread/$userId',
         queryParameters: {'role': role},
       );
-      return response.data['data']['unreadCount'] ?? 0;
+      return response.data['unreadCount'] ?? 0;
     } catch (e) {
       return 0;
     }

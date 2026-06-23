@@ -27,7 +27,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   void _onProductTap(Product product) {
     Navigator.of(context).pushNamed(
-      '/product/${product.id}',
+      AppRoutes.productDetail,
       arguments: product.id,
     );
   }

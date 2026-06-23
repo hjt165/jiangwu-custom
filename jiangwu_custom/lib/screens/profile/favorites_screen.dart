@@ -110,7 +110,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen>
       works: state.favoriteProducts,
       onWorkTap: (product) {
         Navigator.of(context).pushNamed(
-          '/product/${product.id}',
+          AppRoutes.productDetail,
           arguments: product.id,
         );
       },
@@ -158,7 +158,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen>
             ),
             onTap: () {
               Navigator.of(context).pushNamed(
-                '/artisan/${artisan['artisanId']}',
+                AppRoutes.artisanProfile,
                 arguments: artisan['artisanId'].toString(),
               );
             },

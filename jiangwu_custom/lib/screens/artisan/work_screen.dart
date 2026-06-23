@@ -213,7 +213,7 @@ class _WorkScreenState extends ConsumerState<WorkScreen> {
               onTap: () {
                 Navigator.pushNamed(
                   context,
-                  '/order/${order.id}',
+                  AppRoutes.orderDetail,
                   arguments: order.id,
                 );
               },
