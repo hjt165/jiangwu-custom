@@ -38,6 +38,19 @@ public class AdminController {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final ArtisanRepository artisanRepository;
+    private final com.jiangwu.service.WorkflowService workflowService;
+    private final org.springframework.data.redis.core.StringRedisTemplate redisTemplate;
+
+    private static final String SETTINGS_KEY = "admin:settings";
+    private static final Map<String, Object> DEFAULT_SETTINGS = new HashMap<>() {{
+        put("siteName", "匠物定制");
+        put("servicePhone", "400-123-4567");
+        put("announcement", "");
+        put("autoConfirmDays", 7);
+        put("disputeDays", 7);
+        put("orderNotify", true);
+        put("disputeNotify", true);
+    }};
 
     // ==================== 认证 ====================
 
@@ -145,7 +158,18 @@ public class AdminController {
         if (order == null) {
             return Result.error(404, "订单不存在");
         }
+        // 校验：已完成或已取消的订单不能取消
+        com.jiangwu.enums.OrderStatus status = order.getStatus();
+        if (com.jiangwu.enums.OrderStatus.COMPLETED == status || com.jiangwu.enums.OrderStatus.CANCELLED == status) {
+            return Result.error(400, "订单状态不允许取消");
+        }
         orderRepository.updateCancelled(id, com.jiangwu.enums.OrderStatus.CANCELLED, LocalDateTime.now(), reason);
+        // 取消工作流
+        try {
+            workflowService.cancelProcess(id);
+        } catch (Exception e) {
+            // 工作流取消失败不影响主流程
+        }
         return Result.success();
     }
 
@@ -271,26 +295,29 @@ public class AdminController {
         return Result.success(statsService.getUserStats(startDate, endDate));
     }
 
-    // ==================== 系统设置 ====================
-
-    private final Map<String, Object> settingsStore = new HashMap<>() {{
-        put("siteName", "匠物定制");
-        put("servicePhone", "400-123-4567");
-        put("announcement", "");
-        put("autoConfirmDays", 7);
-        put("disputeDays", 7);
-        put("orderNotify", true);
-        put("disputeNotify", true);
-    }};
+    // ==================== 系统设置（Redis 持久化） ====================
 
     @GetMapping("/settings")
     public Result<Map<String, Object>> getSettings() {
-        return Result.success(settingsStore);
+        try {
+            String json = redisTemplate.opsForValue().get(SETTINGS_KEY);
+            if (json != null) {
+                return Result.success(new com.fasterxml.jackson.databind.ObjectMapper().readValue(json, Map.class));
+            }
+        } catch (Exception e) {
+            // Redis 不可用时返回默认设置
+        }
+        return Result.success(DEFAULT_SETTINGS);
     }
 
     @PutMapping("/settings")
     public Result<Void> saveSettings(@RequestBody Map<String, Object> body) {
-        settingsStore.putAll(body);
+        try {
+            String json = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(body);
+            redisTemplate.opsForValue().set(SETTINGS_KEY, json);
+        } catch (Exception e) {
+            return Result.error(500, "保存设置失败");
+        }
         return Result.success();
     }
 }
