@@ -128,6 +128,9 @@ local.properties
 jdk-17.0.2/
 jdk17.zip
 
+# ==================== Redis ====================
+dump.rdb
+
 # ==================== Playwright ====================
 admin/test-results/
 admin/playwright-report/
