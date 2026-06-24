@@ -16,9 +16,9 @@ class StorageService {
 
   SharedPreferences? _prefs;
 
-  /// 初始化
+  /// 初始化（幂等，多次调用安全）
   Future<void> init() async {
-    _prefs = await SharedPreferences.getInstance();
+    _prefs ??= await SharedPreferences.getInstance();
   }
 
   // ==================== 基础操作 ====================
@@ -174,5 +174,7 @@ class StorageService {
 
 /// 存储服务Provider
 final storageServiceProvider = Provider<StorageService>((ref) {
-  return StorageService();
+  final service = StorageService();
+  service.init();
+  return service;
 });
