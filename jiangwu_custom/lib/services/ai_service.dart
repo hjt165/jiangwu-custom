@@ -482,7 +482,7 @@ class ArtisanRecommend {
 
   factory ArtisanRecommend.fromJson(Map<String, dynamic> json) {
     return ArtisanRecommend(
-      id: json['id'].toString(),
+      id: (json['id'] ?? '').toString(),
       name: json['name'] ?? '',
       avatar: json['avatar'],
       specialty: json['specialty'],
@@ -544,7 +544,7 @@ class SolutionRecommend {
 
   factory SolutionRecommend.fromJson(Map<String, dynamic> json) {
     return SolutionRecommend(
-      id: json['id'].toString(),
+      id: (json['id'] ?? '').toString(),
       title: json['title'] ?? '',
       description: json['description'],
       materials: List<String>.from(json['materials'] ?? []),
@@ -603,7 +603,7 @@ class SimilarCase {
 
   factory SimilarCase.fromJson(Map<String, dynamic> json) {
     return SimilarCase(
-      id: json['id'].toString(),
+      id: (json['id'] ?? '').toString(),
       title: json['title'] ?? '',
       description: json['description'],
       imageUrl: json['image_url'],

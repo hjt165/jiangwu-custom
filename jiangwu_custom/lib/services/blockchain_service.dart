@@ -106,8 +106,8 @@ class BlockchainRecord {
 
   factory BlockchainRecord.fromJson(Map<String, dynamic> json) {
     return BlockchainRecord(
-      id: json['id'].toString(),
-      orderId: json['orderId'].toString(),
+      id: (json['id'] ?? '').toString(),
+      orderId: (json['orderId'] ?? '').toString(),
       type: json['type'] ?? '',
       transactionId: json['transactionId'],
       blockHash: json['blockHash'],
@@ -177,7 +177,7 @@ class TraceChain {
 
   factory TraceChain.fromJson(Map<String, dynamic> json) {
     return TraceChain(
-      orderId: json['orderId'].toString(),
+      orderId: (json['orderId'] ?? '').toString(),
       records: (json['records'] as List<dynamic>?)
               ?.map((e) => BlockchainRecord.fromJson(e))
               .toList() ??

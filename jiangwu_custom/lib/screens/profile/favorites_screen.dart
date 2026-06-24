@@ -130,7 +130,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen>
             onTap: () {
               Navigator.of(context).pushNamed(
                 AppRoutes.artisanProfile,
-                arguments: artisan['artisanId'].toString(),
+                arguments: (artisan['artisanId'] ?? '').toString(),
               );
             },
           ),
