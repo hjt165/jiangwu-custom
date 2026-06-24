@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../app/constants.dart';
 import 'image_picker_grid.dart';
+import '../common/app_card.dart';
 
 /// 反馈表单组件
 /// 用于阶段确认时提交反馈
@@ -56,14 +57,8 @@ class FeedbackFormState extends State<FeedbackForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
+    return AppCard(
       padding: const EdgeInsets.all(AppSizes.paddingMedium),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-        boxShadow: AppSizes.cardShadow,
-      ),
       child: Form(
         key: _formKey,
         child: Column(

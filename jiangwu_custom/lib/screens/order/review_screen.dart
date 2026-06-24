@@ -6,6 +6,7 @@ import '../../providers/order_provider.dart';
 import '../../widgets/business/rating_selector.dart';
 import '../../widgets/business/tag_selector.dart';
 import '../../widgets/business/image_picker_grid.dart';
+import '../../widgets/common/app_card.dart';
 import '../../widgets/common/async_data_view.dart';
 import '../../widgets/common/button_widget.dart';
 import '../../widgets/common/bottom_bar_widget.dart';
@@ -104,13 +105,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
   }
 
   Widget _buildOrderSummary(Order order) {
-    return Container(
-      padding: const EdgeInsets.all(AppSizes.paddingMedium),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-        boxShadow: AppSizes.cardShadow,
-      ),
+    return AppCard(
       child: Row(
         children: [
           // 商品图片

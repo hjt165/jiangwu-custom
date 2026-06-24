@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../app/constants.dart';
+import '../common/app_card.dart';
 
 /// 提现记录卡片组件
 /// 展示单条提现记录信息
@@ -24,14 +25,8 @@ class WithdrawRecordCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AppCard(
       margin: const EdgeInsets.only(bottom: AppSizes.paddingMedium),
-      padding: const EdgeInsets.all(AppSizes.paddingMedium),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-        boxShadow: AppSizes.cardShadow,
-      ),
       child: Row(
         children: [
           // 提现图标

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../app/constants.dart';
 import '../../../utils/date_utils.dart';
 import '../../models/order.dart';
+import '../common/app_card.dart';
 
 /// 阶段时间线组件
 /// 展示订单各阶段的进度和状态
@@ -22,13 +23,8 @@ class StageTimeline extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return Container(
+    return AppCard(
       padding: const EdgeInsets.all(AppSizes.paddingMedium),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-        boxShadow: AppSizes.cardShadow,
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

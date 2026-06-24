@@ -5,6 +5,7 @@ import '../../providers/artisan_income_provider.dart';
 import '../../widgets/business/income_chart.dart';
 import '../../widgets/business/withdraw_record_card.dart';
 import '../../widgets/common/async_data_view.dart';
+import '../../widgets/common/app_card.dart';
 import '../../widgets/common/button_widget.dart';
 
 /// 手作人收入统计页面
@@ -181,14 +182,8 @@ class _IncomeScreenState extends ConsumerState<IncomeScreen>
   }
 
   Widget _buildIncomeRecordCard(Map<String, dynamic> record) {
-    return Container(
+    return AppCard(
       margin: const EdgeInsets.only(bottom: AppSizes.paddingMedium),
-      padding: const EdgeInsets.all(AppSizes.paddingMedium),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-        boxShadow: AppSizes.cardShadow,
-      ),
       child: Row(
         children: [
           Container(

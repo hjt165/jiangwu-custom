@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../app/constants.dart';
+import '../common/app_card.dart';
 
 /// 收入统计图表组件
 /// 展示收入趋势折线图（简化版，无第三方图表库）
@@ -18,13 +19,7 @@ class IncomeChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSizes.paddingMedium),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-        boxShadow: AppSizes.cardShadow,
-      ),
+    return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

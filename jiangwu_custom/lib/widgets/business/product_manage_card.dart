@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../app/constants.dart';
 import '../../models/product.dart';
 import '../common/image_widget.dart';
+import '../common/app_card.dart';
 
 /// 作品管理卡片组件
 /// 展示手作人作品信息，支持上下架操作
@@ -26,14 +27,8 @@ class ProductManageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AppCard(
         margin: const EdgeInsets.only(bottom: AppSizes.paddingMedium),
-        padding: const EdgeInsets.all(AppSizes.paddingMedium),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-          boxShadow: AppSizes.cardShadow,
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

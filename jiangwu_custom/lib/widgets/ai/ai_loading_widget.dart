@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../app/constants.dart';
+import '../common/app_card.dart';
 
 /// AI加载状态组件
 /// 展示AI分析/推荐过程中的加载状态
@@ -44,14 +45,9 @@ class _AiLoadingWidgetState extends State<AiLoadingWidget>
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Container(
-        padding: const EdgeInsets.all(AppSizes.spacingLarge),
+      child: AppCard(
         margin: const EdgeInsets.all(AppSizes.spacingMedium),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-          boxShadow: AppSizes.cardShadow,
-        ),
+        padding: const EdgeInsets.all(AppSizes.spacingLarge),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -137,14 +133,9 @@ class AiProgressWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSizes.spacingMedium),
+    return AppCard(
       margin: const EdgeInsets.all(AppSizes.spacingMedium),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-        boxShadow: AppSizes.cardShadow,
-      ),
+      padding: const EdgeInsets.all(AppSizes.spacingMedium),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

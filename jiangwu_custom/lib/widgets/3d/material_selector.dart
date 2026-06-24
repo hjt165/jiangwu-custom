@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../app/constants.dart';
+import '../common/app_card.dart';
 
 /// 3D材质选择器组件
 /// 用于选择和预览模型材质/颜色
@@ -18,13 +19,8 @@ class MaterialSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AppCard(
       padding: const EdgeInsets.all(AppSizes.paddingMedium),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-        boxShadow: AppSizes.cardShadow,
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

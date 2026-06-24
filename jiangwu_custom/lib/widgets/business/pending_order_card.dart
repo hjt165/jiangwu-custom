@@ -3,6 +3,7 @@ import '../../app/constants.dart';
 import '../../models/order.dart';
 import '../common/image_widget.dart';
 import '../common/button_widget.dart';
+import '../common/app_card.dart';
 
 /// 待处理订单卡片组件
 /// 展示单个待处理订单信息，支持接受/拒绝操作
@@ -25,14 +26,8 @@ class PendingOrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AppCard(
         margin: const EdgeInsets.only(bottom: AppSizes.paddingMedium),
-        padding: const EdgeInsets.all(AppSizes.paddingMedium),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-          boxShadow: AppSizes.cardShadow,
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

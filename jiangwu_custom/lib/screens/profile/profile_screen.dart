@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:developer' as developer;
 import '../../app/constants.dart';
+import '../../widgets/common/app_card.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/order_provider.dart';
 import '../../models/order.dart';
@@ -157,14 +158,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Widget _buildOrderStats(BuildContext context) {
     return RepaintBoundary(
-      child: Container(
+      child: AppCard(
         margin: const EdgeInsets.all(AppSizes.paddingMedium),
-        padding: const EdgeInsets.all(AppSizes.paddingMedium),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-          boxShadow: AppSizes.cardShadow,
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

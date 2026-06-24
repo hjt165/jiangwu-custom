@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/constants.dart';
 import '../../models/order.dart';
 import '../../providers/artisan_order_provider.dart';
+import '../../widgets/common/app_card.dart';
 import '../../widgets/common/async_data_view.dart';
 
 /// 手作人订单管理页面
@@ -115,14 +116,8 @@ class _OrderManageScreenState extends ConsumerState<OrderManageScreen>
           arguments: order.id,
         );
       },
-      child: Container(
+      child: AppCard(
         margin: const EdgeInsets.only(bottom: AppSizes.paddingMedium),
-        padding: const EdgeInsets.all(AppSizes.paddingMedium),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-          boxShadow: AppSizes.cardShadow,
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../app/constants.dart';
 import '../../models/order.dart';
+import '../common/app_card.dart';
 
 /// 交付内容展示组件
 /// 展示手作人提交的交付图片和备注
@@ -15,14 +16,8 @@ class StageDeliverCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
+    return AppCard(
       padding: const EdgeInsets.all(AppSizes.paddingMedium),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-        boxShadow: AppSizes.cardShadow,
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

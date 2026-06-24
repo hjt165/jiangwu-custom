@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../app/constants.dart';
+import '../common/app_card.dart';
 
 /// 工作台统计卡片组件
 /// 展示待处理订单、今日订单、本月收入、作品总数
@@ -20,13 +21,8 @@ class WorkspaceStatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AppCard(
       padding: const EdgeInsets.all(AppSizes.paddingMedium),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-        boxShadow: AppSizes.cardShadow,
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

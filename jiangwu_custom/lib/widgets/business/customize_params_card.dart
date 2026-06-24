@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../app/constants.dart';
 import '../../models/customization.dart';
+import '../common/app_card.dart';
 
 /// 定制参数展示组件
 /// 只读展示用户选择的定制参数
@@ -15,14 +16,8 @@ class CustomizeParamsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
+    return AppCard(
       padding: const EdgeInsets.all(AppSizes.paddingMedium),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-        boxShadow: AppSizes.cardShadow,
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

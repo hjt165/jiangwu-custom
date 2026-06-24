@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../app/constants.dart';
 import '../../models/order.dart';
+import '../common/app_card.dart';
 
 /// 订单信息卡片组件
 /// 展示产品信息、手作人信息、定制参数
@@ -17,13 +18,8 @@ class OrderInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AppCard(
       padding: const EdgeInsets.all(AppSizes.paddingMedium),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-        boxShadow: AppSizes.cardShadow,
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

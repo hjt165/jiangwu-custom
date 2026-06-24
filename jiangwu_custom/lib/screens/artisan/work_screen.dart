@@ -5,6 +5,7 @@ import '../../providers/artisan_workspace_provider.dart';
 import '../../providers/artisan_order_provider.dart';
 import '../../widgets/business/workspace_stats_card.dart';
 import '../../widgets/business/pending_order_card.dart';
+import '../../widgets/common/app_card.dart';
 import '../../widgets/common/async_data_view.dart';
 import '../../widgets/common/empty_widget.dart';
 
@@ -81,13 +82,7 @@ class _WorkScreenState extends ConsumerState<WorkScreen> {
   }
 
   Widget _buildQuickActions() {
-    return Container(
-      padding: const EdgeInsets.all(AppSizes.paddingMedium),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
-        boxShadow: AppSizes.cardShadow,
-      ),
+    return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
