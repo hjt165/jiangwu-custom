@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
+import '../../../utils/date_utils.dart';
+import '../../../utils/chat_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/constants.dart';
 import '../../models/order.dart';
 import '../../providers/order_provider.dart';
-import '../../services/chat_service.dart';
-import '../../services/auth_service.dart';
 import '../../services/blockchain_service.dart';
 import '../../widgets/business/order_status_header.dart';
 import '../../widgets/business/order_info_card.dart';
 import '../../widgets/business/stage_timeline.dart';
-import '../../widgets/common/loading_widget.dart';
-import '../../widgets/common/error_widget.dart';
-import '../../widgets/common/empty_widget.dart';
+import '../../widgets/common/async_data_view.dart';
 import '../../widgets/common/button_widget.dart';
+import '../../widgets/common/bottom_bar_widget.dart';
 import '../../utils/share_utils.dart';
 import '../chat/chat_screen.dart';
 
@@ -60,81 +59,72 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
   }
 
   Widget _buildBody(OrderProvider orderState) {
-    if (orderState.isLoading && orderState.currentOrder == null) {
-      return const LoadingWidget();
-    }
+    return AsyncDataView(
+      isLoading: orderState.isLoading && orderState.currentOrder == null,
+      error: orderState.currentOrder == null ? orderState.error : null,
+      isEmpty: orderState.currentOrder == null,
+      onRetry: () => ref.read(orderProvider.notifier).fetchOrderDetail(widget.orderId),
+      emptyMessage: '订单不存在',
+      builder: (context) {
+        final order = orderState.currentOrder!;
+        return RefreshIndicator(
+          onRefresh: () async {
+            await ref.read(orderProvider.notifier).fetchOrderDetail(widget.orderId);
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              children: [
+                // 状态头部
+                OrderStatusHeader(order: order),
+                const SizedBox(height: AppSizes.spacingMedium),
 
-    if (orderState.error != null && orderState.currentOrder == null) {
-      return CustomErrorWidget(
-        message: orderState.error!,
-        onRetry: () {
-          ref.read(orderProvider.notifier).fetchOrderDetail(widget.orderId);
-        },
-      );
-    }
-
-    if (orderState.currentOrder == null) {
-      return const EmptyWidget(message: '订单不存在');
-    }
-
-    final order = orderState.currentOrder!;
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        await ref.read(orderProvider.notifier).fetchOrderDetail(widget.orderId);
-      },
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Column(
-          children: [
-            // 状态头部
-            OrderStatusHeader(order: order),
-            const SizedBox(height: AppSizes.spacingMedium),
-
-            // 订单信息卡片
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
-              child: OrderInfoCard(
-                order: order,
-                onContactArtisan: () => _handleContactArtisan(order),
-              ),
-            ),
-            const SizedBox(height: AppSizes.spacingMedium),
-
-            // 阶段时间线
-            if (order.stages.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
-                child: StageTimeline(
-                  stages: order.stages,
-                  currentStage: order.currentStage,
+                // 订单信息卡片
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
+                  child: OrderInfoCard(
+                    order: order,
+                    onContactArtisan: () => _handleContactArtisan(order),
+                  ),
                 ),
-              ),
-            const SizedBox(height: AppSizes.spacingMedium),
+                const SizedBox(height: AppSizes.spacingMedium),
 
-            // 支付信息
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
-              child: _buildPaymentInfo(order),
-            ),
-            const SizedBox(height: AppSizes.spacingMedium),
+                // 阶段时间线
+                if (order.stages.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
+                    child: StageTimeline(
+                      stages: order.stages,
+                      currentStage: order.currentStage,
+                    ),
+                  ),
+                const SizedBox(height: AppSizes.spacingMedium),
 
-            // 订单信息
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
-              child: _buildOrderInfo(order),
-            ),
-            const SizedBox(height: AppSizes.spacingMedium),
+                // 支付信息
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
+                  child: _buildPaymentInfo(order),
+                ),
+                const SizedBox(height: AppSizes.spacingMedium),
 
-            // 溯源信息
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
-              child: _buildTraceInfo(order),
+                // 订单信息
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
+                  child: _buildOrderInfo(order),
+                ),
+                const SizedBox(height: AppSizes.spacingMedium),
+
+                // 溯源信息
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMedium),
+                  child: _buildTraceInfo(order),
+                ),
+                const SizedBox(height: 100), // 底部留白
+              ],
             ),
-            const SizedBox(height: 100), // 底部留白
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -239,12 +229,12 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
           ),
           const SizedBox(height: AppSizes.paddingMedium),
           _buildInfoRow('订单编号', order.orderNo),
-          _buildInfoRow('创建时间', _formatDateTime(order.createdAt)),
-          _buildInfoRow('更新时间', _formatDateTime(order.updatedAt)),
+          _buildInfoRow('创建时间', AppDateUtils.formatYMDHM(order.createdAt)),
+          _buildInfoRow('更新时间', AppDateUtils.formatYMDHM(order.updatedAt)),
           if (order.paidAt != null)
-            _buildInfoRow('支付时间', _formatDateTime(order.paidAt!)),
+            _buildInfoRow('支付时间', AppDateUtils.formatYMDHM(order.paidAt!)),
           if (order.completedAt != null)
-            _buildInfoRow('完成时间', _formatDateTime(order.completedAt!)),
+            _buildInfoRow('完成时间', AppDateUtils.formatYMDHM(order.completedAt!)),
         ],
       ),
     );
@@ -390,23 +380,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
   }
 
   Widget _buildBottomBar(Order order) {
-    return Container(
-      padding: EdgeInsets.only(
-        left: AppSizes.paddingMedium,
-        right: AppSizes.paddingMedium,
-        top: AppSizes.paddingMedium,
-        bottom: MediaQuery.of(context).padding.bottom + AppSizes.paddingMedium,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
+    return BottomBarContainer(
       child: Row(
         children: [
           // 根据状态显示不同按钮
@@ -439,16 +413,8 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
           if (order.status == OrderStatus.completed && order.review == null) ...[
             Expanded(
               child: ButtonWidget(
-                text: '评价',
+                text: '去评价',
                 onPressed: () => _handleReviewOrder(order),
-              ),
-            ),
-          ],
-          if (order.status == OrderStatus.producing) ...[
-            Expanded(
-              child: ButtonWidget(
-                text: '联系手作人',
-                onPressed: () => _handleContactArtisan(order),
               ),
             ),
           ],
@@ -500,37 +466,8 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     Navigator.pushNamed(context, AppRoutes.review, arguments: order.id);
   }
 
-  void _handleContactArtisan(Order order) async {
-    final user = ref.read(authServiceProvider).currentUser;
-    if (user == null || order.artisanId == null) return;
-
-    try {
-      final chatService = ref.read(chatServiceProvider);
-      final conversation = await chatService.getOrCreateConversation(
-        int.parse(user.id),
-        int.parse(order.artisanId!),
-        orderId: int.tryParse(order.id),
-      );
-
-      if (mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ChatScreen(
-              conversationId: conversation.id,
-              otherName: order.artisan?.name ?? '手作人',
-              otherAvatar: order.artisan?.avatar,
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('创建会话失败: $e')),
-        );
-      }
-    }
+  void _handleContactArtisan(Order order) {
+    ChatUtils.contactArtisan(context, ref, order);
   }
 
   void _showMoreActions() {
@@ -608,7 +545,4 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
     );
   }
 
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-  }
 }

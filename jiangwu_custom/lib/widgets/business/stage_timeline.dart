@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../app/constants.dart';
+import '../../../utils/date_utils.dart';
 import '../../models/order.dart';
 
 /// 阶段时间线组件
@@ -166,7 +167,7 @@ class StageTimeline extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(
-                        '完成于 ${_formatDateTime(stage.completedAt!)}',
+                        '完成于 ${AppDateUtils.formatYMDHM(stage.completedAt!)}',
                         style: const TextStyle(
                           fontSize: 11,
                           color: AppColors.textHint,
@@ -225,7 +226,4 @@ class StageTimeline extends StatelessWidget {
     );
   }
 
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-  }
 }

@@ -6,9 +6,9 @@ import '../../providers/order_provider.dart';
 import '../../widgets/business/rating_selector.dart';
 import '../../widgets/business/tag_selector.dart';
 import '../../widgets/business/image_picker_grid.dart';
-import '../../widgets/common/loading_widget.dart';
-import '../../widgets/common/error_widget.dart';
+import '../../widgets/common/async_data_view.dart';
 import '../../widgets/common/button_widget.dart';
+import '../../widgets/common/bottom_bar_widget.dart';
 
 /// 评价页面
 /// 用户对完成的订单进行评分和评价
@@ -62,25 +62,13 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
   }
 
   Widget _buildBody(OrderProvider orderState) {
-    if (orderState.isLoading && orderState.currentOrder == null) {
-      return const LoadingWidget();
-    }
-
-    if (orderState.error != null && orderState.currentOrder == null) {
-      return CustomErrorWidget(
-        message: orderState.error!,
-        onRetry: () {
-          ref.read(orderProvider.notifier).fetchOrderDetail(widget.orderId);
-        },
-      );
-    }
-
-    if (orderState.currentOrder == null) {
-      return const Center(
-        child: Text('订单不存在', style: TextStyle(color: AppColors.textSecondary)),
-      );
-    }
-
+    return AsyncDataView(
+      isLoading: orderState.isLoading && orderState.currentOrder == null,
+      error: orderState.currentOrder == null ? orderState.error : null,
+      isEmpty: orderState.currentOrder == null,
+      onRetry: () => ref.read(orderProvider.notifier).fetchOrderDetail(widget.orderId),
+      emptyMessage: '订单不存在',
+      builder: (context) {
     final order = orderState.currentOrder!;
 
     return SingleChildScrollView(
@@ -110,6 +98,8 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
           const SizedBox(height: 100),
         ],
       ),
+    );
+      },
     );
   }
 
@@ -327,23 +317,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
   }
 
   Widget _buildBottomBar() {
-    return Container(
-      padding: EdgeInsets.only(
-        left: AppSizes.paddingMedium,
-        right: AppSizes.paddingMedium,
-        top: AppSizes.paddingMedium,
-        bottom: MediaQuery.of(context).padding.bottom + AppSizes.paddingMedium,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
+    return BottomBarContainer(
       child: ButtonWidget(
         text: _isSubmitting ? '提交中...' : '提交评价',
         isLoading: _isSubmitting,

@@ -5,8 +5,7 @@ import '../../providers/artisan_workspace_provider.dart';
 import '../../providers/artisan_order_provider.dart';
 import '../../widgets/business/workspace_stats_card.dart';
 import '../../widgets/business/pending_order_card.dart';
-import '../../widgets/common/loading_widget.dart';
-import '../../widgets/common/error_widget.dart';
+import '../../widgets/common/async_data_view.dart';
 import '../../widgets/common/empty_widget.dart';
 
 /// 手作人工作台页面
@@ -49,40 +48,33 @@ class _WorkScreenState extends ConsumerState<WorkScreen> {
   }
 
   Widget _buildBody(ArtisanWorkspaceProvider workspaceState) {
-    if (workspaceState.isLoading && workspaceState.pendingOrders.isEmpty) {
-      return const LoadingWidget();
-    }
-
-    if (workspaceState.error != null && workspaceState.pendingOrders.isEmpty) {
-      return CustomErrorWidget(
-        message: workspaceState.error!,
-        onRetry: () {
-          ref.read(artisanWorkspaceProvider.notifier).fetchWorkspaceData();
+    return AsyncDataView(
+      isLoading: workspaceState.isLoading && workspaceState.pendingOrders.isEmpty && workspaceState.stats.isEmpty,
+      error: workspaceState.stats.isEmpty ? workspaceState.error : null,
+      isEmpty: false,
+      onRetry: () => ref.read(artisanWorkspaceProvider.notifier).fetchWorkspaceData(),
+      builder: (context) => RefreshIndicator(
+        onRefresh: () async {
+          await ref.read(artisanWorkspaceProvider.notifier).fetchWorkspaceData();
         },
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        await ref.read(artisanWorkspaceProvider.notifier).fetchWorkspaceData();
-      },
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(AppSizes.paddingMedium),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            WorkspaceStatsCard(
-              pendingOrders: workspaceState.stats['pendingOrders'] ?? 0,
-              todayOrders: workspaceState.stats['todayOrders'] ?? 0,
-              monthIncome: (workspaceState.stats['monthIncome'] ?? 0.0).toDouble(),
-              totalWorks: workspaceState.stats['totalWorks'] ?? 0,
-            ),
-            const SizedBox(height: AppSizes.spacingLarge),
-            _buildQuickActions(),
-            const SizedBox(height: AppSizes.spacingLarge),
-            _buildPendingOrders(workspaceState),
-          ],
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(AppSizes.paddingMedium),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              WorkspaceStatsCard(
+                pendingOrders: workspaceState.stats['pendingOrders'] ?? 0,
+                todayOrders: workspaceState.stats['todayOrders'] ?? 0,
+                monthIncome: (workspaceState.stats['monthIncome'] ?? 0.0).toDouble(),
+                totalWorks: workspaceState.stats['totalWorks'] ?? 0,
+              ),
+              const SizedBox(height: AppSizes.spacingLarge),
+              _buildQuickActions(),
+              const SizedBox(height: AppSizes.spacingLarge),
+              _buildPendingOrders(workspaceState),
+            ],
+          ),
         ),
       ),
     );
@@ -203,7 +195,7 @@ class _WorkScreenState extends ConsumerState<WorkScreen> {
         ),
         const SizedBox(height: AppSizes.spacingSmall),
         if (workspaceState.pendingOrders.isEmpty)
-          const EmptyWidget(message: '暂无待处理订单')
+          EmptyWidget(message: '暂无待处理订单')
         else
           ...workspaceState.pendingOrders.take(3).map((order) {
             return PendingOrderCard(

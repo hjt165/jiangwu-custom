@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/constants.dart';
+import '../../../utils/date_utils.dart';
+import '../../../utils/chat_utils.dart';
 import '../../models/order.dart';
 import '../../providers/order_provider.dart';
-import '../../services/chat_service.dart';
-import '../../services/auth_service.dart';
 import '../../widgets/business/stage_deliver_card.dart';
 import '../../widgets/business/feedback_form.dart';
-import '../../widgets/common/loading_widget.dart';
-import '../../widgets/common/error_widget.dart';
+import '../../widgets/common/async_data_view.dart';
 import '../../widgets/common/button_widget.dart';
+import '../../widgets/common/bottom_bar_widget.dart';
 import '../chat/chat_screen.dart';
 
 /// 阶段确认页面
@@ -48,38 +48,10 @@ class _StageConfirmScreenState extends ConsumerState<StageConfirmScreen> {
         title: const Text('阶段确认'),
         actions: [
           IconButton(
-            onPressed: () async {
+            onPressed: () {
               final order = ref.read(orderProvider).currentOrder;
               if (order != null) {
-                final user = ref.read(authServiceProvider).currentUser;
-                if (user != null && order.artisanId != null) {
-                  try {
-                    final chatService = ref.read(chatServiceProvider);
-                    final conversation = await chatService.getOrCreateConversation(
-                      int.parse(user.id),
-                      int.parse(order.artisanId!),
-                      orderId: int.tryParse(order.id),
-                    );
-                    if (mounted) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ChatScreen(
-                            conversationId: conversation.id,
-                            otherName: order.artisan?.name ?? '手作人',
-                            otherAvatar: order.artisan?.avatar,
-                          ),
-                        ),
-                      );
-                    }
-                  } catch (e) {
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('创建会话失败: $e')),
-                      );
-                    }
-                  }
-                }
+                ChatUtils.contactArtisan(context, ref, order);
               }
             },
             icon: const Icon(Icons.chat_outlined),
@@ -94,25 +66,13 @@ class _StageConfirmScreenState extends ConsumerState<StageConfirmScreen> {
   }
 
   Widget _buildBody(OrderProvider orderState) {
-    if (orderState.isLoading && orderState.currentOrder == null) {
-      return const LoadingWidget();
-    }
-
-    if (orderState.error != null && orderState.currentOrder == null) {
-      return CustomErrorWidget(
-        message: orderState.error!,
-        onRetry: () {
-          ref.read(orderProvider.notifier).fetchOrderDetail(widget.orderId);
-        },
-      );
-    }
-
-    if (orderState.currentOrder == null) {
-      return const Center(
-        child: Text('订单不存在', style: TextStyle(color: AppColors.textSecondary)),
-      );
-    }
-
+    return AsyncDataView(
+      isLoading: orderState.isLoading && orderState.currentOrder == null,
+      error: orderState.currentOrder == null ? orderState.error : null,
+      isEmpty: orderState.currentOrder == null,
+      onRetry: () => ref.read(orderProvider.notifier).fetchOrderDetail(widget.orderId),
+      emptyMessage: '订单不存在',
+      builder: (context) {
     final order = orderState.currentOrder!;
     final currentStage = order.currentStageDetail;
 
@@ -145,6 +105,8 @@ class _StageConfirmScreenState extends ConsumerState<StageConfirmScreen> {
           const SizedBox(height: 100),
         ],
       ),
+    );
+      },
     );
   }
 
@@ -224,7 +186,7 @@ class _StageConfirmScreenState extends ConsumerState<StageConfirmScreen> {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  '截止时间：${_formatDateTime(stage.dueDate!)}',
+                  '截止时间：${AppDateUtils.formatYMDHM(stage.dueDate!)}',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.white.withValues(alpha: 0.8),
@@ -239,23 +201,7 @@ class _StageConfirmScreenState extends ConsumerState<StageConfirmScreen> {
   }
 
   Widget _buildBottomBar(Order order) {
-    return Container(
-      padding: EdgeInsets.only(
-        left: AppSizes.paddingMedium,
-        right: AppSizes.paddingMedium,
-        top: AppSizes.paddingMedium,
-        bottom: MediaQuery.of(context).padding.bottom + AppSizes.paddingMedium,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
+    return BottomBarContainer(
       child: Row(
         children: [
           // 联系手作人按钮
@@ -263,39 +209,8 @@ class _StageConfirmScreenState extends ConsumerState<StageConfirmScreen> {
             child: ButtonWidget(
               text: '联系手作人',
               isOutlined: true,
-              onPressed: () async {
-                final order = ref.read(orderProvider).currentOrder;
-                if (order != null) {
-                  final user = ref.read(authServiceProvider).currentUser;
-                  if (user != null && order.artisanId != null) {
-                    try {
-                      final chatService = ref.read(chatServiceProvider);
-                      final conversation = await chatService.getOrCreateConversation(
-                        int.parse(user.id),
-                        int.parse(order.artisanId!),
-                        orderId: int.tryParse(order.id),
-                      );
-                      if (mounted) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ChatScreen(
-                              conversationId: conversation.id,
-                              otherName: order.artisan?.name ?? '手作人',
-                              otherAvatar: order.artisan?.avatar,
-                            ),
-                          ),
-                        );
-                      }
-                    } catch (e) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('创建会话失败: $e')),
-                        );
-                      }
-                    }
-                  }
-                }
+              onPressed: () {
+                ChatUtils.contactArtisan(context, ref, order);
               },
             ),
           ),
@@ -376,7 +291,4 @@ class _StageConfirmScreenState extends ConsumerState<StageConfirmScreen> {
     }
   }
 
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-  }
 }

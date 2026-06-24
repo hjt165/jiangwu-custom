@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/constants.dart';
 import '../../models/address.dart';
 import '../../providers/address_provider.dart';
+import '../../widgets/common/async_data_view.dart';
 
 /// 地址列表页
 class AddressListScreen extends ConsumerStatefulWidget {
@@ -33,30 +34,15 @@ class _AddressListScreenState extends ConsumerState<AddressListScreen> {
           ),
         ],
       ),
-      body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : state.addresses.isEmpty
-              ? _buildEmpty()
-              : _buildList(state.addresses),
-    );
-  }
-
-  Widget _buildEmpty() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.location_off, size: 64, color: AppColors.textHint.withValues(alpha: 0.5)),
-          const SizedBox(height: AppSizes.spacingMedium),
-          const Text('暂无收货地址', style: TextStyle(color: AppColors.textSecondary)),
-          const SizedBox(height: AppSizes.spacingLarge),
-          ElevatedButton.icon(
-            onPressed: () => Navigator.pushNamed(context, AppRoutes.addressEdit),
-            icon: const Icon(Icons.add, size: 16),
-            label: const Text('新增地址'),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-          ),
-        ],
+      body: AsyncDataView(
+        isLoading: state.isLoading,
+        isEmpty: state.addresses.isEmpty,
+        onRetry: () => ref.read(addressProvider.notifier).loadAddresses(),
+        emptyIcon: Icons.location_off,
+        emptyMessage: '暂无收货地址',
+        emptyActionText: '新增地址',
+        onEmptyAction: () => Navigator.pushNamed(context, AppRoutes.addressEdit),
+        builder: (context) => _buildList(state.addresses),
       ),
     );
   }

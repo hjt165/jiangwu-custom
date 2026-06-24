@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/constants.dart';
 import '../../models/product.dart';
 import '../../providers/product_provider.dart';
-import '../../widgets/common/loading_widget.dart';
+import '../../widgets/common/async_data_view.dart';
 
 /// 发现页主页面
 /// 分类浏览、搜索、手作人主页入口
@@ -70,25 +70,15 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
             _buildSearchBar(context),
             _buildCategoryTabs(),
             Expanded(
-              child: _isLoading
-                  ? const Center(child: LoadingWidget())
-                  : productState.error != null
-                      ? Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.error_outline, size: 48, color: AppColors.error),
-                              const SizedBox(height: AppSizes.spacingMedium),
-                              Text('加载失败: ${productState.error}', style: const TextStyle(color: AppColors.textSecondary)),
-                              const SizedBox(height: AppSizes.spacingMedium),
-                              TextButton(
-                                onPressed: _loadProducts,
-                                child: const Text('重试'),
-                              ),
-                            ],
-                          ),
-                        )
-                      : _buildProductGrid(productState.products),
+              child: AsyncDataView(
+                isLoading: _isLoading,
+                error: productState.error,
+                isEmpty: productState.products.isEmpty,
+                onRetry: _loadProducts,
+                emptyIcon: Icons.explore_outlined,
+                emptyMessage: '暂无发现内容',
+                builder: (context) => _buildProductGrid(productState.products),
+              ),
             ),
           ],
         ),

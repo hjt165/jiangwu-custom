@@ -4,9 +4,7 @@ import '../../app/constants.dart';
 import '../../models/product.dart';
 import '../../providers/artisan_product_provider.dart';
 import '../../widgets/business/product_manage_card.dart';
-import '../../widgets/common/loading_widget.dart';
-import '../../widgets/common/error_widget.dart';
-import '../../widgets/common/empty_widget.dart';
+import '../../widgets/common/async_data_view.dart';
 
 /// 手作人作品管理页面
 
@@ -54,41 +52,31 @@ class _ProductManageScreenState extends ConsumerState<ProductManageScreen> {
   }
 
   Widget _buildBody(ArtisanProductProvider productState) {
-    if (productState.isLoading && productState.products.isEmpty) {
-      return const LoadingWidget();
-    }
-
-    if (productState.error != null && productState.products.isEmpty) {
-      return CustomErrorWidget(
-        message: productState.error!,
-        onRetry: () {
-          ref.read(artisanProductProvider.notifier).fetchProducts(refresh: true);
+    return AsyncDataView(
+      isLoading: productState.isLoading && productState.products.isEmpty,
+      error: productState.products.isEmpty ? productState.error : null,
+      isEmpty: productState.products.isEmpty,
+      onRetry: () => ref.read(artisanProductProvider.notifier).fetchProducts(refresh: true),
+      emptyMessage: '暂无作品，点击右下角按钮发布',
+      builder: (context) => RefreshIndicator(
+        onRefresh: () async {
+          await ref.read(artisanProductProvider.notifier).fetchProducts(refresh: true);
         },
-      );
-    }
-
-    if (productState.products.isEmpty) {
-      return const EmptyWidget(message: '暂无作品，点击右下角按钮发布');
-    }
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        await ref.read(artisanProductProvider.notifier).fetchProducts(refresh: true);
-      },
-      child: ListView.builder(
-        padding: const EdgeInsets.all(AppSizes.paddingMedium),
-        itemCount: productState.products.length,
-        itemBuilder: (context, index) {
-          final product = productState.products[index];
-          return ProductManageCard(
-            product: product,
-            onToggleStatus: () => _handleToggleStatus(product),
-            onEdit: () {
-              Navigator.pushNamed(context, AppRoutes.publish, arguments: product);
-            },
-            onDelete: () => _handleDeleteProduct(product),
-          );
-        },
+        child: ListView.builder(
+          padding: const EdgeInsets.all(AppSizes.paddingMedium),
+          itemCount: productState.products.length,
+          itemBuilder: (context, index) {
+            final product = productState.products[index];
+            return ProductManageCard(
+              product: product,
+              onToggleStatus: () => _handleToggleStatus(product),
+              onEdit: () {
+                Navigator.pushNamed(context, AppRoutes.publish, arguments: product);
+              },
+              onDelete: () => _handleDeleteProduct(product),
+            );
+          },
+        ),
       ),
     );
   }

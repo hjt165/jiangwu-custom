@@ -126,6 +126,11 @@ class AppDateUtils {
     return DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
   }
 
+  /// 格式化日期时间为 "yyyy-MM-dd HH:mm"（兼容内联 _formatDateTime 格式）
+  static String formatYMDHM(DateTime dateTime) {
+    return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+  }
+
   /// 获取两个日期之间的天数
   static int daysBetween(DateTime from, DateTime to) {
     from = DateTime(from.year, from.month, from.day);

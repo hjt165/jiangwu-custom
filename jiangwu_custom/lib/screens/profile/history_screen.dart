@@ -4,7 +4,7 @@ import '../../app/constants.dart';
 import '../../models/product.dart';
 import '../../providers/history_provider.dart';
 import '../../widgets/business/artisan_works_grid.dart';
-import '../../widgets/common/empty_widget.dart';
+import '../../widgets/common/async_data_view.dart';
 
 /// 浏览历史页
 /// 通过 API 加载浏览历史
@@ -81,35 +81,18 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             ),
         ],
       ),
-      body: historyState.isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            )
-          : historyState.error != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline, size: 48, color: AppColors.error),
-                      const SizedBox(height: AppSizes.spacingSmall),
-                      Text(historyState.error!, style: const TextStyle(color: AppColors.textSecondary)),
-                      const SizedBox(height: AppSizes.spacingMedium),
-                      ElevatedButton(
-                        onPressed: () => historyState.loadHistory(),
-                        child: const Text('重试'),
-                      ),
-                    ],
-                  ),
-                )
-              : historyState.historyProducts.isEmpty
-                  ? const EmptyWidget(
-                      icon: Icons.history,
-                      message: '暂无浏览历史',
-                    )
-                  : ArtisanWorksGrid(
-                      works: historyState.historyProducts,
-                      onWorkTap: _onProductTap,
-                    ),
+      body: AsyncDataView(
+        isLoading: historyState.isLoading,
+        error: historyState.error,
+        isEmpty: historyState.historyProducts.isEmpty,
+        onRetry: () => historyState.loadHistory(),
+        emptyIcon: Icons.history,
+        emptyMessage: '暂无浏览历史',
+        builder: (context) => ArtisanWorksGrid(
+          works: historyState.historyProducts,
+          onWorkTap: _onProductTap,
+        ),
+      ),
     );
   }
 }

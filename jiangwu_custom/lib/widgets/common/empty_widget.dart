@@ -9,6 +9,7 @@ class EmptyWidget extends StatelessWidget {
   final IconData icon;
   final String? actionText;
   final VoidCallback? onAction;
+  final String? subtitle;
 
   const EmptyWidget({
     super.key,
@@ -16,6 +17,7 @@ class EmptyWidget extends StatelessWidget {
     this.icon = Icons.inbox_outlined,
     this.actionText,
     this.onAction,
+    this.subtitle,
   });
 
   @override
@@ -40,6 +42,17 @@ class EmptyWidget extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
+            if (subtitle != null) ...[
+              const SizedBox(height: AppSizes.spacingSmall),
+              Text(
+                subtitle!,
+                style: const TextStyle(
+                  color: AppColors.textHint,
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
             if (actionText != null && onAction != null) ...[
               const SizedBox(height: AppSizes.spacingLarge),
               ElevatedButton(

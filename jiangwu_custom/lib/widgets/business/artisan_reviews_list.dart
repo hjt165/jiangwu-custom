@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../app/constants.dart';
+import '../../../utils/date_utils.dart';
 import '../../models/review.dart';
 import '../common/empty_widget.dart';
 import '../common/image_widget.dart';
@@ -187,7 +188,7 @@ class ArtisanReviewsList extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      _formatDateTime(review.createdAt),
+                      AppDateUtils.formatYMDHM(review.createdAt),
                       style: const TextStyle(
                         fontSize: 11,
                         color: AppColors.textHint,
@@ -289,7 +290,4 @@ class ArtisanReviewsList extends StatelessWidget {
     );
   }
 
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}';
-  }
 }

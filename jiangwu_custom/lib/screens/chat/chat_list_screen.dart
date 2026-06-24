@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../app/constants.dart';
 import '../../providers/chat_provider.dart';
 import '../../services/auth_service.dart';
+import '../../widgets/common/async_data_view.dart';
 import 'chat_screen.dart';
 
 /// 聊天列表页
@@ -39,25 +40,13 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: chatState.isLoadingConversations
-          ? Center(child: CircularProgressIndicator(color: AppColors.primary))
-          : chatState.conversations.isEmpty
-              ? _buildEmptyWidget()
-              : _buildConversationList(chatState, isArtisan),
-    );
-  }
-
-  Widget _buildEmptyWidget() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.chat_bubble_outline, size: 80, color: AppColors.textHint),
-          SizedBox(height: AppSizes.spacingMedium),
-          Text('暂无聊天记录', style: TextStyle(color: AppColors.textSecondary, fontSize: 16)),
-          SizedBox(height: AppSizes.spacingSmall),
-          Text('浏览手作人作品时，可以点击联系发起聊天', style: TextStyle(color: AppColors.textHint, fontSize: 14)),
-        ],
+      body: AsyncDataView(
+        isLoading: chatState.isLoadingConversations,
+        isEmpty: chatState.conversations.isEmpty,
+        emptyIcon: Icons.chat_bubble_outline,
+        emptyMessage: '暂无聊天记录',
+        emptySubtitle: '浏览手作人作品时，可以点击联系发起聊天',
+        builder: (context) => _buildConversationList(chatState, isArtisan),
       ),
     );
   }

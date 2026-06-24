@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/constants.dart';
 import '../../models/order.dart';
 import '../../providers/artisan_order_provider.dart';
-import '../../widgets/common/loading_widget.dart';
-import '../../widgets/common/error_widget.dart';
-import '../../widgets/common/empty_widget.dart';
+import '../../widgets/common/async_data_view.dart';
 
 /// 手作人订单管理页面
 /// 展示手作人收到的订单列表，支持状态筛选
@@ -86,34 +84,24 @@ class _OrderManageScreenState extends ConsumerState<OrderManageScreen>
   }
 
   Widget _buildBody(ArtisanOrderProvider orderState) {
-    if (orderState.isLoading && orderState.orders.isEmpty) {
-      return const LoadingWidget();
-    }
-
-    if (orderState.error != null && orderState.orders.isEmpty) {
-      return CustomErrorWidget(
-        message: orderState.error!,
-        onRetry: () {
-          ref.read(artisanOrderProvider.notifier).fetchOrders(refresh: true);
+    return AsyncDataView(
+      isLoading: orderState.isLoading && orderState.orders.isEmpty,
+      error: orderState.orders.isEmpty ? orderState.error : null,
+      isEmpty: orderState.orders.isEmpty,
+      onRetry: () => ref.read(artisanOrderProvider.notifier).fetchOrders(refresh: true),
+      emptyMessage: '暂无订单',
+      builder: (context) => RefreshIndicator(
+        onRefresh: () async {
+          await ref.read(artisanOrderProvider.notifier).fetchOrders(refresh: true);
         },
-      );
-    }
-
-    if (orderState.orders.isEmpty) {
-      return const EmptyWidget(message: '暂无订单');
-    }
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        await ref.read(artisanOrderProvider.notifier).fetchOrders(refresh: true);
-      },
-      child: ListView.builder(
-        padding: const EdgeInsets.all(AppSizes.paddingMedium),
-        itemCount: orderState.orders.length,
-        itemBuilder: (context, index) {
-          final order = orderState.orders[index];
-          return _buildOrderCard(order);
-        },
+        child: ListView.builder(
+          padding: const EdgeInsets.all(AppSizes.paddingMedium),
+          itemCount: orderState.orders.length,
+          itemBuilder: (context, index) {
+            final order = orderState.orders[index];
+            return _buildOrderCard(order);
+          },
+        ),
       ),
     );
   }

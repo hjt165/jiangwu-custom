@@ -4,9 +4,7 @@ import '../../app/constants.dart';
 import '../../providers/artisan_income_provider.dart';
 import '../../widgets/business/income_chart.dart';
 import '../../widgets/business/withdraw_record_card.dart';
-import '../../widgets/common/loading_widget.dart';
-import '../../widgets/common/error_widget.dart';
-import '../../widgets/common/empty_widget.dart';
+import '../../widgets/common/async_data_view.dart';
 import '../../widgets/common/button_widget.dart';
 
 /// 手作人收入统计页面
@@ -160,34 +158,24 @@ class _IncomeScreenState extends ConsumerState<IncomeScreen>
   }
 
   Widget _buildIncomeRecords(ArtisanIncomeProvider incomeState) {
-    if (incomeState.isLoading && incomeState.incomeRecords.isEmpty) {
-      return const LoadingWidget();
-    }
-
-    if (incomeState.error != null && incomeState.incomeRecords.isEmpty) {
-      return CustomErrorWidget(
-        message: incomeState.error!,
-        onRetry: () {
-          ref.read(artisanIncomeProvider.notifier).fetchIncomeRecords(refresh: true);
+    return AsyncDataView(
+      isLoading: incomeState.isLoading && incomeState.incomeRecords.isEmpty,
+      error: incomeState.incomeRecords.isEmpty ? incomeState.error : null,
+      isEmpty: incomeState.incomeRecords.isEmpty,
+      onRetry: () => ref.read(artisanIncomeProvider.notifier).fetchIncomeRecords(refresh: true),
+      emptyMessage: '暂无收入记录',
+      builder: (context) => RefreshIndicator(
+        onRefresh: () async {
+          await ref.read(artisanIncomeProvider.notifier).fetchIncomeRecords(refresh: true);
         },
-      );
-    }
-
-    if (incomeState.incomeRecords.isEmpty) {
-      return const EmptyWidget(message: '暂无收入记录');
-    }
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        await ref.read(artisanIncomeProvider.notifier).fetchIncomeRecords(refresh: true);
-      },
-      child: ListView.builder(
-        padding: const EdgeInsets.all(AppSizes.paddingMedium),
-        itemCount: incomeState.incomeRecords.length,
-        itemBuilder: (context, index) {
-          final record = incomeState.incomeRecords[index];
-          return _buildIncomeRecordCard(record);
-        },
+        child: ListView.builder(
+          padding: const EdgeInsets.all(AppSizes.paddingMedium),
+          itemCount: incomeState.incomeRecords.length,
+          itemBuilder: (context, index) {
+            final record = incomeState.incomeRecords[index];
+            return _buildIncomeRecordCard(record);
+          },
+        ),
       ),
     );
   }
@@ -243,41 +231,31 @@ class _IncomeScreenState extends ConsumerState<IncomeScreen>
   }
 
   Widget _buildWithdrawRecords(ArtisanIncomeProvider incomeState) {
-    if (incomeState.isLoading && incomeState.withdrawRecords.isEmpty) {
-      return const LoadingWidget();
-    }
-
-    if (incomeState.error != null && incomeState.withdrawRecords.isEmpty) {
-      return CustomErrorWidget(
-        message: incomeState.error!,
-        onRetry: () {
-          ref.read(artisanIncomeProvider.notifier).fetchWithdrawRecords(refresh: true);
+    return AsyncDataView(
+      isLoading: incomeState.isLoading && incomeState.withdrawRecords.isEmpty,
+      error: incomeState.withdrawRecords.isEmpty ? incomeState.error : null,
+      isEmpty: incomeState.withdrawRecords.isEmpty,
+      onRetry: () => ref.read(artisanIncomeProvider.notifier).fetchWithdrawRecords(refresh: true),
+      emptyMessage: '暂无提现记录',
+      builder: (context) => RefreshIndicator(
+        onRefresh: () async {
+          await ref.read(artisanIncomeProvider.notifier).fetchWithdrawRecords(refresh: true);
         },
-      );
-    }
-
-    if (incomeState.withdrawRecords.isEmpty) {
-      return const EmptyWidget(message: '暂无提现记录');
-    }
-
-    return RefreshIndicator(
-      onRefresh: () async {
-        await ref.read(artisanIncomeProvider.notifier).fetchWithdrawRecords(refresh: true);
-      },
-      child: ListView.builder(
-        padding: const EdgeInsets.all(AppSizes.paddingMedium),
-        itemCount: incomeState.withdrawRecords.length,
-        itemBuilder: (context, index) {
-          final record = incomeState.withdrawRecords[index];
-          return WithdrawRecordCard(
-            id: record['id'] ?? '',
-            amount: (record['amount'] ?? 0.0).toDouble(),
-            status: record['status'] ?? 'pending',
-            accountType: record['accountType'] ?? 'alipay',
-            accountInfo: record['accountInfo'] ?? '',
-            createdAt: DateTime.tryParse(record['createdAt'] ?? '') ?? DateTime.now(),
-          );
-        },
+        child: ListView.builder(
+          padding: const EdgeInsets.all(AppSizes.paddingMedium),
+          itemCount: incomeState.withdrawRecords.length,
+          itemBuilder: (context, index) {
+            final record = incomeState.withdrawRecords[index];
+            return WithdrawRecordCard(
+              id: record['id'] ?? '',
+              amount: (record['amount'] ?? 0.0).toDouble(),
+              status: record['status'] ?? 'pending',
+              accountType: record['accountType'] ?? 'alipay',
+              accountInfo: record['accountInfo'] ?? '',
+              createdAt: DateTime.tryParse(record['createdAt'] ?? '') ?? DateTime.now(),
+            );
+          },
+        ),
       ),
     );
   }

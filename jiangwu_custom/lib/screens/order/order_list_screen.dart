@@ -3,8 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/constants.dart';
 import '../../models/order.dart';
 import '../../providers/order_provider.dart';
-import '../../widgets/common/empty_widget.dart';
-import '../../widgets/common/loading_widget.dart';
+import '../../widgets/common/async_data_view.dart';
 
 /// 订单列表页
 /// 订单状态筛选、订单卡片展示
@@ -83,29 +82,6 @@ class _OrderListScreenState extends ConsumerState<OrderListScreen>
   }
 
   Widget _buildOrderList(String tab, OrderProvider orderState) {
-    if (orderState.isLoading && orderState.orders.isEmpty) {
-      return const Center(child: LoadingWidget());
-    }
-
-    if (orderState.error != null && orderState.orders.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 60, color: AppColors.error),
-            const SizedBox(height: AppSizes.spacingMedium),
-            Text(orderState.error!, style: const TextStyle(color: AppColors.textSecondary)),
-            const SizedBox(height: AppSizes.spacingMedium),
-            ElevatedButton(
-              onPressed: () => orderState.fetchOrders(),
-              child: const Text('重试'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // 按状态筛选
     List<Order> filteredOrders = orderState.orders;
     if (tab != '全部') {
       final statusMap = {
@@ -120,21 +96,22 @@ class _OrderListScreenState extends ConsumerState<OrderListScreen>
       }
     }
 
-    if (filteredOrders.isEmpty) {
-      return const EmptyWidget(
-        icon: Icons.receipt_long_outlined,
-        message: '暂无订单',
-      );
-    }
-
-    return RefreshIndicator(
-      onRefresh: () => orderState.fetchOrders(refresh: true),
-      child: ListView.builder(
-        padding: const EdgeInsets.all(AppSizes.paddingMedium),
-        itemCount: filteredOrders.length,
-        itemBuilder: (context, index) {
-          return _buildOrderCard(filteredOrders[index]);
-        },
+    return AsyncDataView(
+      isLoading: orderState.isLoading && orderState.orders.isEmpty,
+      error: orderState.orders.isEmpty ? orderState.error : null,
+      isEmpty: filteredOrders.isEmpty,
+      onRetry: () => orderState.fetchOrders(),
+      emptyIcon: Icons.receipt_long_outlined,
+      emptyMessage: '暂无订单',
+      builder: (context) => RefreshIndicator(
+        onRefresh: () => orderState.fetchOrders(refresh: true),
+        child: ListView.builder(
+          padding: const EdgeInsets.all(AppSizes.paddingMedium),
+          itemCount: filteredOrders.length,
+          itemBuilder: (context, index) {
+            return _buildOrderCard(filteredOrders[index]);
+          },
+        ),
       ),
     );
   }

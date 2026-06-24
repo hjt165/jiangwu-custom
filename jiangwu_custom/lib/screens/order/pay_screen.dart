@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/constants.dart';
+import '../../../utils/date_utils.dart';
 import '../../models/order.dart';
 import '../../providers/order_provider.dart';
 import '../../services/payment_service.dart';
 import '../../widgets/business/payment_method_selector.dart';
-import '../../widgets/common/loading_widget.dart';
-import '../../widgets/common/error_widget.dart';
+import '../../widgets/common/async_data_view.dart';
 import '../../widgets/common/button_widget.dart';
+import '../../widgets/common/bottom_bar_widget.dart';
 
 /// 支付页面
 /// 用户选择支付方式，完成订单支付
@@ -52,25 +53,13 @@ class _PayScreenState extends ConsumerState<PayScreen> {
   }
 
   Widget _buildBody(OrderProvider orderState) {
-    if (orderState.isLoading && orderState.currentOrder == null) {
-      return const LoadingWidget();
-    }
-
-    if (orderState.error != null && orderState.currentOrder == null) {
-      return CustomErrorWidget(
-        message: orderState.error!,
-        onRetry: () {
-          ref.read(orderProvider.notifier).fetchOrderDetail(widget.orderId);
-        },
-      );
-    }
-
-    if (orderState.currentOrder == null) {
-      return const Center(
-        child: Text('订单不存在', style: TextStyle(color: AppColors.textSecondary)),
-      );
-    }
-
+    return AsyncDataView(
+      isLoading: orderState.isLoading && orderState.currentOrder == null,
+      error: orderState.currentOrder == null ? orderState.error : null,
+      isEmpty: orderState.currentOrder == null,
+      onRetry: () => ref.read(orderProvider.notifier).fetchOrderDetail(widget.orderId),
+      emptyMessage: '订单不存在',
+      builder: (context) {
     final order = orderState.currentOrder!;
 
     return SingleChildScrollView(
@@ -103,6 +92,8 @@ class _PayScreenState extends ConsumerState<PayScreen> {
           const SizedBox(height: 100),
         ],
       ),
+    );
+      },
     );
   }
 
@@ -141,7 +132,7 @@ class _PayScreenState extends ConsumerState<PayScreen> {
           _buildInfoRow('商品名称', order.product?.title ?? '定制作品'),
           if (order.artisan != null)
             _buildInfoRow('手作人', order.artisan!.name),
-          _buildInfoRow('下单时间', _formatDateTime(order.createdAt)),
+          _buildInfoRow('下单时间', AppDateUtils.formatYMDHM(order.createdAt)),
         ],
       ),
     );
@@ -279,23 +270,7 @@ class _PayScreenState extends ConsumerState<PayScreen> {
   Widget _buildBottomBar(Order order) {
     final amount = order.totalAmount - order.paidAmount;
 
-    return Container(
-      padding: EdgeInsets.only(
-        left: AppSizes.paddingMedium,
-        right: AppSizes.paddingMedium,
-        top: AppSizes.paddingMedium,
-        bottom: MediaQuery.of(context).padding.bottom + AppSizes.paddingMedium,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
+    return BottomBarContainer(
       child: ButtonWidget(
         text: _isPaying ? '支付中...' : '确认支付 ¥${amount.toStringAsFixed(2)}',
         isLoading: _isPaying,
@@ -380,7 +355,4 @@ class _PayScreenState extends ConsumerState<PayScreen> {
     }
   }
 
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-  }
 }

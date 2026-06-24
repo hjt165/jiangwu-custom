@@ -5,7 +5,7 @@ import '../../models/product.dart';
 import '../../providers/product_provider.dart';
 import '../../widgets/business/artisan_works_grid.dart';
 import '../../widgets/business/filter_sort_sheet.dart';
-import '../../widgets/common/loading_widget.dart';
+import '../../widgets/common/async_data_view.dart';
 
 /// 分类列表页
 /// 展示特定分类下的作品列表，支持筛选排序
@@ -121,17 +121,21 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
         children: [
           _buildFilterBar(),
           Expanded(
-            child: _isLoading
-                ? const Center(child: LoadingWidget())
-                : ArtisanWorksGrid(
-                    works: _products,
-                    onWorkTap: (product) {
-                      Navigator.of(context).pushNamed(
-                        AppRoutes.productDetail,
-                        arguments: product.id,
-                      );
-                    },
-                  ),
+            child: AsyncDataView(
+              isLoading: _isLoading,
+              isEmpty: _products.isEmpty,
+              emptyIcon: Icons.inventory_2_outlined,
+              emptyMessage: '该分类暂无作品',
+              builder: (context) => ArtisanWorksGrid(
+                works: _products,
+                onWorkTap: (product) {
+                  Navigator.of(context).pushNamed(
+                    AppRoutes.productDetail,
+                    arguments: product.id,
+                  );
+                },
+              ),
+            ),
           ),
         ],
       ),

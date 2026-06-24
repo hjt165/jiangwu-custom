@@ -8,8 +8,8 @@ import '../../services/api_service.dart';
 import '../../widgets/business/artisan_header.dart';
 import '../../widgets/business/artisan_works_grid.dart';
 import '../../widgets/business/artisan_reviews_list.dart';
+import '../../widgets/common/async_data_view.dart';
 import '../../widgets/common/loading_widget.dart';
-import '../../widgets/common/error_widget.dart';
 import '../../widgets/common/button_widget.dart';
 import '../../utils/share_utils.dart';
 
@@ -93,25 +93,15 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
   }
 
   Widget _buildBody(ArtisanProvider artisanState) {
-    if (artisanState.isLoading && artisanState.currentArtisan == null) {
-      return const LoadingWidget();
-    }
-
-    if (artisanState.error != null && artisanState.currentArtisan == null) {
-      return CustomErrorWidget(
-        message: artisanState.error!,
-        onRetry: () {
-          ref.read(artisanProvider.notifier).fetchArtisanDetail(widget.artisanId);
-        },
-      );
-    }
-
-    if (artisanState.currentArtisan == null) {
-      return const Center(
-        child: Text('手作人不存在', style: TextStyle(color: AppColors.textSecondary)),
-      );
-    }
-
+    return AsyncDataView(
+      isLoading: artisanState.isLoading && artisanState.currentArtisan == null,
+      error: artisanState.currentArtisan == null ? artisanState.error : null,
+      isEmpty: artisanState.currentArtisan == null,
+      onRetry: () {
+        ref.read(artisanProvider.notifier).fetchArtisanDetail(widget.artisanId);
+      },
+      emptyMessage: '手作人不存在',
+      builder: (context) {
     final artisan = artisanState.currentArtisan!;
 
     return Column(
@@ -152,7 +142,7 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
               ),
               // 评价列表
               _isLoadingReviews
-                  ? const Center(child: LoadingWidget())
+                  ? Center(child: LoadingWidget())
                   : ArtisanReviewsList(
                       reviews: _reviews,
                       averageRating: artisan.rating,
@@ -162,6 +152,8 @@ class _ArtisanProfileScreenState extends ConsumerState<ArtisanProfileScreen>
           ),
         ),
       ],
+    );
+      },
     );
   }
 
