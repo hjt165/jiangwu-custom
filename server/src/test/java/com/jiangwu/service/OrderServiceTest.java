@@ -58,6 +58,12 @@ class OrderServiceTest {
     @Mock
     private WorkflowService workflowService;
 
+    @Mock
+    private ProductService productService;
+
+    @Mock
+    private ArtisanService artisanService;
+
     @InjectMocks
     private OrderService orderService;
 

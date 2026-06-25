@@ -1,9 +1,10 @@
-FROM python:3.11-slim
+# Stage 1: 依赖安装
+FROM python:3.11-slim AS builder
 
 WORKDIR /app
 
 # 安装系统依赖 (OpenCV + Milvus client)
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1-mesa-glx \
     libglib2.0-0 \
     libsm6 \
@@ -11,17 +12,24 @@ RUN apt-get update && apt-get install -y \
     libxrender-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# 复制依赖文件
+# 复制依赖文件并安装
 COPY requirements.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-# 安装 Python 依赖
-RUN pip install --no-cache-dir -r requirements.txt
+# Stage 2: 运行时
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# 复制已安装的依赖
+COPY --from=builder /install /usr/local
 
 # 复制项目代码
 COPY . .
 
-# 创建非 root 用户
-RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+# 创建非 root 用户 (Debian 方式)
+RUN groupadd -r appgroup && useradd -r -g appgroup -d /app -s /sbin/nologin appuser && \
+    chown -R appuser:appgroup /app
 USER appuser
 
 # 暴露端口

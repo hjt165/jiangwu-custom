@@ -11,6 +11,7 @@ import com.jiangwu.exception.ErrorCode;
 import com.jiangwu.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,11 +41,14 @@ public class OrderService {
     private final AiService aiService;
     private final ObjectMapper objectMapper;
     private final WorkflowService workflowService;
+    private final ProductService productService;
+    private final ArtisanService artisanService;
 
     /**
      * 创建订单
      */
     @Transactional
+    @CacheEvict(value = "products", key = "'featured'")
     public OrderResponse createOrder(Long userId, CreateOrderRequest request) {
         // 生成订单号: JW + 年月日 + 6位随机数
         String orderNo = generateOrderNo();
@@ -238,6 +242,7 @@ public class OrderService {
      * 取消订单
      */
     @Transactional
+    @CacheEvict(value = "products", allEntries = true)
     public void cancelOrder(Long orderId, Long userId, String reason) {
         Order order = orderRepository.findById(orderId);
         if (order == null) {
@@ -368,10 +373,10 @@ public class OrderService {
         review.setIsAnonymous(isAnonymous != null ? isAnonymous : false);
         reviewRepository.insert(review);
 
-        // 更新作品评分
+        // 更新作品评分（通过 ProductService 清除缓存）
         updateProductRating(order.getProductId());
 
-        // 更新手作人评分
+        // 更新手作人评分（通过 ArtisanService 清除缓存）
         updateArtisanRating(order.getArtisanId());
     }
 
@@ -403,7 +408,7 @@ public class OrderService {
     }
 
     /**
-     * 更新作品评分（取平均值）- 修复：使用 findByProductId 而非 findByArtisanId
+     * 更新作品评分（取平均值）- 通过 ProductService 更新，启用缓存驱逐
      */
     private void updateProductRating(Long productId) {
         List<Review> reviews = reviewRepository.findByProductId(productId);
@@ -412,12 +417,12 @@ public class OrderService {
                     .mapToInt(Review::getRating)
                     .average()
                     .orElse(0);
-            productRepository.updateRating(productId, BigDecimal.valueOf(avg));
+            productService.updateProductRating(productId, avg);
         }
     }
 
     /**
-     * 更新手作人评分（取平均值）
+     * 更新手作人评分（取平均值）- 通过 ArtisanService 更新，启用缓存驱逐
      */
     private void updateArtisanRating(Long artisanId) {
         List<Review> reviews = reviewRepository.findByArtisanId(artisanId);
@@ -426,7 +431,7 @@ public class OrderService {
                     .mapToInt(Review::getRating)
                     .average()
                     .orElse(0);
-            artisanRepository.updateRating(artisanId, new BigDecimal(avg));
+            artisanService.updateArtisanRating(artisanId, avg);
         }
     }
 }

@@ -15,6 +15,7 @@ import com.jiangwu.repository.WithdrawRepository;
 import com.jiangwu.utils.CurrentUserUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -186,6 +187,7 @@ public class ArtisanSelfController {
      * 发布新作品
      */
     @PostMapping("/products")
+    @CacheEvict(value = "products", allEntries = true)
     public Result<Product> createProduct(@RequestBody Map<String, Object> body, HttpServletRequest request) {
         Artisan artisan = resolveArtisan(request);
 
@@ -216,6 +218,7 @@ public class ArtisanSelfController {
      * 更新作品信息
      */
     @PutMapping("/products/{id}")
+    @CacheEvict(value = "products", allEntries = true)
     public Result<Void> updateProduct(
             @PathVariable Long id,
             @RequestBody Map<String, Object> body,
@@ -239,6 +242,7 @@ public class ArtisanSelfController {
      * 切换作品上下架状态
      */
     @PutMapping("/products/{id}/toggle-status")
+    @CacheEvict(value = "products", allEntries = true)
     public Result<Void> toggleProductStatus(@PathVariable Long id, HttpServletRequest request) {
         Artisan artisan = resolveArtisan(request);
         Product product = productRepository.findById(id);
@@ -255,6 +259,7 @@ public class ArtisanSelfController {
      * 删除作品
      */
     @DeleteMapping("/products/{id}")
+    @CacheEvict(value = "products", allEntries = true)
     public Result<Void> deleteProduct(@PathVariable Long id, HttpServletRequest request) {
         Artisan artisan = resolveArtisan(request);
         Product product = productRepository.findById(id);
