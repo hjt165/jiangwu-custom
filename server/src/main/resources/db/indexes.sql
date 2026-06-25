@@ -51,3 +51,12 @@ ALTER TABLE `t_blockchain_record` ADD INDEX `idx_blockchain_record_order_id` (`o
 
 -- 定制参数表索引
 ALTER TABLE `t_customization` ADD INDEX `idx_customization_order_id` (`order_id`);
+
+-- 复合索引: 手作人订单查询 (artisan_id + status)
+ALTER TABLE `t_order` ADD INDEX `idx_order_artisan_status` (`artisan_id`, `status`);
+
+-- 复合索引: 地址默认查询 (user_id + is_default)
+ALTER TABLE `t_address` ADD INDEX `idx_address_user_default` (`user_id`, `is_default`);
+
+-- 作品标题索引
+ALTER TABLE `t_product` ADD INDEX `idx_product_title` (`title`);

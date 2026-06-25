@@ -6,10 +6,12 @@ import com.jiangwu.common.Result;
 import com.jiangwu.entity.Artisan;
 import com.jiangwu.entity.Order;
 import com.jiangwu.entity.Product;
+import com.jiangwu.entity.Withdraw;
 import com.jiangwu.enums.OrderStatus;
 import com.jiangwu.repository.ArtisanRepository;
 import com.jiangwu.repository.OrderRepository;
 import com.jiangwu.repository.ProductRepository;
+import com.jiangwu.repository.WithdrawRepository;
 import com.jiangwu.utils.CurrentUserUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,7 @@ public class ArtisanSelfController {
     private final ArtisanRepository artisanRepository;
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final WithdrawRepository withdrawRepository;
     private final CurrentUserUtil currentUserUtil;
 
     /**
@@ -319,12 +322,26 @@ public class ArtisanSelfController {
      * 获取提现记录
      */
     @GetMapping("/withdraw/records")
-    public Result<List<Map<String, Object>>> getWithdrawRecords(
+    public Result<Map<String, Object>> getWithdrawRecords(
             HttpServletRequest request,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize) {
-        // 暂时返回空列表，提现功能后续实现
-        return Result.success(List.of());
+        Artisan artisan = resolveArtisan(request);
+        QueryWrapper<Withdraw> wrapper = new QueryWrapper<>();
+        wrapper.eq("artisan_id", artisan.getId()).orderByDesc("created_at");
+        Page<Withdraw> result = withdrawRepository.selectPage(new Page<>(page, pageSize), wrapper);
+        List<Map<String, Object>> records = result.getRecords().stream().map(w -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", w.getId().toString());
+            map.put("amount", w.getAmount());
+            map.put("status", w.getStatus() == 0 ? "pending" : w.getStatus() == 1 ? "approved" : w.getStatus() == 2 ? "paid" : "rejected");
+            map.put("accountType", w.getAccountType());
+            map.put("accountInfo", w.getAccountInfo());
+            map.put("remark", w.getRemark());
+            map.put("createdAt", w.getCreatedAt() != null ? w.getCreatedAt().toString() : "");
+            return map;
+        }).collect(Collectors.toList());
+        return Result.success(Map.of("data", records, "total", result.getTotal(), "pages", result.getPages()));
     }
 
     /**
@@ -334,7 +351,41 @@ public class ArtisanSelfController {
     public Result<Void> requestWithdraw(
             @RequestBody Map<String, Object> body,
             HttpServletRequest request) {
-        // 暂时返回成功，提现功能后续实现
+        Artisan artisan = resolveArtisan(request);
+
+        // 校验参数
+        Object amountObj = body.get("amount");
+        if (amountObj == null) {
+            return Result.error("提现金额不能为空");
+        }
+        BigDecimal amount = new BigDecimal(amountObj.toString());
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            return Result.error("提现金额必须大于0");
+        }
+
+        String accountType = (String) body.getOrDefault("accountType", "alipay");
+        String accountInfo = (String) body.getOrDefault("accountInfo", "");
+        if (accountInfo.isEmpty()) {
+            return Result.error("提现账号不能为空");
+        }
+
+        // 检查是否有待处理的提现申请
+        QueryWrapper<Withdraw> pendingWrapper = new QueryWrapper<>();
+        pendingWrapper.eq("artisan_id", artisan.getId()).eq("status", 0);
+        Long pendingCount = withdrawRepository.selectCount(pendingWrapper);
+        if (pendingCount > 0) {
+            return Result.error("您有待处理的提现申请，请等待审核");
+        }
+
+        // 创建提现记录
+        Withdraw withdraw = new Withdraw();
+        withdraw.setArtisanId(artisan.getId());
+        withdraw.setAmount(amount);
+        withdraw.setAccountType(accountType);
+        withdraw.setAccountInfo(accountInfo);
+        withdraw.setStatus(0); // 待审核
+        withdrawRepository.insert(withdraw);
+
         return Result.success();
     }
 }

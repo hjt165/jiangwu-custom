@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -56,6 +57,7 @@ public class PaymentService {
     /**
      * 处理支付回调（Mock模式）
      */
+    @Transactional
     public void handleNotify(String orderId, String transactionId) {
         log.info("支付回调: orderId={}, transactionId={}, mock={}", orderId, transactionId, mockEnabled);
 

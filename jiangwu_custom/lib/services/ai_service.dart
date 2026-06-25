@@ -26,7 +26,7 @@ class AiService {
   }) async {
     try {
       final result = await _apiService.upload<Map<String, dynamic>>(
-        '$_aiBaseUrl/analyze/image',
+        '$_aiBaseUrl/analyze-image',
         filePath: imagePath,
         data: {
           if (description != null) 'description': description,
@@ -51,7 +51,7 @@ class AiService {
   }) async {
     try {
       final result = await _apiService.post<Map<String, dynamic>>(
-        '$_aiBaseUrl/analyze/text',
+        '$_aiBaseUrl/analyze-text',
         data: {
           'text': text,
           if (category != null) 'category': category,

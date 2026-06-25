@@ -17,7 +17,7 @@ spring:
     redis:
       host: localhost
       port: 6379
-      password:
+      password: jiangwu-dev-redis-pwd
       database: 0
       lettuce:
         pool:
@@ -29,13 +29,14 @@ spring:
   rabbitmq:
     host: localhost
     port: 5672
-    username: guest
-    password: guest
+    username: jiangwu-dev
+    password: jiangwu-dev-mq-pwd
     virtual-host: /
 
 # JWT
+# JWT - prod 环境务必通过 JWT_SECRET 环境变量注入，不要硬编码
 jwt:
-  secret: jiangwu-custom-secret-key-must-be-at-least-256-bits-long-for-hs256
+  secret: ${JWT_SECRET:jiangwu-dev-secret-key-2024-change-in-prod-min-256-bits-long-for-hs256}
   expiration: 86400000  # 24小时
 
 # AI Service

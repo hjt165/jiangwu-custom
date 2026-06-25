@@ -28,5 +28,9 @@ COPY --from=builder /build/target/*.jar app.jar
 # 暴露端口
 EXPOSE 8080
 
+# 创建非 root 用户
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+
 # 启动服务
 ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=docker"]

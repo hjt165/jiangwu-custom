@@ -275,6 +275,7 @@ CREATE TABLE `t_browse_history` (
     `product_id` BIGINT   NOT NULL COMMENT '作品ID',
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '浏览时间',
     PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_user_product` (`user_id`, `product_id`),
     KEY `idx_user_id` (`user_id`),
     KEY `idx_product_id` (`product_id`),
     KEY `idx_created_at` (`created_at`)
@@ -373,3 +374,19 @@ CREATE TABLE `t_feedback` (
     KEY `idx_user_id` (`user_id`),
     KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='意见反馈表';
+
+-- 提现记录表
+CREATE TABLE IF NOT EXISTS `t_withdraw` (
+    `id`           BIGINT        NOT NULL COMMENT '提现ID',
+    `artisan_id`   BIGINT        NOT NULL COMMENT '手作人ID',
+    `amount`       DECIMAL(10,2) NOT NULL COMMENT '提现金额',
+    `account_type` VARCHAR(20)   NOT NULL COMMENT '提现方式：alipay/wechat/bank',
+    `account_info` VARCHAR(200)  NOT NULL COMMENT '提现账号信息',
+    `status`       TINYINT       NOT NULL DEFAULT 0 COMMENT '状态：0待审核 1已审核 2已打款 3已拒绝',
+    `remark`       VARCHAR(500)  DEFAULT NULL COMMENT '审核备注',
+    `created_at`   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at`   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_artisan_id` (`artisan_id`),
+    KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='提现记录表';

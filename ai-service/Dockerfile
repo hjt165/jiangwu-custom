@@ -20,6 +20,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 复制项目代码
 COPY . .
 
+# 创建非 root 用户
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+USER appuser
+
 # 暴露端口
 EXPOSE 8001
 

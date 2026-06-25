@@ -10,7 +10,7 @@ spring:
     name: jiangwu-server
   sql:
     init:
-      mode: always
+      mode: never
       continue-on-error: true
   cache:
     type: redis

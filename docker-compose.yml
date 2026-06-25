@@ -37,10 +37,11 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD:-jiangwu-dev-redis-pwd}
     volumes:
       - redis-data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-jiangwu-dev-redis-pwd}", "ping"]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -55,8 +56,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-jiangwu-dev}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-jiangwu-dev-mq-pwd}
       TZ: Asia/Shanghai
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
@@ -150,7 +151,18 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: docker
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
-      JWT_SECRET: ${JWT_SECRET:-jiangwu-custom-secret-key-must-be-at-least-256-bits-long-for-hs256}
+      JWT_SECRET: ${JWT_SECRET:}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-jiangwu-dev-redis-pwd}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-jiangwu-dev}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-jiangwu-dev-mq-pwd}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:https://jiangwu.com}
+      DB_HOST: ${DB_HOST:mysql}
+      DB_PORT: ${DB_PORT:3306}
+      DB_NAME: ${DB_NAME:jiangwu_custom}
+      DB_USERNAME: ${DB_USERNAME:root}
+      DB_PASSWORD: ${DB_PASSWORD:}
       TZ: Asia/Shanghai
     depends_on:
       mysql:
@@ -184,8 +196,8 @@ services:
       REDIS_URL: redis://redis:6379/1
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
-      RABBITMQ_USER: guest
-      RABBITMQ_PASSWORD: guest
+      RABBITMQ_USER: ${RABBITMQ_USERNAME:-jiangwu-dev}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-jiangwu-dev-mq-pwd}
       SPRING_BOOT_URL: http://server:8080
       TZ: Asia/Shanghai
     depends_on:
