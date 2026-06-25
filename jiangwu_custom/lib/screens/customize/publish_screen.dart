@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:image_picker/image_picker.dart';
 import '../../app/constants.dart';
 import '../../services/api_service.dart';
-import '../../widgets/common/platform_image.dart';
+import '../../widgets/business/publish_image_section.dart';
+import '../../widgets/business/publish_form_section.dart';
 
 /// 需求发布页
 /// 多模态输入（图片/文字/语音）
@@ -70,7 +70,7 @@ class _PublishScreenState extends State<PublishScreen> {
 
     if (pickedFiles.isNotEmpty && mounted) {
       setState(() {
-        _images = [..._images, ...pickedFiles.map((f) => f.path).toList()];
+        _images = [..._images, ...pickedFiles.map((f) => f.path)];
       });
     }
   }
@@ -123,221 +123,31 @@ class _PublishScreenState extends State<PublishScreen> {
                 ],
               ),
               const SizedBox(height: AppSizes.spacingMedium),
-              _buildImageUploadSection(),
+              PublishImageSection(
+                images: _images,
+                onAddImage: _showImageSourceDialog,
+                onRemoveImage: (image) {
+                  setState(() {
+                    _images.remove(image);
+                  });
+                },
+              ),
               const SizedBox(height: AppSizes.spacingLarge),
-              _buildCategorySection(),
-              const SizedBox(height: AppSizes.spacingLarge),
-              _buildDescriptionSection(),
+              PublishFormSection(
+                selectedCategory: _selectedCategory,
+                onCategoryChanged: (category) {
+                  setState(() {
+                    _selectedCategory = category;
+                  });
+                },
+                descriptionController: _descriptionController,
+              ),
               const SizedBox(height: AppSizes.spacingLarge),
               _buildSubmitButton(),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildImageUploadSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          '上传图片',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: AppSizes.spacingSmall),
-        const Text(
-          '支持JPG/PNG格式，单图≤10MB，最多9张',
-          style: TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-          ),
-        ),
-        const SizedBox(height: AppSizes.spacingMedium),
-        Wrap(
-          spacing: AppSizes.spacingSmall,
-          runSpacing: AppSizes.spacingSmall,
-          children: [
-            ..._images.map((image) => _buildSelectedImage(
-              image,
-              onRemove: () {
-                setState(() {
-                  _images.remove(image);
-                });
-              },
-            )),
-            if (_images.length < 9)
-              GestureDetector(
-                onTap: () => _showImageSourceDialog(),
-                child: Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: AppColors.background,
-                    borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
-                    border: Border.all(
-                      color: AppColors.divider,
-                      style: BorderStyle.solid,
-                    ),
-                  ),
-                  child: const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.add_photo_alternate_outlined,
-                        size: 24,
-                        color: AppColors.textHint,
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        '添加图片',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: AppColors.textHint,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSelectedImage(String imagePath, {required VoidCallback onRemove}) {
-    return Stack(
-      children: [
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            color: AppColors.divider,
-            borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
-            child: imagePath.startsWith('http')
-                ? Image.network(
-                    imagePath,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const Center(
-                      child: Icon(Icons.image, size: 24, color: AppColors.textHint),
-                    ),
-                  )
-                : buildLocalImage(
-                    imagePath,
-                    fit: BoxFit.cover,
-                  ),
-          ),
-        ),
-        Positioned(
-          top: 4,
-          right: 4,
-          child: GestureDetector(
-            onTap: onRemove,
-            child: Container(
-              width: 20,
-              height: 20,
-              decoration: const BoxDecoration(
-                color: AppColors.accent,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.close,
-                size: 12,
-                color: AppColors.white,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCategorySection() {
-    final categories = ['首饰', '皮具', '陶瓷', '木艺', '绘画', '其他'];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          '工艺分类',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: AppSizes.spacingMedium),
-        Wrap(
-          spacing: AppSizes.spacingSmall,
-          runSpacing: AppSizes.spacingSmall,
-          children: categories.map((category) {
-            final isSelected = _selectedCategory == category;
-            return ChoiceChip(
-              label: Text(category),
-              selected: isSelected,
-              onSelected: (selected) {
-                setState(() {
-                  _selectedCategory = selected ? category : null;
-                });
-              },
-              selectedColor: AppColors.primary,
-              backgroundColor: AppColors.white,
-              labelStyle: TextStyle(
-                color: isSelected ? AppColors.white : AppColors.textPrimary,
-                fontSize: 14,
-              ),
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDescriptionSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          '需求描述',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: AppSizes.spacingSmall),
-        const Text(
-          '请详细描述您的定制需求，包括材质、尺寸、颜色、雕刻内容等',
-          style: TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-          ),
-        ),
-        const SizedBox(height: AppSizes.spacingMedium),
-        TextFormField(
-          controller: _descriptionController,
-          maxLines: 5,
-          maxLength: 500,
-          decoration: const InputDecoration(
-            hintText: '请输入您的定制需求...',
-            border: OutlineInputBorder(),
-          ),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return '请输入需求描述';
-            }
-            return null;
-          },
-        ),
-      ],
     );
   }
 
@@ -388,7 +198,7 @@ class _PublishScreenState extends State<PublishScreen> {
     try {
       final uploadedUrls = await _uploadImages(_images);
 
-      final response = await ApiService().post<Map<String, dynamic>>(
+      await ApiService().post<Map<String, dynamic>>(
         '/order/create',
         data: {
           'specialRequests': _descriptionController.text,

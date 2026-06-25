@@ -9,6 +9,8 @@ import '../../services/storage_service.dart';
 import '../../widgets/business/search_history_tags.dart';
 import '../../widgets/business/filter_sort_sheet.dart';
 import '../../widgets/business/artisan_works_grid.dart';
+import '../../widgets/business/hot_search_tags.dart';
+import '../../widgets/business/search_filter_bar.dart';
 import '../../widgets/common/empty_widget.dart';
 import '../../widgets/common/loading_widget.dart';
 
@@ -35,7 +37,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   bool _hasSearched = false;
   Timer? _debounceTimer;
 
-  // 热门搜索数据
   final List<String> _hotSearches = [
     '银饰',
     '皮包',
@@ -105,12 +106,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   void _applyFilter() {
     setState(() {
       _searchResults = _searchResults.where((product) {
-        // 分类筛选
         if (_filterOptions.category != null &&
             product.category != _filterOptions.category) {
           return false;
         }
-        // 价格筛选
         if (_filterOptions.minPrice != null &&
             product.price < _filterOptions.minPrice!) {
           return false;
@@ -122,7 +121,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         return true;
       }).toList();
 
-      // 排序
       switch (_filterOptions.sortType) {
         case SortType.priceAsc:
           _searchResults.sort((a, b) => a.price.compareTo(b.price));
@@ -137,16 +135,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           _searchResults.sort((a, b) => b.rating.compareTo(a.rating));
           break;
         case SortType.newest:
-          _searchResults.sort((a, b) => (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
+          _searchResults.sort((a, b) =>
+              (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
           break;
         case SortType.comprehensive:
           _searchResults.sort((a, b) {
-            final scoreA = a.rating * 0.4 +
-                a.orderCount * 0.3 +
-                a.viewCount * 0.3;
-            final scoreB = b.rating * 0.4 +
-                b.orderCount * 0.3 +
-                b.viewCount * 0.3;
+            final scoreA = a.rating * 0.4 + a.orderCount * 0.3 + a.viewCount * 0.3;
+            final scoreB = b.rating * 0.4 + b.orderCount * 0.3 + b.viewCount * 0.3;
             return scoreB.compareTo(scoreA);
           });
           break;
@@ -203,11 +198,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       child: Row(
         children: [
           const SizedBox(width: 12),
-          const Icon(
-            Icons.search,
-            color: Colors.white70,
-            size: 18,
-          ),
+          const Icon(Icons.search, color: Colors.white70, size: 18),
           const SizedBox(width: 8),
           Expanded(
             child: TextField(
@@ -222,10 +213,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 8),
               ),
-              style: const TextStyle(
-                fontSize: 13,
-                color: Colors.white,
-              ),
+              style: const TextStyle(fontSize: 13, color: Colors.white),
               onSubmitted: _performSearch,
             ),
           ),
@@ -269,9 +257,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     return Column(
       children: [
-        // 筛选标签栏
-        _buildFilterBar(),
-        // 搜索结果
+        SearchFilterBar(
+          filterOptions: _filterOptions,
+          resultCount: _searchResults.length,
+          onFilterChanged: (options) {
+            setState(() {
+              _filterOptions = options;
+            });
+            _applyFilter();
+          },
+          onShowFilterSheet: _showFilterSheet,
+        ),
         Expanded(
           child: ArtisanWorksGrid(
             works: _searchResults,
@@ -293,7 +289,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 搜索历史
           SearchHistoryTags(
             onTagTap: (tag) {
               _searchController.text = tag;
@@ -301,192 +296,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             },
           ),
           const SizedBox(height: AppSizes.paddingLarge),
-          // 热门搜索
-          _buildHotSearches(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHotSearches() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Row(
-          children: [
-            Icon(
-              Icons.trending_up,
-              size: 18,
-              color: AppColors.error,
-            ),
-            SizedBox(width: AppSizes.spacingSmall),
-            Text(
-              '热门搜索',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSizes.spacingSmall),
-        Wrap(
-          spacing: AppSizes.spacingSmall,
-          runSpacing: AppSizes.spacingSmall,
-          children: _hotSearches.map((tag) {
-            return GestureDetector(
-              onTap: () {
-                _searchController.text = tag;
-                _performSearch(tag);
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.error.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: AppColors.error.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Text(
-                  tag,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppColors.error,
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFilterBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSizes.paddingMedium,
-        vertical: AppSizes.paddingSmall,
-      ),
-      color: AppColors.white,
-      child: Row(
-        children: [
-          // 当前筛选标签
-          if (_filterOptions.category != null)
-            Container(
-              margin: const EdgeInsets.only(right: AppSizes.spacingSmall),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 4,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _filterOptions.category!.label,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _filterOptions = _filterOptions.copyWith(
-                          clearCategory: true,
-                        );
-                      });
-                      _applyFilter();
-                    },
-                    child: const Icon(
-                      Icons.close,
-                      size: 14,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          if (_filterOptions.minPrice != null || _filterOptions.maxPrice != null)
-            Container(
-              margin: const EdgeInsets.only(right: AppSizes.spacingSmall),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 4,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '¥${_filterOptions.minPrice ?? 0}~${_filterOptions.maxPrice ?? "∞"}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _filterOptions = _filterOptions.copyWith(
-                          clearPrice: true,
-                        );
-                      });
-                      _applyFilter();
-                    },
-                    child: const Icon(
-                      Icons.close,
-                      size: 14,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          // 结果数量
-          Expanded(
-            child: Text(
-              '共${_searchResults.length}件作品',
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.textHint,
-              ),
-            ),
-          ),
-          // 排序按钮
-          GestureDetector(
-            onTap: _showFilterSheet,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  _filterOptions.sortType.label,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const Icon(
-                  Icons.arrow_drop_down,
-                  size: 18,
-                  color: AppColors.textSecondary,
-                ),
-              ],
-            ),
+          HotSearchTags(
+            hotSearches: _hotSearches,
+            onTagTap: (tag) {
+              _searchController.text = tag;
+              _performSearch(tag);
+            },
           ),
         ],
       ),
