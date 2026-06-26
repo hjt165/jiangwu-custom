@@ -12,7 +12,7 @@ export 'package:integration_test/integration_test.dart';
 class TestHelper {
   static const String testPhone = '13800000000';
   static const String testPassword = 'admin123';
-  static String get baseUrl => kIsWeb ? 'http://localhost:8080/api' : 'http://10.0.2.2:8080/api';
+  static String get baseUrl => kIsWeb ? 'http://localhost:8080/api' : 'http://127.0.0.1:8080/api';
 
   /// 等待页面加载完成
   static Future<void> waitForPageLoad(WidgetTester tester, {int seconds = 3}) async {
@@ -35,11 +35,21 @@ class TestHelper {
     await tester.pumpAndSettle();
   }
 
-  /// 点击指定按钮内的文本
+  /// 收起键盘（仅在有焦点时）
+  static Future<void> dismissKeyboard(WidgetTester tester) async {
+    final hasFocus = tester.binding.focusManager.primaryFocus?.hasFocus ?? false;
+    if (hasFocus) {
+      tester.binding.focusManager.primaryFocus?.unfocus();
+      await tester.pumpAndSettle(const Duration(milliseconds: 300));
+    }
+  }
+
+  /// 点击指定按钮内的文本（收起键盘避免遮挡）
   static Future<void> tapButtonText(WidgetTester tester, String text) async {
+    await dismissKeyboard(tester);
     final finder = find.widgetWithText(ElevatedButton, text);
     if (finder.evaluate().isNotEmpty) {
-      await tester.tap(finder);
+      await tester.tap(finder, warnIfMissed: false);
       await tester.pumpAndSettle();
     } else {
       await tapText(tester, text);

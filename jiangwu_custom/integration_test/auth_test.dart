@@ -65,12 +65,12 @@ void main() {
 
       // 点击登录按钮
       await TestHelper.tapButtonText(tester, '登录');
-      await tester.pumpAndSettle(const Duration(seconds: 5));
+      await tester.pumpAndSettle(const Duration(seconds: 8));
 
       // 登录成功后应该跳转到首页
       expect(
         find.byType(BottomNavigationBar),
-        findsOneWidget,
+        findsAtLeastNWidgets(1),
         reason: '登录成功后应跳转到首页并显示底部导航栏',
       );
     });

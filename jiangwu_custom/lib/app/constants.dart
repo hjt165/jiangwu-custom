@@ -155,8 +155,8 @@ class AppRoutes {
 class ApiConstants {
   ApiConstants._();
 
-  // 开发环境
-  static const String devBaseUrl = 'http://10.0.2.2:8080/api';
+  // 开发环境（真机和模拟器都用电脑IP）
+  static const String devBaseUrl = 'http://127.0.0.1:8080/api';
   // 生产环境
   static const String prodBaseUrl = 'https://api.jiangwu.com/api';
 
