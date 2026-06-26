@@ -33,7 +33,6 @@ public class ProductService {
     /**
      * 获取作品列表（数据库分页 + 分类筛选 + 批量图片查询）
      */
-    @Cacheable(value = "products", key = "'list:' + #page + ':' + #size + ':' + (#category ?: 'all')")
     public PageResult<ProductResponse> getProductList(int page, int size, String category) {
         Page<Product> pageParam = new Page<>(page, size);
 
@@ -52,7 +51,6 @@ public class ProductService {
     /**
      * 获取作品详情
      */
-    @Cacheable(value = "products", key = "'detail:' + #productId")
     public ProductResponse getProductDetail(Long productId) {
         return getProductDetail(productId, null);
     }
@@ -104,7 +102,6 @@ public class ProductService {
     /**
      * 获取推荐作品（批量图片查询）
      */
-    @Cacheable(value = "products", key = "'featured'")
     public List<ProductResponse> getFeaturedProducts() {
         return toResponseListWithImages(productRepository.findFeatured());
     }

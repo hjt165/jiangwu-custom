@@ -33,7 +33,6 @@ public class ArtisanService {
     /**
      * 获取手作人列表（缓存 5 分钟）
      */
-    @Cacheable(value = "artisans", key = "'list:verified'")
     public List<ArtisanResponse> getArtisanList() {
         return artisanRepository.findByStatus(ArtisanStatus.VERIFIED).stream()
                 .map(ArtisanResponse::fromEntity)
@@ -43,7 +42,6 @@ public class ArtisanService {
     /**
      * 获取手作人详情（缓存 5 分钟）
      */
-    @Cacheable(value = "artisans", key = "'detail:' + #artisanId")
     public ArtisanResponse getArtisanDetail(Long artisanId) {
         Artisan artisan = artisanRepository.findById(artisanId);
         if (artisan == null) {

@@ -24,3 +24,5 @@
 [27340] 26 Jun 11:28:14.030 * Ready to accept connections
 [27340] 26 Jun 15:01:23.464 * 1 changes in 900 seconds. Saving...
 [27340] 26 Jun 15:01:23.484 * Background saving started by pid 28508
+[27340] 26 Jun 15:01:23.585 # fork operation complete
+[27340] 26 Jun 15:01:23.594 * Background saving terminated with success
