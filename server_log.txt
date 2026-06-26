@@ -1,0 +1,26 @@
+[27340] 26 Jun 11:28:14.018 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+[27340] 26 Jun 11:28:14.019 # Redis version=5.0.14, bits=64, commit=a7c01ef4, modified=0, pid=27340, just started
+[27340] 26 Jun 11:28:14.020 # Configuration loaded
+                _._                                                  
+           _.-``__ ''-._                                             
+      _.-``    `.  `_.  ''-._           Redis 5.0.14 (a7c01ef4/0) 64 bit
+  .-`` .-```.  ```\/    _.,_ ''-._                                   
+ (    '      ,       .-`  | `,    )     Running in standalone mode
+ |`-._`-...-` __...-.``-._|'` _.-'|     Port: 6379
+ |    `-._   `._    /     _.-'    |     PID: 27340
+  `-._    `-._  `-./  _.-'    _.-'                                   
+ |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+ |    `-._`-._        _.-'_.-'    |           http://redis.io        
+  `-._    `-._`-.__.-'_.-'    _.-'                                   
+ |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+ |    `-._`-._        _.-'_.-'    |                                  
+  `-._    `-._`-.__.-'_.-'    _.-'                                   
+      `-._    `-.__.-'    _.-'                                       
+          `-._        _.-'                                           
+              `-.__.-'                                               
+
+[27340] 26 Jun 11:28:14.023 # Server initialized
+[27340] 26 Jun 11:28:14.030 * DB loaded from disk: 0.007 seconds
+[27340] 26 Jun 11:28:14.030 * Ready to accept connections
+[27340] 26 Jun 15:01:23.464 * 1 changes in 900 seconds. Saving...
+[27340] 26 Jun 15:01:23.484 * Background saving started by pid 28508
