@@ -25,12 +25,12 @@ spring:
           max-idle: 8
           min-idle: 2
 
-  # RabbitMQ
+  # RabbitMQ (dev环境使用默认guest凭据)
   rabbitmq:
     host: localhost
     port: 5672
-    username: jiangwu-dev
-    password: jiangwu-dev-mq-pwd
+    username: guest
+    password: guest
     virtual-host: /
 
 # JWT
