@@ -1,0 +1,205 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  server-test:
+    name: Spring Boot Tests
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: jiangwu_custom
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+      - name: Init Database
+        run: |
+          mysql -h 127.0.0.1 -u root -proot jiangwu_custom < server/src/main/resources/schema.sql
+          mysql -h 127.0.0.1 -u root -proot jiangwu_custom < server/src/main/resources/data.sql
+      - name: Run Tests
+        working-directory: server
+        run: mvn test -B -Dspring.profiles.active=ci
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/jiangwu_custom?useSSL=false&allowPublicKeyRetrieval=true
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: root
+          SPRING_DATA_REDIS_HOST: 127.0.0.1
+          SPRING_DATA_REDIS_PORT: 6379
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-test-results
+          path: server/target/surefire-reports/
+
+  ai-test:
+    name: AI Service Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install Dependencies
+        run: |
+          pip install -r ai-service/requirements.txt
+          pip install pytest pytest-cov
+      - name: Run Tests
+        working-directory: ai-service
+        run: pytest tests/ --junitxml=../ai-test-results.xml --cov=. --cov-report=xml -v
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-test-results
+          path: ai-test-results.xml
+
+  flutter-test:
+    name: Flutter Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Install Dependencies
+        working-directory: jiangwu_custom
+        run: flutter pub get
+      - name: Run Unit Tests
+        working-directory: jiangwu_custom
+        run: flutter test --coverage --machine > test-results.json 2>&1 || true
+      - name: Run Integration Tests (Desktop)
+        working-directory: jiangwu_custom
+        run: flutter test integration_test/ --machine > integration-results.json 2>&1 || true
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-test-results
+          path: |
+            jiangwu_custom/test-results.json
+            jiangwu_custom/integration-results.json
+            jiangwu_custom/coverage/
+
+  e2e-test:
+    name: Playwright E2E Tests
+    runs-on: ubuntu-latest
+    needs: [server-test, ai-test]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: admin/package-lock.json
+      - name: Install Dependencies
+        working-directory: admin
+        run: npm ci
+      - name: Install Playwright Browsers
+        working-directory: admin
+        run: npx playwright install --with-deps chromium
+      - name: Start Services
+        run: |
+          docker compose up -d mysql redis
+          sleep 15
+          cd server && mvn spring-boot:run -Dspring-boot.run.profiles=ci &
+          cd ai-service && pip install -r requirements.txt && python main.py &
+          sleep 30
+      - name: Run E2E Tests
+        working-directory: admin
+        run: npx playwright test --reporter=junit
+      - name: Upload E2E Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: admin/test-results/
+
+  report:
+    name: Test Report
+    runs-on: ubuntu-latest
+    needs: [server-test, ai-test, flutter-test, e2e-test]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ci-reports/
+      - name: Analyze Results
+        id: analyze
+        run: |
+          echo "## CI Test Report" > ci-report-summary.md
+          echo "" >> ci-report-summary.md
+          echo "| Module | Status |" >> ci-report-summary.md
+          echo "|--------|--------|" >> ci-report-summary.md
+
+          has_failure=false
+
+          for dir in ci-reports/*/; do
+            name=$(basename "$dir")
+            if ls "$dir"*.xml 1>/dev/null 2>&1; then
+              # Count failures from JUnit XML
+              failures=$(grep -o 'failures="[0-9]*"' "$dir"*.xml 2>/dev/null | grep -o '[0-9]*' | paste -sd+ | bc 2>/dev/null || echo "0")
+              errors=$(grep -o 'errors="[0-9]*"' "$dir"*.xml 2>/dev/null | grep -o '[0-9]*' | paste -sd+ | bc 2>/dev/null || echo "0")
+              total=$((failures + errors))
+              if [ "$total" -gt 0 ]; then
+                echo "| $name | FAIL ($total issues) |" >> ci-report-summary.md
+                has_failure=true
+              else
+                echo "| $name | PASS |" >> ci-report-summary.md
+              fi
+            else
+              echo "| $name | NO RESULTS |" >> ci-report-summary.md
+            fi
+          done
+
+          echo "" >> ci-report-summary.md
+          echo "Generated at: $(date -Iseconds)" >> ci-report-summary.md
+
+          echo "has_failure=$has_failure" >> "$GITHUB_OUTPUT"
+      - name: Upload Summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-report-summary
+          path: ci-report-summary.md
+      - name: Trigger Loop Monitor
+        if: steps.analyze.outputs.has_failure == 'true'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          event-type: ci-complete
+          client-payload: '{"has_failure": "true", "run_id": "${{ github.run_id }}", "commit_sha": "${{ github.sha }}"}'

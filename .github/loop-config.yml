@@ -1,0 +1,71 @@
+# Loop Engineering 全局配置
+# 匠物定制项目 - AI 自动化循环系统配置
+
+loop:
+  # 循环控制
+  max_iterations: 3                # 最大自动修复迭代次数
+  iteration_timeout_minutes: 30    # 单次迭代超时
+  total_timeout_minutes: 120       # 整体超时
+
+  # 允许自动修复的模块
+  auto_fixable_modules:
+    - server
+    - flutter
+    - ai-service
+    - admin
+
+  # 允许自动修复的错误类型
+  auto_fixable_errors:
+    - ASSERTION_FAILURE
+    - TIMEOUT
+    - DEPENDENCY_MISSING
+    - CONFIGURATION_ERROR
+
+  # 需要人工介入的错误类型
+  manual_required_errors:
+    - COMPILATION_ERROR
+    - SECURITY_VULNERABILITY
+
+  # 不允许自动修改的文件
+  protected_files:
+    - "**/docker-compose.yml"
+    - "**/.env*"
+    - "**/Dockerfile"
+    - "**/pom.xml"
+    - "**/pubspec.yaml"
+    - "**/requirements.txt"
+    - "**/package.json"
+    - "**/.github/workflows/*.yml"
+
+  # 修复策略
+  strategy:
+    conservative: true             # true=只改最小范围
+    require_test_pass_before_merge: true
+    max_files_per_fix: 3           # 单次修复最多改几个文件
+    create_backup: true            # 修改前备份
+
+# 通知配置
+notifications:
+  on_success: false                # 全部自动修复成功时不通知
+  on_failure: true                 # 有未修复问题时通知
+  on_manual_required: true         # 需人工介入时通知
+
+# 历史记忆
+memory:
+  max_history: 50                  # 最多记录 50 条修复模式
+  similarity_threshold: 0.85       # 相似度阈值
+  auto_archive_after_days: 30      # 30 天后归档
+
+# 测试配置
+testing:
+  server_test_command: "mvn test -B"
+  flutter_test_command: "flutter test"
+  ai_test_command: "python -m pytest tests/ -v"
+  e2e_test_command: "npx playwright test"
+
+# AI 配置
+ai:
+  model: "gpt-4"
+  temperature: 0.1                 # 低温度 = 更稳定的修复
+  max_tokens: 4000
+  timeout_seconds: 60
