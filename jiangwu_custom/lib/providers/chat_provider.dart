@@ -92,6 +92,11 @@ class ChatNotifier extends StateNotifier<ChatState> {
           isLoadingConversations: false,
           clearError: true,
         );
+      } else {
+        state = state.copyWith(
+          isLoadingConversations: false,
+          error: '请先登录',
+        );
       }
     } catch (e) {
       state = state.copyWith(

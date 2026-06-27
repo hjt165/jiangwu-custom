@@ -26,7 +26,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _loadOrderStats();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadOrderStats();
+    });
   }
 
   Future<void> _loadOrderStats() async {
