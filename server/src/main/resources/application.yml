@@ -13,7 +13,7 @@ spring:
       mode: never
       continue-on-error: true
   cache:
-    type: redis
+    type: simple
     redis:
       time-to-live: 600000
       cache-null-values: true

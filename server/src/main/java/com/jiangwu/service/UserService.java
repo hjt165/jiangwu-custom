@@ -30,7 +30,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final JWTUtil jwtUtil;
-    private final RedisTemplate<String, Object> redisTemplate;
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private RedisTemplate<String, Object> redisTemplate = null;
 
     /**
      * 发送验证码（带频率限制）

@@ -39,7 +39,9 @@ public class AdminController {
     private final ProductRepository productRepository;
     private final ArtisanRepository artisanRepository;
     private final com.jiangwu.service.WorkflowService workflowService;
-    private final org.springframework.data.redis.core.StringRedisTemplate redisTemplate;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private org.springframework.data.redis.core.StringRedisTemplate redisTemplate;
 
     private static final String SETTINGS_KEY = "admin:settings";
     private static final Map<String, Object> DEFAULT_SETTINGS = new HashMap<>() {{
