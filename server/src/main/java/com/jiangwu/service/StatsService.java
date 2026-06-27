@@ -31,12 +31,11 @@ public class StatsService {
     /**
      * 获取仪表盘概览数据（缓存 30 秒）
      */
-    @Cacheable(value = "stats", key = "'dashboard'")
     public Map<String, Object> getDashboard() {
         Map<String, Object> data = new HashMap<>();
 
         // 用户统计
-        data.put("totalUsers", userRepository.selectCount(null));
+        data.put("totalUsers", userRepository.selectCount(new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>()));
         data.put("todayUsers", userRepository.selectCount(
                 new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.jiangwu.entity.User>()
                         .ge("created_at", LocalDateTime.of(LocalDate.now(), LocalTime.MIN))
@@ -44,7 +43,7 @@ public class StatsService {
         ));
 
         // 订单统计
-        data.put("totalOrders", orderRepository.selectCount(null));
+        data.put("totalOrders", orderRepository.selectCount(new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>()));
         data.put("todayOrders", orderRepository.selectCount(
                 new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<com.jiangwu.entity.Order>()
                         .ge("created_at", LocalDateTime.of(LocalDate.now(), LocalTime.MIN))
@@ -57,8 +56,8 @@ public class StatsService {
         ));
 
         // 手作人/作品统计
-        data.put("totalArtisans", artisanRepository.selectCount(null));
-        data.put("totalProducts", productRepository.selectCount(null));
+        data.put("totalArtisans", artisanRepository.selectCount(new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>()));
+        data.put("totalProducts", productRepository.selectCount(new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>()));
 
         // 总交易额（使用 SQL SUM，不再全表加载）
         data.put("totalRevenue", orderRepository.sumCompletedRevenue());
