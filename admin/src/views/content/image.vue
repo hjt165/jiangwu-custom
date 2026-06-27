@@ -138,10 +138,10 @@ async function loadData() {
     const res = await getImageReviewList({
       keyword: searchKeyword.value,
       status: searchStatus.value,
-      page: currentPage.value,
+      page: currentPage.value - 1,
       size: pageSize.value
     })
-    tableData.value = res.data?.list || []
+    tableData.value = res.data?.data || []
     total.value = res.data?.total || 0
   } catch (e) {
     console.error('加载图片列表失败:', e)

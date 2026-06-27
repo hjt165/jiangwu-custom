@@ -75,11 +75,11 @@ async function loadData() {
   try {
     const res = await getUserList({
       keyword: searchKeyword.value,
-      page: page.value,
+      page: page.value - 1,
       size: 10
     })
-    tableData.value = res.data || []
-    total.value = res.total || 0
+    tableData.value = res.data?.data || []
+    total.value = res.data?.total || 0
   } catch (e) {
     console.error('加载用户列表失败:', e)
   } finally {

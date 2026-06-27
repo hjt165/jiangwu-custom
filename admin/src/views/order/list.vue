@@ -19,8 +19,12 @@
 
       <el-table :data="tableData" stripe v-loading="loading">
         <el-table-column prop="orderNo" label="订单号" width="200" />
-        <el-table-column prop="userName" label="用户" width="120" />
-        <el-table-column prop="artisanName" label="手作人" width="120" />
+        <el-table-column label="用户" width="120">
+          <template #default="{ row }">用户#{{ row.userId }}</template>
+        </el-table-column>
+        <el-table-column label="手作人" width="120">
+          <template #default="{ row }">{{ row.artisanId ? '手作人#' + row.artisanId : '-' }}</template>
+        </el-table-column>
         <el-table-column prop="totalAmount" label="金额" width="100">
           <template #default="{ row }">¥{{ row.totalAmount }}</template>
         </el-table-column>
@@ -68,11 +72,11 @@ async function loadData() {
     const res = await getOrderList({
       keyword: searchKeyword.value,
       status: filterStatus.value,
-      page: page.value,
+      page: page.value - 1,
       size: 10
     })
-    tableData.value = res.data || []
-    total.value = res.total || 0
+    tableData.value = res.data?.data || []
+    total.value = res.data?.total || 0
   } catch (e) {
     console.error('加载订单列表失败:', e)
   } finally {

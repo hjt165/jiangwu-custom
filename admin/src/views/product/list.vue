@@ -12,9 +12,11 @@
 
       <el-table :data="tableData" stripe v-loading="loading">
         <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="name" label="作品名称" min-width="150" />
+        <el-table-column prop="title" label="作品名称" min-width="150" />
         <el-table-column prop="category" label="分类" width="100" />
-        <el-table-column prop="artisanName" label="手作人" width="120" />
+        <el-table-column label="手作人" width="120">
+          <template #default="{ row }">{{ row.craftParams?.artisanName || '-' }}</template>
+        </el-table-column>
         <el-table-column prop="price" label="价格" width="100">
           <template #default="{ row }">¥{{ row.price }}</template>
         </el-table-column>
@@ -63,11 +65,11 @@ async function loadData() {
   try {
     const res = await getProductList({
       keyword: searchKeyword.value,
-      page: page.value,
+      page: page.value - 1,
       size: 10
     })
-    tableData.value = res.data || []
-    total.value = res.total || 0
+    tableData.value = res.data?.data || []
+    total.value = res.data?.total || 0
   } catch (e) {
     console.error('加载作品列表失败:', e)
   } finally {
