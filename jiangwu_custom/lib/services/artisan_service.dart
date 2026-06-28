@@ -47,13 +47,14 @@ class ArtisanService {
   // ==================== 订单管理 ====================
 
   /// 获取手作人订单列表
+  /// 后端返回 Map{data, total, pages}
   Future<List<Order>> getOrders({
     OrderStatus? status,
     int page = 1,
     int pageSize = 20,
   }) async {
     try {
-      final response = await _apiService.get<List<dynamic>>(
+      final response = await _apiService.get<Map<String, dynamic>>(
         '/artisan/orders',
         queryParameters: {
           'page': page,
@@ -61,7 +62,8 @@ class ArtisanService {
           if (status != null) 'status': status.name,
         },
       );
-      return response.map((e) => Order.fromJson(e)).toList();
+      final records = response['data'] as List<dynamic>? ?? [];
+      return records.map((e) => Order.fromJson(e)).toList();
     } catch (e) {
       return [];
     }
@@ -114,19 +116,21 @@ class ArtisanService {
   // ==================== 作品管理 ====================
 
   /// 获取手作人作品列表
+  /// 后端返回 Map{data, total, pages}
   Future<List<Product>> getProducts({
     int page = 1,
     int pageSize = 20,
   }) async {
     try {
-      final response = await _apiService.get<List<dynamic>>(
+      final response = await _apiService.get<Map<String, dynamic>>(
         '/artisan/products',
         queryParameters: {
           'page': page,
           'pageSize': pageSize,
         },
       );
-      return response.map((e) => Product.fromJson(e)).toList();
+      final records = response['data'] as List<dynamic>? ?? [];
+      return records.map((e) => Product.fromJson(e)).toList();
     } catch (e) {
       return [];
     }
@@ -196,38 +200,42 @@ class ArtisanService {
   }
 
   /// 获取收入明细列表
+  /// 后端返回 Map{data, total, pages}
   Future<List<Map<String, dynamic>>> getIncomeRecords({
     int page = 1,
     int pageSize = 20,
   }) async {
     try {
-      final response = await _apiService.get<List<dynamic>>(
+      final response = await _apiService.get<Map<String, dynamic>>(
         '/artisan/income/records',
         queryParameters: {
           'page': page,
           'pageSize': pageSize,
         },
       );
-      return response.cast<Map<String, dynamic>>();
+      final records = response['data'] as List<dynamic>? ?? [];
+      return records.cast<Map<String, dynamic>>();
     } catch (e) {
       return [];
     }
   }
 
   /// 获取提现记录
+  /// 后端返回 Map{data, total, pages}
   Future<List<Map<String, dynamic>>> getWithdrawRecords({
     int page = 1,
     int pageSize = 20,
   }) async {
     try {
-      final response = await _apiService.get<List<dynamic>>(
+      final response = await _apiService.get<Map<String, dynamic>>(
         '/artisan/withdraw/records',
         queryParameters: {
           'page': page,
           'pageSize': pageSize,
         },
       );
-      return response.cast<Map<String, dynamic>>();
+      final records = response['data'] as List<dynamic>? ?? [];
+      return records.cast<Map<String, dynamic>>();
     } catch (e) {
       return [];
     }

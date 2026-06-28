@@ -40,14 +40,15 @@ public class ArtisanService {
     }
 
     /**
-     * 获取手作人详情（缓存 5 分钟）
+     * 获取手作人详情（含作品列表）
      */
     public ArtisanResponse getArtisanDetail(Long artisanId) {
         Artisan artisan = artisanRepository.findById(artisanId);
         if (artisan == null) {
             throw new BusinessException(ErrorCode.ARTISAN_NOT_FOUND);
         }
-        return ArtisanResponse.fromEntity(artisan);
+        List<Product> products = productRepository.findByArtisanId(artisanId);
+        return ArtisanResponse.fromEntity(artisan, products);
     }
 
     /**

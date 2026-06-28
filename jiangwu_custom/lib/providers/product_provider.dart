@@ -41,6 +41,7 @@ class ProductProvider extends ChangeNotifier {
   }
 
   /// 获取作品列表
+  /// 后端返回 PageResult{records, total, ...}，interceptor 解包 data 后得到该结构
   Future<void> fetchProducts({
     String? category,
     bool refresh = false,
@@ -60,7 +61,7 @@ class ProductProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _apiService.get<List<dynamic>>(
+      final response = await _apiService.get<Map<String, dynamic>>(
         '/product/list',
         queryParameters: {
           'page': _currentPage,
@@ -69,7 +70,8 @@ class ProductProvider extends ChangeNotifier {
         },
       );
 
-      final newProducts = response.map((e) => Product.fromJson(e)).toList();
+      final records = response['records'] as List<dynamic>? ?? [];
+      final newProducts = records.map((e) => Product.fromJson(e)).toList();
 
       if (refresh) {
         _products = newProducts;
@@ -88,6 +90,7 @@ class ProductProvider extends ChangeNotifier {
   }
 
   /// 获取作品详情
+  /// 后端返回 {product: {...}, recommendedArtisans: [...]}, interceptor 解包 data 后得到该结构
   Future<void> fetchProductDetail(String productId) async {
     _isLoading = true;
     _error = null;
@@ -98,7 +101,8 @@ class ProductProvider extends ChangeNotifier {
         '/product/$productId',
       );
 
-      _currentProduct = Product.fromJson(response);
+      final productData = response['product'] ?? response;
+      _currentProduct = Product.fromJson(productData);
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -108,13 +112,14 @@ class ProductProvider extends ChangeNotifier {
   }
 
   /// 搜索作品
+  /// 后端返回 PageResult{records, total, ...}
   Future<void> searchProducts(String keyword) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      final response = await _apiService.get<List<dynamic>>(
+      final response = await _apiService.get<Map<String, dynamic>>(
         '/product/search',
         queryParameters: {
           'keyword': keyword,
@@ -123,7 +128,8 @@ class ProductProvider extends ChangeNotifier {
         },
       );
 
-      _products = response.map((e) => Product.fromJson(e)).toList();
+      final records = response['records'] as List<dynamic>? ?? [];
+      _products = records.map((e) => Product.fromJson(e)).toList();
     } catch (e) {
       _error = e.toString();
     } finally {

@@ -1,15 +1,15 @@
 package com.jiangwu.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.jiangwu.entity.Product;
-import com.jiangwu.enums.ProductCategory;
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 /**
  * 作品响应 DTO
+ * 字段命名与 Flutter Product.fromJson 保持一致
  */
 @Data
 public class ProductResponse {
@@ -30,9 +30,15 @@ public class ProductResponse {
     private int likeCount;
     private int orderCount;
     private double rating;
+
+    @JsonProperty("isFeatured")
     private boolean isFeatured;
+
+    @JsonProperty("isAvailable")
     private boolean isAvailable;
+
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     /**
      * 从 Entity 转换
@@ -58,6 +64,7 @@ public class ProductResponse {
         dto.setFeatured(Boolean.TRUE.equals(product.getIsFeatured()));
         dto.setAvailable(Boolean.TRUE.equals(product.getIsAvailable()));
         dto.setCreatedAt(product.getCreatedAt());
+        dto.setUpdatedAt(product.getUpdatedAt());
         return dto;
     }
 

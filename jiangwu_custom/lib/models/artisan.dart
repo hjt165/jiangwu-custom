@@ -14,10 +14,15 @@ enum ArtisanStatus {
   const ArtisanStatus(this.label);
 
   static ArtisanStatus fromString(String value) {
-    return ArtisanStatus.values.firstWhere(
-      (e) => e.name == value,
-      orElse: () => ArtisanStatus.pending,
-    );
+    // 先匹配英文 name（如 "pending", "verified"）
+    for (final e in ArtisanStatus.values) {
+      if (e.name == value) return e;
+    }
+    // 再匹配中文 label（如 "待认证", "已认证"）兼容旧数据
+    for (final e in ArtisanStatus.values) {
+      if (e.label == value) return e;
+    }
+    return ArtisanStatus.pending;
   }
 }
 
