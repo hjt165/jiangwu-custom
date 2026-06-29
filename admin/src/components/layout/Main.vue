@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="layout">
     <Sidebar />
     <div class="layout-main">
@@ -27,12 +27,12 @@ import Sidebar from './Sidebar.vue'
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-width: 0;
 }
 
 .layout-content {
   flex: 1;
-  padding: 20px;
   overflow-y: auto;
-  background: #f0f2f5;
+  background: #FAFAF9;
 }
 </style>

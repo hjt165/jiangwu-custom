@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+﻿import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { getToken, setToken, removeToken, getUser, setUser, removeUser } from '@/utils/auth'
 import { adminLogin } from '@/api/user'
@@ -14,14 +14,14 @@ export const useUserStore = defineStore('user', () => {
   async function login(loginForm) {
     const res = await adminLogin(loginForm)
     token.value = res.data.token
-    userInfo.value = res.data
+    userInfo.value = res.data.user  // 只保存 user 对象
     setToken(res.data.token)
-    setUser(res.data)
+    setUser(res.data.user)          // 只保存 user 对象
     router.push('/')
   }
 
   /**
-   * 登出
+   * 退出
    */
   function logout() {
     token.value = ''

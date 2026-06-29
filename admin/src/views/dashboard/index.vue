@@ -1,135 +1,92 @@
-<template>
+﻿<template>
   <div class="dashboard" v-loading="loading">
     <div class="page-header">
-      <h2>工作台</h2>
-      <el-button type="primary" @click="fetchDashboardData" :loading="loading">
+      <div>
+        <h2>概览</h2>
+        <p class="page-desc">平台运营关键指标</p>
+      </div>
+      <el-button @click="fetchDashboardData" :loading="loading" class="refresh-btn">
         <el-icon><Refresh /></el-icon>
         刷新
       </el-button>
     </div>
 
-    <el-row :gutter="20" class="stat-cards">
-      <el-col :span="6">
-        <div class="stat-card stat-card--blue">
-          <div class="stat-icon">
-            <el-icon :size="24"><User /></el-icon>
-          </div>
-          <div class="stat-info">
-            <div class="stat-value">{{ stats.totalUsers }}</div>
-            <div class="stat-label">用户总数</div>
-          </div>
-        </div>
-      </el-col>
-      <el-col :span="6">
-        <div class="stat-card stat-card--orange">
-          <div class="stat-icon">
-            <el-icon :size="24"><Document /></el-icon>
-          </div>
-          <div class="stat-info">
-            <div class="stat-value">{{ stats.totalOrders }}</div>
-            <div class="stat-label">订单总数</div>
-          </div>
-        </div>
-      </el-col>
-      <el-col :span="6">
-        <div class="stat-card stat-card--green">
-          <div class="stat-icon">
-            <el-icon :size="24"><Money /></el-icon>
-          </div>
-          <div class="stat-info">
-            <div class="stat-value">¥{{ stats.totalRevenue }}</div>
-            <div class="stat-label">总交易额</div>
-          </div>
-        </div>
-      </el-col>
-      <el-col :span="6">
-        <div class="stat-card stat-card--purple">
-          <div class="stat-icon">
-            <el-icon :size="24"><Star /></el-icon>
-          </div>
-          <div class="stat-info">
-            <div class="stat-value">{{ stats.totalArtisans }}</div>
-            <div class="stat-label">手作人数</div>
-          </div>
-        </div>
-      </el-col>
-    </el-row>
+    <!-- 统计行 -->
+    <div class="stat-row">
+      <div class="stat-item" v-for="item in statItems" :key="item.key">
+        <div class="stat-value">{{ item.display }}</div>
+        <div class="stat-label">{{ item.label }}</div>
+      </div>
+    </div>
 
-    <el-row :gutter="20">
-      <el-col :span="16">
-        <el-card class="content-card">
-          <template #header>
-            <div class="card-header">
-              <span>待办事项</span>
-            </div>
-          </template>
-          <el-table :data="todoList" stripe>
-            <el-table-column prop="type" label="类型" width="120" />
-            <el-table-column prop="content" label="内容" />
-            <el-table-column prop="time" label="时间" width="180" />
-            <el-table-column label="操作" width="100">
-              <template #default="{ row }">
-                <el-button type="primary" link size="small" @click="handleTodoAction(row)">处理</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-card>
-      </el-col>
-      <el-col :span="8">
-        <el-card class="content-card">
-          <template #header>
-            <div class="card-header">
-              <span>快捷操作</span>
-            </div>
-          </template>
-          <div class="quick-actions">
-            <div class="quick-action-item" @click="$router.push('/user/list')">
-              <div class="action-icon action-icon--blue">
-                <el-icon><User /></el-icon>
-              </div>
-              <span>用户管理</span>
-            </div>
-            <div class="quick-action-item" @click="$router.push('/order/list')">
-              <div class="action-icon action-icon--orange">
-                <el-icon><Document /></el-icon>
-              </div>
-              <span>订单管理</span>
-            </div>
-            <div class="quick-action-item" @click="$router.push('/content/image')">
-              <div class="action-icon action-icon--green">
-                <el-icon><Picture /></el-icon>
-              </div>
-              <span>图片审核</span>
-            </div>
-            <div class="quick-action-item" @click="$router.push('/stats/transaction')">
-              <div class="action-icon action-icon--purple">
-                <el-icon><DataAnalysis /></el-icon>
-              </div>
-              <span>数据统计</span>
-            </div>
+    <div class="content-row">
+      <!-- 待办事项 -->
+      <div class="panel">
+        <div class="panel-header">
+          <span>待处理事项</span>
+          <el-link type="primary" @click="$router.push('/order/list')">查看全部</el-link>
+        </div>
+        <el-table :data="todoList" class="todo-table">
+          <el-table-column prop="type" label="类型" width="100" />
+          <el-table-column prop="content" label="内容" />
+          <el-table-column prop="time" label="时间" width="180" />
+          <el-table-column label="操作" width="80">
+            <template #default="{ row }">
+              <el-link type="primary" @click="handleTodoAction(row)">处理</el-link>
+            </template>
+          </el-table-column>
+        </el-table>
+        <div v-if="!todoList.length" class="empty-tip">暂无待处理事项</div>
+      </div>
+
+      <!-- 快捷入口 -->
+      <div class="panel">
+        <div class="panel-header">
+          <span>快捷入口</span>
+        </div>
+        <div class="shortcuts">
+          <div
+            v-for="s in shortcuts"
+            :key="s.path"
+            class="shortcut-item"
+            @click="$router.push(s.path)"
+          >
+            <span class="shortcut-label">{{ s.label }}</span>
           </div>
-        </el-card>
-      </el-col>
-    </el-row>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getDashboardData } from '@/api/stats'
 
 const router = useRouter()
-
+const loading = ref(false)
 const stats = reactive({
   totalUsers: 0,
   totalOrders: 0,
   totalRevenue: '0',
   totalArtisans: 0,
 })
-
 const todoList = ref([])
-const loading = ref(false)
+
+const statItems = computed(() => [
+  { key: 'users', label: '用户总数', display: stats.totalUsers },
+  { key: 'orders', label: '订单总数', display: stats.totalOrders },
+  { key: 'revenue', label: '总交易额', display: `¥${stats.totalRevenue}` },
+  { key: 'artisans', label: '手作人数量', display: stats.totalArtisans },
+])
+
+const shortcuts = [
+  { label: '用户管理', path: '/user/list' },
+  { label: '订单管理', path: '/order/list' },
+  { label: '图片审核', path: '/content/image' },
+  { label: '交易统计', path: '/stats/transaction' },
+]
 
 const fetchDashboardData = async () => {
   loading.value = true
@@ -141,11 +98,6 @@ const fetchDashboardData = async () => {
     }
   } catch (error) {
     console.error('获取仪表盘数据失败:', error)
-    stats.totalUsers = 0
-    stats.totalOrders = 0
-    stats.totalRevenue = '0'
-    stats.totalArtisans = 0
-    todoList.value = []
   } finally {
     loading.value = false
   }
@@ -161,120 +113,143 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+.dashboard {
+  padding: 28px 32px;
+  background: #FAFAF9;
+  min-height: 100%;
+}
+
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
+  align-items: flex-start;
+  margin-bottom: 28px;
 
   h2 {
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 600;
     color: #2C3E50;
+    margin: 0;
+    letter-spacing: 0.5px;
+  }
+
+  .page-desc {
+    font-size: 13px;
+    color: #909399;
+    margin: 4px 0 0;
+  }
+
+  .refresh-btn {
+    border-radius: 6px;
+    background: #fff;
+    border: 1px solid #E4E7ED;
+    color: #606266;
+
+    &:hover {
+      border-color: #2C3E50;
+      color: #2C3E50;
+    }
   }
 }
 
-.stat-cards {
-  margin-bottom: 24px;
+/* 统计行 */
+.stat-row {
+  display: flex;
+  gap: 1px;
+  background: #E4E7ED;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 28px;
 }
 
-.stat-card {
+.stat-item {
+  flex: 1;
   background: #fff;
-  border-radius: 12px;
-  padding: 24px;
+  padding: 24px 28px;
   display: flex;
-  align-items: center;
-  gap: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: all 0.3s;
-  cursor: default;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  }
-
-  &--blue .stat-icon { background: #e8f4fd; color: #3498DB; }
-  &--orange .stat-icon { background: #fef0e6; color: #E67E22; }
-  &--green .stat-icon { background: #e8fae8; color: #27AE60; }
-  &--purple .stat-icon { background: #f0e8fd; color: #9B59B6; }
-}
-
-.stat-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .stat-value {
   font-size: 28px;
   font-weight: 700;
   color: #2C3E50;
-  line-height: 1.2;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
 }
 
 .stat-label {
   font-size: 13px;
   color: #909399;
-  margin-top: 4px;
 }
 
-.content-card {
-  :deep(.el-card__header) {
-    padding: 16px 20px;
-    border-bottom: 1px solid #f0f2f5;
-  }
+/* 内容行 */
+.content-row {
+  display: flex;
+  gap: 1px;
+  background: #E4E7ED;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.card-header {
+.panel {
+  flex: 1;
+  background: #fff;
+  padding: 24px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
   font-size: 15px;
   font-weight: 600;
   color: #303133;
 }
 
-.quick-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.quick-action-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 16px 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    background: #f5f7fa;
-  }
-
-  span {
-    font-size: 13px;
+.todo-table {
+  :deep(.el-table__header) th {
+    background: #FAFAF9;
     color: #606266;
     font-weight: 500;
+    font-size: 13px;
+  }
+
+  :deep(.el-table__row) td {
+    font-size: 13px;
   }
 }
 
-.action-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
+.empty-tip {
+  text-align: center;
+  padding: 40px 0;
+  color: #C0C4CC;
+  font-size: 14px;
+}
 
-  &--blue { background: #e8f4fd; color: #3498DB; }
-  &--orange { background: #fef0e6; color: #E67E22; }
-  &--green { background: #e8fae8; color: #27AE60; }
-  &--purple { background: #f0e8fd; color: #9B59B6; }
+/* 快捷入口 */
+.shortcuts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.shortcut-item {
+  padding: 16px;
+  border: 1px solid #E4E7ED;
+  border-radius: 6px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 14px;
+  color: #606266;
+
+  &:hover {
+    border-color: #2C3E50;
+    color: #2C3E50;
+    background: #FAFAF9;
+  }
 }
 </style>

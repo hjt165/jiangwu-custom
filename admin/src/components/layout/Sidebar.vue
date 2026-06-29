@@ -1,11 +1,11 @@
-<template>
+﻿<template>
   <div class="sidebar" :class="{ collapsed: appStore.sidebarCollapsed }">
     <div class="sidebar-logo">
       <div class="logo-icon-wrap">
         <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="2" y="2" width="28" height="28" rx="6" fill="#E74C3C"/>
-          <path d="M10 24V14l7 5-7 5z" fill="#fff"/>
-          <path d="M17 14v10l7-5-7-5z" fill="#fff" opacity="0.7"/>
+          <rect x="2" y="2" width="28" height="28" rx="6" stroke="#2C3E50" stroke-width="1.5"/>
+          <path d="M10 24V14l7 5-7 5z" fill="#2C3E50"/>
+          <path d="M17 14v10l7-5-7-5z" fill="#E74C3C" opacity="0.8"/>
         </svg>
       </div>
       <span v-show="!appStore.sidebarCollapsed" class="logo-title">匠物定制</span>
@@ -16,13 +16,13 @@
       :collapse="appStore.sidebarCollapsed"
       router
       background-color="transparent"
-      text-color="rgba(255,255,255,0.65)"
-      active-text-color="#fff"
+      text-color="#606266"
+      active-text-color="#2C3E50"
       class="sidebar-menu"
     >
       <el-menu-item index="/dashboard">
         <el-icon><Odometer /></el-icon>
-        <span>工作台</span>
+        <template #title><span>概览</span></template>
       </el-menu-item>
 
       <el-sub-menu index="user">
@@ -39,17 +39,17 @@
           <span>订单管理</span>
         </template>
         <el-menu-item index="/order/list">订单列表</el-menu-item>
-        <el-menu-item index="/order/dispute">争议仲裁</el-menu-item>
+        <el-menu-item index="/order/dispute">争议处理</el-menu-item>
       </el-sub-menu>
 
       <el-menu-item index="/product/list">
         <el-icon><Goods /></el-icon>
-        <span>作品管理</span>
+        <template #title><span>商品管理</span></template>
       </el-menu-item>
 
       <el-menu-item index="/artisan/list">
         <el-icon><Avatar /></el-icon>
-        <span>手作人管理</span>
+        <template #title><span>手作人</span></template>
       </el-menu-item>
 
       <el-sub-menu index="content">
@@ -58,7 +58,7 @@
           <span>内容管理</span>
         </template>
         <el-menu-item index="/content/image">图片审核</el-menu-item>
-        <el-menu-item index="/content/comment">评论审核</el-menu-item>
+        <el-menu-item index="/content/comment">评论管理</el-menu-item>
       </el-sub-menu>
 
       <el-sub-menu index="stats">
@@ -72,7 +72,7 @@
 
       <el-menu-item index="/settings">
         <el-icon><Setting /></el-icon>
-        <span>系统设置</span>
+        <template #title><span>系统设置</span></template>
       </el-menu-item>
     </el-menu>
   </div>
@@ -90,11 +90,13 @@ const appStore = useAppStore()
 .sidebar {
   width: 220px;
   height: 100vh;
-  background: linear-gradient(180deg, #1a252f 0%, #2C3E50 100%);
+  background: #fff;
+  border-right: 1px solid #F0F0F0;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
 
   &.collapsed {
     width: 64px;
@@ -107,13 +109,14 @@ const appStore = useAppStore()
   align-items: center;
   justify-content: center;
   gap: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0 16px;
+  border-bottom: 1px solid #F0F0F0;
   flex-shrink: 0;
 }
 
 .logo-icon-wrap {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
 
   svg {
@@ -123,9 +126,9 @@ const appStore = useAppStore()
 }
 
 .logo-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
-  color: #fff;
+  color: #2C3E50;
   white-space: nowrap;
   letter-spacing: 1px;
 }
@@ -138,44 +141,48 @@ const appStore = useAppStore()
 
   :deep(.el-menu-item),
   :deep(.el-sub-menu__title) {
-    height: 44px;
-    line-height: 44px;
-    margin: 2px 8px;
-    border-radius: 8px;
-    transition: all 0.2s;
+    height: 42px;
+    line-height: 42px;
+    margin: 1px 6px;
+    border-radius: 6px;
+    transition: all 0.15s;
+    font-size: 14px;
+    color: #606266;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.08) !important;
+      background: #F5F5F0 !important;
     }
   }
 
   :deep(.el-menu-item.is-active) {
-    background: linear-gradient(135deg, #E74C3C, #c0392b) !important;
-    color: #fff !important;
-    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+    background: #F5F5F0 !important;
+    color: #2C3E50 !important;
+    font-weight: 500;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 16px;
+      background: #2C3E50;
+      border-radius: 0 2px 2px 0;
+    }
   }
 
   :deep(.el-sub-menu .el-menu-item) {
-    min-width: auto;
     padding-left: 52px !important;
-    margin: 2px 8px;
+    margin: 1px 6px;
     border-radius: 6px;
-    height: 40px;
-    line-height: 40px;
+    height: 38px;
+    line-height: 38px;
     font-size: 13px;
   }
 
   :deep(.el-sub-menu.is-opened > .el-sub-menu__title) {
-    color: #fff !important;
-  }
-}
-
-:deep(.el-menu--collapse) {
-  .sidebar-menu {
-    :deep(.el-menu-item),
-    :deep(.el-sub-menu__title) {
-      margin: 2px 8px;
-    }
+    color: #2C3E50 !important;
   }
 }
 </style>

@@ -1,0 +1,48 @@
+sources:
+  jiangwu-mysql:
+    kind: mysql
+    host: 127.0.0.1
+    port: 3306
+    database: jiangwu_custom
+    user: root
+    password: 123456
+
+tools:
+  # 查询类工具
+  mysql-query:
+    kind: mysql-sql
+    source: jiangwu-mysql
+    description: 执行只读SQL查询（SELECT），用于查询数据库中的数据
+    parameters:
+      - name: sql
+        type: string
+        description: 要执行的SELECT SQL语句
+    statement: "{{.sql}}"
+
+  mysql-execute:
+    kind: mysql-execute-sql
+    source: jiangwu-mysql
+    description: 执行写操作SQL（INSERT/UPDATE/DELETE），用于修改数据库数据
+    parameters:
+      - name: sql
+        type: string
+        description: 要执行的写操作SQL语句
+    statement: "{{.sql}}"
+
+  # 快捷查询工具
+  mysql-list-tables:
+    kind: mysql-list-tables
+    source: jiangwu-mysql
+    description: 列出数据库中所有表
+
+  mysql-table-stats:
+    kind: mysql-list-table-stats
+    source: jiangwu-mysql
+    description: 查看所有表的行数统计
+
+toolsets:
+  jiangwu-db:
+    - mysql-query
+    - mysql-execute
+    - mysql-list-tables
+    - mysql-table-stats

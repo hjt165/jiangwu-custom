@@ -1,4 +1,4 @@
-// Element Plus 样式覆盖 - 新中式简约风
+﻿// Element Plus 样式覆盖 - 克制约简约
 
 // ==================== 按钮 ====================
 .el-button--primary {
@@ -10,46 +10,30 @@
   --el-button-active-border-color: #1A252F;
 }
 
-.el-button--success {
-  --el-button-bg-color: #27AE60;
-  --el-button-border-color: #27AE60;
-  --el-button-hover-bg-color: #2ECC71;
-  --el-button-hover-border-color: #2ECC71;
-}
-
-.el-button--warning {
-  --el-button-bg-color: #E67E22;
-  --el-button-border-color: #E67E22;
-  --el-button-hover-bg-color: #F39C12;
-  --el-button-hover-border-color: #F39C12;
-}
-
-.el-button--danger {
-  --el-button-bg-color: #E74C3C;
-  --el-button-border-color: #E74C3C;
-  --el-button-hover-bg-color: #EC7063;
-  --el-button-hover-border-color: #EC7063;
-}
-
 .el-button {
-  border-radius: 8px;
+  border-radius: 6px;
   font-weight: 500;
 }
 
 // ==================== 表格 ====================
 .el-table {
-  --el-table-header-bg-color: #fafbfc;
+  --el-table-header-bg-color: #FAFAF9;
   --el-table-header-text-color: #2C3E50;
-  --el-table-row-hover-bg-color: #f5f7fa;
-  --el-table-border-color: #f0f2f5;
+  --el-table-row-hover-bg-color: #F5F5F0;
+  --el-table-border-color: #F0F0F0;
 
   th.el-table__cell {
-    font-weight: 600;
+    font-weight: 500;
     font-size: 13px;
+    color: #606266;
   }
 
   td.el-table__cell {
     font-size: 13px;
+  }
+
+  :deep(.el-table__body tr:hover > td) {
+    background-color: #FAFAF9 !important;
   }
 }
 
@@ -61,20 +45,24 @@
   .el-pager li.is-active {
     background-color: #2C3E50;
   }
+
+  .el-pager li:hover {
+    color: #2C3E50;
+  }
 }
 
 // ==================== 对话框 ====================
 .el-dialog {
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
 
   .el-dialog__header {
-    border-bottom: 1px solid #f0f2f5;
+    border-bottom: 1px solid #F0F0F0;
     padding: 16px 20px;
     margin: 0;
 
     .el-dialog__title {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
       color: #2C3E50;
     }
@@ -85,7 +73,7 @@
   }
 
   .el-dialog__footer {
-    border-top: 1px solid #f0f2f5;
+    border-top: 1px solid #F0F0F0;
     padding: 12px 20px;
   }
 }
@@ -93,61 +81,87 @@
 // ==================== 标签页 ====================
 .el-tabs__item.is-active {
   color: #2C3E50;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .el-tabs__active-bar {
   background-color: #2C3E50;
 }
 
-// ==================== 表单 ====================
+// ==================== 输入框 ====================
 .el-input__wrapper {
-  border-radius: 8px;
-  transition: box-shadow 0.2s;
+  border-radius: 6px;
+  padding: 0 12px;
+  box-shadow: none;
+  border: 1px solid #DCDFE6;
+  transition: border-color 0.2s;
 
   &:hover {
-    box-shadow: 0 0 0 1px #c0c4cc inset;
+    border-color: #2C3E50;
+  }
+
+  &.is-focus {
+    border-color: #2C3E50;
+    box-shadow: 0 0 0 1px #2C3E50 inset;
   }
 }
 
 .el-textarea__inner {
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 // ==================== 卡片 ====================
 .el-card {
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  border: 1px solid #f0f2f5;
+  border-radius: 8px;
+  box-shadow: none;
+  border: 1px solid #F0F0F0;
 
   .el-card__header {
-    font-weight: 600;
+    font-weight: 500;
     color: #303133;
+    padding: 14px 20px;
+    background: #FAFAF9;
+    border-bottom: 1px solid #F0F0F0;
+  }
+
+  .el-card__body {
+    padding: 20px;
   }
 }
 
 // ==================== 标签 ====================
 .el-tag {
-  border-radius: 6px;
-  font-weight: 500;
+  border-radius: 4px;
+  font-weight: 400;
+  border: none;
 }
 
 // ==================== 下拉菜单 ====================
 .el-dropdown-menu {
   border-radius: 8px;
-  border: 1px solid #f0f2f5;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid #F0F0F0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
-// ==================== 消息框 ====================
+// ==================== 消息提示 ====================
 .el-message-box {
-  border-radius: 12px;
+  border-radius: 10px;
 }
 
 // ==================== 描述列表 ====================
 .el-descriptions {
   .el-descriptions__label {
-    font-weight: 600;
+    font-weight: 500;
     color: #606266;
   }
+}
+
+// ==================== 链接 ====================
+.el-link {
+  font-weight: 500;
+}
+
+// ==================== 分割线 ====================
+.el-divider {
+  --el-divider-border-color: #F0F0F0;
 }
